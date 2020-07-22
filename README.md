@@ -25,6 +25,8 @@ Next, edit `all_.txt` following the instructions in the comments. Then
 cd server-ui; python3 -m http.server
 # or
 cd server-ui; python2 -m SimpleHTTPServer
+# or
+cd server-ui; npm install; npm start
 ```
 
 and open `http://localhost:8000/` in a web browser.

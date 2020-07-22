@@ -1,0 +1,4 @@
+# Save this file as all.txt (not all_.txt).
+# Format is HAPI server URL, server ID, server name, contact name, contact email
+# Any HAPI server may be used.
+http://localhost:9998/TestData2.0/hapi,TestData,HAPI 2.0 Test Data,Server Admin,admin@localhost

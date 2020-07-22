@@ -1,0 +1,22 @@
+# Autoplot Jython script. See http://autoplot.org/scripting for more information.
+# Report software bugs/issues/feature requests at
+# https://github.com/hapi-server/client-autoplot/issues
+# Report data server issues to CONTACT
+
+# To use:
+#  1. Click 'Download script' or copy script into a file named demo.jy
+#  2. If needed, install Java [https://jdk.java.net/14/]
+#  3. curl -O http://autoplot.org/jnlp/latest/autoplot.jar
+#  4. java -jar autoplot.jar --open=demo.jy # Autoplot opens an shows plot
+
+server     = 'SERVER'
+dataset    = 'DATASET'
+# Use parameters='' to request all data. Multiple parameters
+# can be requested using a comma-separated listCSV_EXAMPLE
+parameters = 'PARAMETERS'
+start      = 'START'
+stop       = 'STOP'
+
+args = (server, dataset, parameters, start, stop)
+
+plot('vap+hapi:%s?id=%s&parameters=%s&timerange=%s/%s' % args)

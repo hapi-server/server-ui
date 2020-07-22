@@ -1,0 +1,1254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<script>
+
+		let debug = true;
+
+		// Show all servers if all.txt not found
+		SERVER_LIST_FALLBACK = 
+			"https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
+
+		let SERVER_LIST = "";
+		if (location.href.match("hapi-server.org")) {
+			SERVER_LIST = SERVER_LIST_FALLBACK;
+		} else {
+			SERVER_LIST = "all.txt";
+		}
+		</script>
+
+		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+		<meta name="keywords" content="HAPI Heliophysics Data UI">
+		<meta name="description"
+			content="HAPI Server UI; https://github.com/hapi-server/client-javascript">
+		<title>HAPI Browser</title>
+		<link rel="icon"
+			href="http://hapi-server.org/favicon.ico" type="image/x-icon">
+
+		<link rel="stylesheet"
+		    type="text/css" href="css/highlight-10.0.0-github.css"/>
+		<link rel="stylesheet"
+			type="text/css" href="css/jquery-ui-1.9.2.custom.css"/>
+		<link rel="stylesheet" 
+			type="text/css" href="css/tooltipster.bundle.min.css"/>
+		<link rel="stylesheet" 
+			type="text/css" href="css/tooltipster-sideTip-noir.min.css"/>
+
+		<link rel="stylesheet" href="css/index.css">
+
+		<script type="text/javascript" 
+			src="js/deps/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript"
+			src="js/deps/jquery-ui-1.9.2.custom.patched.js"></script>
+		<script type="text/javascript"
+			src="js/deps/jquery.ba-hashchange-1.3.js"></script>
+		<script type="text/javascript"
+			src="js/deps/tooltipster.bundle.min.js"></script>
+
+		<script type="text/javascript"
+			src="js/deps/highlight-10.0.0.min.js"></script>
+		<script type="text/javascript" charset="UTF-8" 
+			src="js/deps/highlight-10.0.0-python.min.js"></script>
+		<script type="text/javascript" charset="UTF-8" 
+			src="js/deps/highlight-10.0.0-matlab.min.js"></script>
+ 		<script>
+ 			hljs.initHighlightingOnLoad();
+			hljs.getLanguage('python').keywords += ' hapiplot hapiclient hapi';
+			hljs.getLanguage('matlab').keywords += ' hapiplot hapiclient hapi';
+			hljs.getLanguage('javascript').keywords += ' dataset parameters';
+ 		</script>
+
+		<script src="js/deps/dayjs-1.8.29/dayjs.min.js"></script>
+		<script src="js/deps/dayjs-1.8.29/duration.js"></script>
+		<script>
+			dayjs.extend(window.dayjs_plugin_duration);
+			dayjs().format();
+		</script>
+
+		<script type="text/javascript" src="js/deps/clipboard.min.js"></script>
+
+		<script type="text/javascript" src="js/parseQueryString.js"></script>
+		<script type="text/javascript" src="js/checkboxes.js"></script>
+		<script type="text/javascript" src="js/dropdowns.js"></script>
+		<script type="text/javascript" src="js/examplelist.js"></script>
+
+		<script>
+
+			// Catch and report uncaught errors?
+			// window.onerror = function (message, filename, linenumber) {
+			//	$('#xstatus.append').message();}
+
+			var qs = parseQueryString();
+
+			$(function() {
+				main(); // DOM is loaded. Start execution.
+			})
+
+			function main() {
+
+				if (!debug) {
+					// Suppress console loggin.
+					console.log = function() {};
+				}
+
+				$('.tooltip').tooltipster({theme: 'tooltipster-noir'})
+
+				// https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
+				$('body').on('mouseenter', 
+							 '.tooltip:not(.tooltipstered)', function () {
+						$(this)
+							.tooltipster({theme: 'tooltipster-noir'})
+							.tooltipster('show');
+				});
+
+				// Bind events to changes in the hash part of the URL
+				hashchange();
+
+				// When clear button is clicked, change URI to be only the URL
+				$('#clear').on('click', 
+					() => {window.location=window.location.pathname});
+				$('#clear').show(); // Show clear button
+
+				checkboxes();
+
+				// Set up main drop-downs
+				dropdowns(
+					[
+						"server","dataset","parameters","start",
+						"stop","return","format","type","style"
+					],
+					[
+						"Servers","Datasets","Parameters","Start",
+						"Stop","Return","Format","Type","Style"
+					],
+					[
+						servers,datasets,parameters,starttime,
+						stoptime,returntype,format,type,style
+					],
+					[
+						["Enter text to narrow list","Show full list"],
+						[],
+						[],
+						[],	
+						[],
+						[],
+						[],
+						[],
+						[]
+					],
+					"#dropdowns");
+
+				// Set up examples drop-down
+				//dropdowns(["examples"],["Examples"],[examples],[],"#examples");
+
+			}
+
+			// Highlight text area when clicked so that user can copy.
+			function highlight() {
+				// https://stackoverflow.com/a/5797700
+				var $this = $(this);
+				$this.select();
+
+				// Work around Chrome's little problem
+				$this.mouseup(function() {
+					// Prevent further mouseup intervention
+					$this.unbind("mouseup");
+					return false;
+				});						
+			}
+
+			// Monitor hash for changes via text entry in address bar.
+			function hashchange() {
+
+				// Update drop-downs when URL is changed manually.
+				console.log("hashchange(): Binding hashchange.");
+				$(window).hashchange.byurledit = true;
+
+				$(window).bind("hashchange", function() {
+
+					$('#xstatus').empty();
+					// Need to figure out what parameter was changed and then
+					// remove all parameters after that. Otherwise user could
+					// change the server and the parameter list will not be
+					// updated.
+					console.log("hashchange(): Hash change; by urledit = "
+								+ $(window).hashchange.byurledit);
+					var qs = parseQueryString();
+
+					for (var id in qs) {
+						console.log("hashchange(): id in query string = " + qs[id]);
+						var val = $('#' + id).parent().parent().attr('value');
+						console.log("hashchange(): id selected value  = " + val);
+						if (qs[id] !== val) {
+							console.log('hashchange(): value changed in ' 
+										+ qs['id'] + " dropdown.");
+						}
+					}
+
+					if ($(window).hashchange.byurledit) {
+						console.log("hashchange(): Hash change made by manual edit");
+						console.log("hashchange(): Last hash:")
+						console.log(qs);
+						for (var id in qs) {
+							console.log("hashchange(): Triggering: " + qs[id]);
+							// This does not work in jquery-ui 1.12.1
+							$("#" + id)
+								.val(qs[id])
+								.data("autocomplete")
+								._trigger("select",event,{item:qs[id]});
+						}
+					}					
+					$(window).hashchange.byurledit = true;
+				});	
+			}
+
+			function ajaxerror(url, xhr) {
+				let errmsg = xhr.responseText || xhr.statusText;
+				$('#xstatus').show().html(
+					"<div class='error'>Error encountered when attempting to retrieve "
+					+ "<a target='_blank' href='" + url + "'>"
+					+ url.replace("&para","&#38;para")+"</a>"
+					+ ".<br><br>Message: <pre>" + errmsg + "</pre></div>");
+				console.log("ajaxerror():");
+				console.log(xhr);
+			}	
+
+			function get(url,cb) {
+
+				// Client-side cache of response.
+				if (typeof(get.cache) === "undefined") {
+					get.cache = {};
+				}
+				if (get.cache[url]) {
+					console.log("get(): Client-side cache hit.");
+					cb($.parseJSON(get.cache[url]));
+				}
+
+				$("#xstatus").append("Requesting " + link(url) + " ");
+				// Append ● every 0.5 s
+				let interval = setInterval( 
+						() => $("#xstatus").append("●"), 500);
+
+				$.ajax({
+					type: "GET",
+					url: url,
+					async: true,
+					dataType: "text",
+					success: function (data, textStatus, jqXHR) {
+						if (!data.match(/^\s*\[|^\s*\{/)) {
+							console.log("get(): Non-JSON response. Converting response to an array of lines.");
+							xret = data.replace(/,$/,"").split("\n");
+							xret = xret.filter(x => x !== ""); // Remove empty lines
+						} else {
+							xret = $.parseJSON(data);
+						}
+						clearInterval(interval);
+						console.log("get(): Parsed response from " + url + ":");
+						console.log(xret);
+						get.cache[url] = xret; // Cache response.
+						cb(xret);
+						$("#xstatus").empty();
+					},
+					error: function (xhr, textStatus, errorThrown) {
+						clearInterval(interval);
+						ajaxerror(url, xhr);
+					}
+				});
+			}
+
+			// Determine selected value for a drop-down.	
+			function selected(name) {
+
+				// When drop-down value is selected, URL should be up-to-date.
+				// Use value in URL.
+				if (location.hash !== "") {
+					var qs = parseQueryString();
+					if (qs[name]) {
+						return qs[name];
+					}
+				}
+				return $("span[name='"+name+"']").attr('value');
+			}
+
+			// Create a HTML link.
+			function link(url, text) {
+				if (arguments.length > 1) {
+					return "<a target='_blank' title='" 
+								+ url + "' href='" 
+								+ url + "'>" 
+								+ text + "</a>";
+				} else {
+					return "<a target='_blank' title='" 
+								+ url + "' href='" 
+								+ url + "'>" 
+								+ url + "</a>";
+				}
+			}
+
+			function downloadlink(url, what, showdots) {
+
+				$("#downloadlink")
+					.empty()
+					.append(
+						"<span>" 
+						+ link(url, "Download " + what) 
+						+ "</span>")
+					.show();
+				$("#downloadlink > span > a")
+							.css('font-weight', 'bold');
+	
+				if (showdots) {
+					$("#loading").text("Loading " + what + " ").show();
+					let interval = setInterval( 
+										() => $("#loading").append("●"), 500);
+					return interval;
+				}
+			}
+
+			// Handle servers drop-down.
+			function servers(cb) {
+
+				servers.onselect = function () {
+
+					console.log('servers.onselect(): Called.');
+
+					$('#overviewinfo').hide();
+					$('#output').hide();
+					$('#serverinfo').nextAll().hide();
+
+					let url = servers.info[selected('server')]['url'];
+					let text = "Server URL";
+					$('#serverinfo ul').empty();
+					$('#serverinfo ul').append(
+										'<li>Server URL: ' + link(url) + '</li>');
+					let email = servers.info[selected('server')]['contactEmail'];
+					$('#serverinfo ul').append(
+						'<li>Server Contact: ' 
+						+ servers.info[selected('server')]['contactName'] 
+						+ " &lt;"
+						+ link("mailto:" + email + "?subject=" + url,email)
+						+ "&gt;"
+						+ '</li>');
+
+					$('#serverinfo').show();
+				};
+
+				console.log('servers(): Called.');
+
+				$.ajax({
+					type: "HEAD",
+					url: SERVER_LIST,
+					success: function (data, textStatus, jqXHR) {
+						get(SERVER_LIST, function (res) {process(res)});
+					},
+					error: function (xhr, textStatus, errorThrown) {
+						console.log("Did not find " 
+							+ SERVER_LIST + ".\n"
+							+ "Using fall-back of " + SERVER_LIST_FALLBACK);
+						SERVER_LIST = SERVER_LIST_FALLBACK;
+					}
+				});
+
+				function process(res) {
+					let list = [];
+					let info = {};
+					for (let i = 0; i < res.length; i++) {
+						if (res[i].substring(0,1) === "#") {
+							continue;
+						}
+						let name = res[i].split(',')[2].trim();
+						let id = res[i].split(',')[1].trim();
+						info[id] = {};
+						info[id]['url'] = res[i].split(',')[0].trim();
+						info[id]['contactName'] = res[i].split(',')[3].trim();
+						info[id]['contactEmail'] = res[i].split(',')[4].trim();
+						if (info[id]['contactName'] == info[id]['contactEmail']) {
+							info[id]['contactName'] = '';
+						}
+
+						if (qs['server'] === id) {
+							console.log("servers(): server value for " 
+										+ id 
+										+ " found in hash. Will select it.")
+						}
+						list.push({
+							"label": name,
+							"value": id, 
+							selected: qs['server'] === id
+						});
+					}
+					$('#overviewinfo > ul').append(
+								'<li>' 
+								+ (list.length) 
+								+ " servers available.</li>");
+					servers.info = info;
+					cb(list);
+				}
+			}
+
+			// Handle datasets drop-down.
+			function datasets(cb) {
+
+				datasets.onselect = function () {
+					console.log('datasets.onselect(): Called.');
+
+					$('#output').hide();
+					$('#datasetinfo').nextAll().hide();
+
+					let url = servers.info[selected('server')]['url'] 
+								+ "/info?id=" + selected('dataset');
+					$('#datasetinfo ul').empty();
+					$('#datasetinfo').show();
+				};
+
+				console.log('datasets(): Called.');
+
+				let url = servers.info[selected('server')]['url'] + "/catalog";
+				get(url, function (res) {
+					res = res.catalog;
+					// Show number of datasets
+					let plural = res.length > 1 ? "s" : "";
+					$('#serverinfo ul').append(
+										'<li>' 
+										+ (res.length) 
+										+ ' dataset' + plural + '</li>');
+					let info = {};
+					let list = [];
+					for (var i = 0; i < res.length; i++) {
+						info[res[i]['id']] = {};
+						for (key of Object.keys(res[i])) {
+							info[res[i]['id']][key] = res[i][key];
+						}
+						if (qs['dataset'] === res[i]['id']) {
+							console.log("datasets(): dataset value for " 
+										+ res[i]['id'] 
+										+ " found in hash. Will select it.")
+						}
+						list.push({
+							"label": res[i]['title'] || res[i]['id'],
+							"value": res[i]['id'], 
+							selected: qs['dataset'] === res[i]['id']
+						});
+					}
+					datasets.info = info;
+					cb(list);
+				});
+			}
+			
+			// Handle parameters drop-down.			
+			function parameters(cb) {
+
+				console.log('parameters(): Called.');
+
+				parameters.clearfollowing = function () {
+					if (selected('return')) {
+						output();
+						return false;
+					} else {
+						return true;
+					}
+				}	
+
+				parameters.onselect = function () {
+
+					console.log('parameters.onselect(): Called.');
+
+					$('#parameterinfo').nextAll().hide();
+					$('#output').hide();
+					$('#parameterinfo ul').empty();
+
+					if (0) {
+						if (selected('parameters') === '*all*') {
+							alert('*all* selected');
+							// Loop through all parameters and create bulleted list.
+						}
+					}
+
+					let meta = parameters.info[selected('parameters')];
+
+					let url = servers.info[selected('server')]['url'] 
+								+ "/info?id=" + selected('dataset') 
+								+ "&parameters=" + selected('parameters');
+					for (key of Object.keys(meta)) {
+						if (key !== "bins") {
+							$('#parameterinfo ul').append(""
+									+ '<li>' + key 
+									+ ": " + JSON.stringify(meta[key]) 
+									+ '</li>');
+						}
+					}
+
+					$('#parameterinfo ul')
+						.append('<li>' 
+								+ '<a id="parameterjson" title=' + url + '>'
+								+ 'HAPI JSON for parameter'
+								+ '</a>'
+								+ '</li>');
+
+					(function(url) {$('#parameterjson').click(() => output(url));})(url)
+
+					$('#parameterinfo').show();
+				};
+
+				let url = servers.info[selected('server')]['url'] 
+							+ "/info?id=" 
+							+ selected('dataset');
+
+				get(url, function (res) {
+
+					if (res['resourceURL']) {
+						$('#datasetinfo ul').append('<li>' 
+							+ link(res['resourceURL'], 
+										"Dataset documentation or metadata") 
+							+ '</li>');
+					}
+					if (res['contact']) {
+						$('#datasetinfo ul').append(
+												'<li>Dataset contact: ' 
+												+ res['contact']
+												+ '</li>');
+					}
+
+					// Show number of parameters
+					$('#datasetinfo ul')
+						.append(""
+								+ "<li>"
+								+ (res.parameters.length) 
+								+ " parameters</li>");
+
+					$('#datasetinfo ul')
+						.append('<li>Start: ' + res['startDate'] + '</li>');
+					$('#datasetinfo ul')
+						.append('<li>Stop: ' + res['stopDate'] + '</li>');
+
+
+					let cadence = res['cadence'] || "not given";
+					$('#datasetinfo ul')
+						.append('<li>Cadence: ' 
+								+ cadence
+									.replace("PT","")
+									.replace("D"," days, ") 
+									.replace("H"," hours, ") 
+									.replace("M"," minutes, ") 
+									.replace("S"," seconds")
+									.replace(/, $/,"")
+									.replace("1 days", "1 day")
+									.replace("1 hours", "1 hour")
+									.replace("1 minutes", "1 hour")
+									.replace("1 seconds", "1 second")
+								+ '</li>');
+
+					$('#datasetinfo ul')
+						.append('<li>' 
+								+ '<a id="datasetjson" title=' + url + '>'
+								+ 'HAPI JSON for dataset'
+								+ '</a>'
+								+ '</li>');
+
+					(function(url) {$('#datasetjson').click(() => output(url));})(url)
+
+					datasets.info[selected('dataset')]['info'] = res;
+
+					res = res.parameters;
+
+					let info = {};
+					let list = [];
+					for (var k = 0; k < res.length; k++) {
+						info[res[k]['name']] = {};
+						for (key of Object.keys(res[k])) {
+							info[res[k]['name']][key] = res[k][key];
+						}
+						if (qs['parameters'] === res[k]['name']) {
+							console.log("parameters(): parameter value for " 
+										+ name 
+										+ " found in hash. Will select it.")
+						}
+						list.push({
+							"label": res[k]['label'] || res[k]['name'],
+							"value": res[k]['name'], 
+							"selected": qs['parameters'] === res[k]['name']
+						});
+					}
+
+					if (0) {
+						list.unshift({
+										"label": "*All*",
+										"value": "*all*",
+										"selected": qs['parameters'] === "*all*"
+									});
+					}
+
+					datasets.info[selected('dataset')]['info']['parameters'] = info;
+					parameters.info = info;
+					parameters.list = list;
+
+					cb(list);
+				});	
+			}
+
+			// Handle start time drop-down.
+			function starttime(cb) {
+
+				console.log('starttime(): Called.');
+
+				starttime.clearfollowing = function () {
+					if (selected('return')) {
+						output();
+						return false;
+					} else {
+						return true;
+					}
+				}	
+				starttime.onselect = function () {};
+
+				let meta = datasets.info[selected('dataset')]['info'];				
+				let start = meta['sampleStartDate'];
+				let stop = meta['sampleStopDate'];
+
+				list = [{}];
+				if (qs['start'] !== undefined) {
+					list[0].label = qs['start'];
+					list[0].value = qs['start'];
+				} else if (start && stop) {
+					list[0].label = start;
+					list[0].value = start;
+				} else {
+					list[0].label = meta['startDate'];
+					list[0].value = meta['startDate'];
+				}
+				cb(list);
+			}
+
+			// Handle stop time drop-down.			
+			function stoptime(cb) {
+
+				console.log('stoptime(): Called.');
+
+				stoptime.clearfollowing = function () {
+					if (selected('return')) {
+						output();
+						return false;
+					} else {
+						return true;
+					}
+				}
+
+				stoptime.onselect = function () {};
+
+				let meta = datasets.info[selected('dataset')]['info'];				
+				let start = meta['sampleStartDate'];
+				let stop = meta['sampleStopDate'];
+
+				list = [{}];
+				if (qs['stop'] !== undefined) {
+					list[0].label = qs['stop'];
+					list[0].value = qs['stop'];
+					cb(list);
+					return;
+				}
+
+				if (start && stop) {
+					list[0].label = stop;
+					list[0].value = stop;
+					cb(list);
+					return;
+				}
+
+				start = meta['startDate'];
+				let cadenceString = meta['cadence'] || "PT1M";
+				let cadenceMillis = dayjs.duration(cadenceString)['$ms'];
+
+				if (cadenceMillis <= 100) { // 0.1 s or less
+					stop = dayjs(start).add(1,'minute');					
+				} else if (cadenceMillis <= 1000*10) { // 10 s or less
+					stop = dayjs(start).add(1,'hour').toISOString();
+				} else if (cadenceMillis <= 1000*60) { // 1 min or less
+					stop = dayjs(start).add(2,'day').toISOString();
+				} else if (cadenceMillis <= 1000*60*10) { // 10 min or less
+					stop = dayjs(start).add(4,'day').toISOString();
+				} else if (cadenceMillis <= 1000*60*60) { // 1 hr or less
+					stop = dayjs(start).add(10,'day').toISOString();
+				} else if (cadenceMillis <= 1000*60*60*24) { // 1 day or less
+					stop = dayjs(start).add(31,'day').toISOString();
+				} else if (cadenceMillis <= 1000*60*60*24*10) { // 10 days or less
+					stop = dayjs(start).add(1,'year').toISOString();
+				} else if  (cadenceMillis <= 1000*60*60*24*100) { // 100 days or less
+					stop = dayjs(start).add(10,'year');
+				} else {
+					stop = meta['stopDate'];
+				}
+
+				list[0].label = stop;
+				list[0].value = stop;
+
+				cb(list);
+			}
+			
+			// Handle return drop-down.
+			function returntype(cb) {
+
+				format.clearfollowing = function () {
+					if (selected('return')) {
+						output();
+						return false;
+					} else {
+						return true;
+					}
+				}
+				returntype.onselect = function () {};
+
+				var values = 
+							[
+								{label:"Data", value:"data"},
+								{label:"Image", value:"image"},
+								{label:"Script", value:"script"}
+							];
+				for (var i = 0; i < values.length; i++) {
+					if (qs['return'] === values[i]['value']) {
+						values[i]['selected'] = true;
+					}
+				}
+				cb(values);
+			}
+
+			// Handle format drop-down.
+			function format(cb) {
+
+				console.log('format(): Called.');
+
+				format.clearfollowing = function () {
+					if (selected('type')) {
+						output();
+						return false;
+					} else {
+						return true;
+					}
+				}
+
+				format.onselect = function () {
+					$('#output').children().hide();
+
+					if (selected("return") === "image" 
+						|| selected("return") === "script") {
+						output();
+					}
+				};
+
+				if (selected("return").match("data")) {
+					var values = 
+								[
+									{label:"HAPI ASCII", value:"ascii"},
+									{label:"HAPI JSON", value:"json"}
+								];
+				}
+				if (selected("return").match("image")) {
+					var values =
+								[
+									{label:"SVG",value:"svg"},
+									{label:"PNG",value:"png"},
+									{label:"PDF",value:"pdf"},
+									{label:"Gallery",value:"gallery"}
+								];
+				}
+				if (selected("return").match("script")) {
+					var values =
+								[
+									{label:"IDL",value:"idl"},
+									{label:"MATLAB",value:"matlab"},
+									{label:"Python",value:"python"},
+									{label:"Autoplot",value:"autoplot"}
+								];
+				}
+
+				for (var i = 0; i < values.length; i++) {
+					if (qs['format'] === values[i]['value']) {
+						values[i]['selected'] = true;
+					}
+				}
+				cb(values);
+			}
+
+			// Handle type drop-down.
+			function type(cb) {
+
+				console.log('type(): Called.');
+
+				type.clearfollowing = function () {
+					if (selected('style')) {
+						output();
+						return false;
+					} else {
+						return true;
+					}
+				}
+
+				type.onselect = function () {};
+
+				var values = [];
+				if (false && selected("return").match("image")) {
+					values = 
+							[
+								{
+									label: "Time Series", 
+									value: "timeseries", 
+									selected: true
+								}
+							];
+				}
+				cb(values);
+			}
+
+			// Handle style drop-down.
+			function style(cb) {
+
+				console.log('type(): Called.');
+
+				style.onselect = function () {
+					output();
+				}
+
+				var values = [];
+				if (false && selected("return") === "image") {
+					values = 
+						[
+							{label: "None/Black/Blue", value: "0", selected: true},
+							{label: "Black/Yellow/Yellow", value: "1"},
+							{label: "Sparkline", value: "2"}
+						];
+				}
+
+				if (selected("return") === "data") {
+					var values = [];						
+					if (selected('format') == 'ascii') {
+						var values = 
+							[
+								{
+									label: "No Header",
+									value: "noheader",
+									selected: true
+								},
+								{label: "Header", value: "header"}
+							];
+					}
+				}
+				for (var i = 0; i < values.length; i++) {
+					if (qs['style'] === values[i]['value']) {
+						values[i]['selected'] = true;
+					}
+				}
+				cb(values);
+			}
+
+			// Examples drop-down.
+			function examples(cb) {
+
+				console.log('examples(): Called.');
+
+				examples.onselect = function () {
+					vid = $("#examples0").attr('value');
+					console.log("Example " + vid + " selected");
+
+					// Find example corresponding to vid.
+					for (var k = 0; k < examples.list.length; k++) {
+						if (examples.list[k].value === vid) {
+							break;
+						}
+					}
+					$(window).unbind("hashchange");
+					location.hash = examples.list[k].value;
+					location.reload();
+				};
+				var list = examplelist(); // Function defined in examplelist.js.
+				examples.list = list;
+				cb(list);
+			}
+
+			// Form URL and place it in DOM based on drop-down state.
+			function output(jsonURL) {
+
+				console.log('output(): Called.')
+
+				let selectedParameters = selected('parameters');
+				if (0) {
+					if (selectedParameters === '*all*') {
+						selectedParameters = "";
+					}
+				}
+
+				if (jsonURL) {
+					let interval = downloadlink(jsonURL, "json", true);
+					$.ajax({
+						type: "GET",
+						url: jsonURL,
+						async: true,
+						dataType: "json",
+						success: function (data, textStatus, jqXHR) {
+							showText(JSON.stringify(data,null,4),'','json')
+							clearInterval(interval);
+							$("#loading").empty();
+						},
+						error: function (xhr, textStatus, errorThrown) {
+							clearInterval(interval);
+							$('#downloadlink').empty();
+							$("#loading").empty();
+							ajaxerror(jsonURL, xhr);
+						}
+					});
+					return;		
+				}
+
+				if (selected('return').match(/script/)) {
+					let cclass = '';
+					let ext = '';
+					if (selected('format') === 'python') {
+						cclass = 'python';
+						ext = 'py';
+					}
+					if (selected('format') === 'matlab') {
+						cclass = 'matlab';
+						ext = 'm';
+					}
+					if (selected('format') === 'autoplot') {
+						cclass = 'python';
+						ext = 'jy';
+					}
+					if (selected('format') === 'idl') {
+						cclass = 'matlab';
+						ext = 'pro';
+					}
+
+					script(cclass, selected('format') + "." + ext, 
+						function (sText) {showText(sText,cclass,ext)})
+
+				} else if (selected('return').match(/data/)) {
+
+					parameterString = "&parameters=" + selectedParameters
+					let url = servers.info[selected('server')]['url'] 
+								+ "/data?id=" + selected('dataset')
+								+ parameterString
+								+ "&time.min=" + selected('start')
+								+ "&time.max=" + selected('stop')
+
+					if (selected('format') === 'ascii') {
+						if (selected('style') === 'header') {
+							url = url + "&include=header";
+						}
+					}
+					if (selected('format') === 'json') {
+						url = url + "&format=json";
+					}
+
+					$('#output').show();
+
+					if (!$("#showdata").prop('checked')) {
+						downloadlink(url, "data", false);
+						return;
+					}
+
+					let interval = downloadlink(url, "data", true);
+
+					$.ajax({
+						type: "GET",
+						url: url,
+						async: true,
+						dataType: "text",
+						success: function (data, textStatus, jqXHR) {
+							$("#downloadlink")
+								.append("<pre class='data'>" + data + "</pre>");
+							$("#downloadlink > pre")
+								.width($("#infodiv").width()-15)
+
+							clearInterval(interval);
+							$("#loading").empty();
+						},
+						error: function (xhr, textStatus, errorThrown) {
+							clearInterval(interval);
+							$('#downloadlink').empty();
+							$("#loading").empty();
+							ajaxerror(url, xhr);
+						}
+					});
+
+				} else if (selected('return').match(/image/)) {
+
+					url = "http://hapi-server.org/plot"
+							+ "?server=" + servers.info[selected('server')]['url']
+							+ "&id=" + selected('dataset')
+							+ "&parameters=" + selectedParameters
+							+ "&time.min=" + selected('start')
+							+ "&time.max=" + selected('stop')
+							+ "&format=" + selected('format')
+							+ "&usecache=" + $("#useimagecache").prop('checked')
+
+					$('#output').show();
+
+					if (selected('format').match(/png|svg/)) {
+
+						let interval = downloadlink(url,selected('format'),true);
+
+						$("#image")
+							.empty()
+							.append("<img></img>")
+							.find('img')
+							.attr('src',url)
+							.parent()
+							.show()
+							.find('img')
+							.width($("#infodiv").width()-15)
+							.load( () => {
+								clearInterval(interval);
+								$("#loading").empty();
+							})
+					}
+					if (selected('format').match(/pdf/)) {
+
+						let interval = downloadlink(url, 'pdf', true);
+
+						$("#image")
+							.empty()
+							.append("<iframe></iframe>")
+							.find('iframe')
+							.attr('frameborder',0)
+							.attr('scrolling','no')
+							.attr('src',url)
+							.width('0')
+							.height('0')
+							.parent()
+							.show()
+
+						$('#image > iframe').load(function () {
+							clearInterval(interval);
+							$("#loading").empty();
+							let w = $("#infodiv").width()-15
+							$('#image > iframe')
+								.width(w)
+								.height(w*3/7+30) 
+							// Defaut hapiplot is 7x3 image. Add 30 for PDF
+							// controls.
+	
+						})
+					}
+					if (selected('format').match(/gallery/)) {
+						$("#downloadlink")
+							.empty()
+							.append(
+								"<span>" 
+								+ link(url, "View gallery", true) 
+								+ "</span>")
+							.show();
+						$("#downloadlink > span > a")
+									.css('font-weight', 'bold');
+					}
+				
+				}
+
+				function script(lang,templateFile,cb) {
+
+					$.ajax({
+						type: "GET",
+						url: "scripts/" + templateFile,
+						async: true,
+						dataType: "text",
+						success: function (data, textStatus, jqXHR) {
+							process_(data);
+						}
+					});
+
+					function process_(sText) {
+						let email = servers.info[selected('server')]['contactEmail']
+						sText = sText.replace(/CONTACT/gm,email);
+
+						let selectedParameters = selected('parameters');
+						if (0) {
+							if (selectedParameters === '*all*') {
+								selectedParameters = "";
+							}
+						}
+
+						let server = servers.info[selected('server')]['url']
+						sText = sText.replace(/SERVER/gm,server);
+						sText = sText.replace(/DATASET/gm,selected('dataset'));
+						sText = sText.replace(/PARAMETERS/gm,selectedParameters);
+						sText = sText.replace(/START/gm,selected('start'));
+						sText = sText.replace(/STOP/gm,selected('stop'));
+
+						let p = parameters.list.slice(0); // copy 
+						
+						p.forEach((el,i) => {p[i] = el.value});
+						if (p.length == 1) {
+							sText = sText.replace(/CSV_EXAMPLE/gm,'.');
+						} else if (p.length == 2) {
+							sText = sText.replace(/CSV_EXAMPLE/gm,
+													", e.g., parameters='" 
+													+ p.join(','));
+						} else {
+							sText = sText.replace(/CSV_EXAMPLE/gm,
+													", e.g., parameters='" 
+													+ p.slice(1,3).join(',') + "'");
+						}
+						cb(sText);
+					}
+				}
+
+				function showText(sText,cclass,ext) {
+					$('#scriptcopy > button')
+						.attr("data-clipboard-text",sText)
+					$('#scriptcopy').show()
+
+					var clipboard = new ClipboardJS('.btn');
+					clipboard.on('success', function () {
+						console.log('Copied script to clipboard.');
+						$('#copied').tooltipster('open');
+						setTimeout(() => $('#copied').tooltipster('close'), 800);
+					});
+
+					$("#scripttext")
+						.empty()
+						.append(
+							"<pre><code class='" + cclass + "'>" 
+							+ sText.replace('&param','&amp;param')
+							+ "</code></pre>")
+						.show();
+
+					let scriptFile = 'data:text/plain;base64;charset=utf-8,' 
+										+ btoa(sText);
+
+					let type = "script";
+					let fname = 'demo';
+					if (ext === 'json') {
+						type = 'json';
+						fname = 'hapi';
+					}
+
+					//https://stackoverflow.com/a/30139435
+					var el = document.createElement('a');
+					el.setAttribute('href', scriptFile);
+					el.setAttribute('download', fname + "." + ext);
+
+					$("#downloadlink").empty().append(el).show();
+					$("#downloadlink > a")
+						.html('Download ' + type)
+						.css('font-weight', 'bold');
+
+					document
+						.querySelectorAll('pre code')
+						.forEach((block) => {hljs.highlightBlock(block);});
+					$("#scripttext")
+						.width($("#infodiv").width()-15)
+						.height()
+					$("#output").show();
+				}
+
+			}
+
+		</script>
+		
+	</head>
+
+	<body>
+		<div id="options">
+			<div id="cacheoptions">
+				<a id="cachecheckboxeslink">
+					Options
+				</a>
+			</div>
+			<div id="cachecheckboxes" style="display:none">
+				<font size="-1">
+					<div class="tooltip" title="When requesting data, show download link and data in broswer (default is to show download link only)">
+						<input id="showdata" type="checkbox" value=""/>
+							&nbsp;Show data
+					</div>
+					<div class="tooltip" title="For fastest response time, use cached metadata (if available). Disable this for metadata that change frequently.">
+						<input id="usemetadatacache" type="checkbox" value=""/>
+							&nbsp;Use cached metadata
+					</div>
+					<div class="tooltip" title="For fastest response time, use cached images (if available).  Disable this for data that change frequently.">
+						<input id="useimagecache" type="checkbox" value=""/>
+							&nbsp;Use cached images
+					</div>
+				</font>
+			</div>
+			<span id="dropdowns0" class="dropdown"></span>
+			<span id="dropdowns1" class="dropdown"></span>
+			<span id="dropdowns2" class="dropdown"></span>
+			<span id="dropdowns3" class="dropdown"></span>
+			<span id="dropdowns4" class="dropdown"></span>
+			<span id="dropdowns5" class="dropdown"></span>
+			<span id="dropdowns6" class="dropdown"></span>
+			<span id="dropdowns7" class="dropdown"></span>
+			<span id="dropdowns8" class="dropdown"></span>
+			<button id="clear" class='simple' type="button" title="re-set drop-downs">
+				Clear
+			</button>
+		</div>
+
+		<div id="infodiv">
+			<div id="xstatus">
+			</div>
+			<div id="overviewinfo">
+				<b>Overview</b>
+				<ul>
+					<li>
+						Use this interface to 
+						<ul>
+							<li>generate a 
+								<a class="tooltip" title="Heliphysics Data Application Interface: http://hapi-server.org/" href="http://hapi-server.org/">HAPI</a> 
+								URL to download data,
+							</li>
+							<li>
+								plot data from a HAPI server, and
+							</li>
+							<li>generate
+								<a title="https://github.com/hapi-server/client-idl" href="https://github.com/hapi-server/client-idl">IDL</a>
+								/<a title="https://github.com/hapi-server/client-matlab" href="https://github.com/hapi-server/client-matlab">MATLAB</a>
+								/<a title="https://github.com/hapi-server/client-python" href="https://github.com/hapi-server/client-python">Python</a> scripts that read and plot the selected parameter.
+							</li>
+						</ul>
+					</li>
+					<li>
+						Begin by selecting a HAPI data server on the left or selecting an example set of selections below.
+					</li>
+				</ul>
+				<div id="examplelist">
+					<span id="examples0"></span>
+				</div>
+			</div>
+			<div id="output" style="display:none;">
+				<div id="downloadlink" style="display:none;">
+				</div>
+
+				<div id="scriptcopy"
+					class='tooltip' 
+					title='Copy to clipboard'
+					alt='Copy to clipboard'>
+					<button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
+						<img class='clippy'	width='20px' src='css/clippy.png' />
+					</button>
+					<span id="copied" class="tooltip" title="Copied!"></span>
+				</div>
+
+				<div id="scripttext" style="display:none;">
+				</div>
+				<div id="loading"></div>
+				<div id="image" style="display:none;">
+				</div>
+			</div>
+			<div id="serverinfo" style="display:none;">
+				<b>Server information</b>
+				<ul>
+				</ul>
+			</div>
+			<div id="datasetinfo" style="display:none;">
+				<b>Dataset information</b>
+				<ul>
+				</ul>
+			</div>
+			<div id="parameterinfo" style="display:none;">
+				<b>Parameter information</b>
+				<ul>
+				</ul>				
+			</div>
+		</div>
+	</body>
+	
+</html>

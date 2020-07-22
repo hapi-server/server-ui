@@ -1,0 +1,159 @@
+iframe, #previewimgs {
+	font-size: 100%;
+  	border: 1px solid green;
+	margin: 5px 0;
+	padding: 3px;
+}
+body {
+	font-family: Veranda, Arial, sans-serif;
+	font-size: 1em;
+}
+ul {
+	line-height:140%
+}
+.ui-widget {
+	font-family: Veranda, Arial, sans-serif;
+	font-size: 1em;
+	padding: 1px;
+}
+
+.list {
+	display:table;width:100%;border:1px solid black;
+}
+
+.error {
+	border: 2px solid red;
+	padding: 0.5em;
+}
+
+.ui-autocomplete {
+    max-height: 200px;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: hidden;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 1px;
+}
+
+.ui-state-highlight a {
+  font-weight: bold;
+  color: #002e5b !important;
+}
+
+.ui-state-highlight {
+  font-weight: bold;
+  color: #002e5b !important;
+}
+
+.tooltipster-sidetip.tooltipster-noir .tooltipster-box {
+	border-radius: 0px; 
+	border: 1px solid black;
+	background: #fff;
+}
+
+.hljs {
+	background-color: white;
+}
+
+.hljs-comment, .hljs-quote {
+  color: #006400;
+}
+
+button.simple {
+	background-color: white;
+	color: black;
+	border:1px solid black;
+	margin-top:5px;
+}
+
+a {
+	text-decoration: underline;
+	text-decoration-color: blue;
+	cursor: pointer;
+}
+
+a:link {
+	color: rgb(0,0,0);
+}
+a:visited {
+	color: rgb(0,0,0);
+}
+
+.dropdown-input {
+	width:100%;display:table-cell;color:black;font-weight:bold;text-align:center;
+}
+
+.dropdown {
+	display: none;
+}
+#scriptcopy {
+	float: left;
+	position: absolute;
+	opacity: 0.9;
+	z-index: 100;
+}
+
+#scripttext {
+	border: 1px solid black;
+}
+
+pre {
+	margin: 13px;	
+}
+
+#output {
+	margin-bottom: 1em;
+}
+
+#examplelist {
+	margin-left: 2.5em;
+	margin-top: -5px;
+	width: 10em;
+}
+
+#infodiv {
+ margin-left: 14em;
+ margin-top: 0em;
+}
+
+#cacheoptions {
+	margin-bottom: 5px;
+}
+
+#options {
+	float: left;
+	width: 12em;
+	margin-right: 14px;
+	margin-top: 0em;
+	padding-right: 1em;
+	border-right: 1px solid black;
+	display: none;
+}
+
+textarea.script {
+	background-color: #f9f9f9;
+}
+
+textarea.data {
+	background-color: #f9f9f9;
+    max-height: 200px;
+    width: 100%;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: auto;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 5px;
+    border: 1px solid rgb(0,0,0);
+}
+
+pre.data {
+	background-color: #f9f9f9,
+    max-height: 200px;
+    width: 100%;
+    overflow-y: auto;
+    /* prevent horizontal scrollbar */
+    overflow-x: auto;
+    /* add padding to account for vertical scrollbar */
+    padding-right: 5px;
+    border: 1px solid rgb(0,0,0);
+}

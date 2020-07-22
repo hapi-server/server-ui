@@ -3,7 +3,7 @@
 	<head>
 		<script>
 
-		let debug = true;
+		let debug = true; // Show log messages in console.
 
 		// Show all servers if all.txt not found
 		SERVER_LIST_FALLBACK = 
@@ -15,20 +15,21 @@
 		} else {
 			SERVER_LIST = "all.txt";
 		}
+
 		</script>
 
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 		<meta name="keywords" content="HAPI Heliophysics Data UI">
 		<meta name="description"
-			content="HAPI Server UI; https://github.com/hapi-server/client-javascript">
+			content="HAPI Server UI; https://github.com/hapi-server/server-ui">
 		<title>HAPI Browser</title>
 		<link rel="icon"
 			href="http://hapi-server.org/favicon.ico" type="image/x-icon">
 
 		<link rel="stylesheet"
-		    type="text/css" href="css/highlight-10.0.0-github.css"/>
-		<link rel="stylesheet"
 			type="text/css" href="css/jquery-ui-1.9.2.custom.css"/>
+		<link rel="stylesheet"
+		    type="text/css" href="css/highlight-10.0.0-github.css"/>
 		<link rel="stylesheet" 
 			type="text/css" href="css/tooltipster.bundle.min.css"/>
 		<link rel="stylesheet" 
@@ -87,31 +88,36 @@
 			function main() {
 
 				if (!debug) {
-					// Suppress console loggin.
+					// Suppress console logging.
 					console.log = function() {};
 				}
 
 				$('.tooltip').tooltipster({theme: 'tooltipster-noir'})
 
 				// https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
-				$('body').on('mouseenter', 
-							 '.tooltip:not(.tooltipstered)', function () {
-						$(this)
-							.tooltipster({theme: 'tooltipster-noir'})
-							.tooltipster('show');
-				});
+				$('body')
+					.on('mouseenter','.tooltip:not(.tooltipstered)', 
+						function () {
+							$(this)
+								.tooltipster({theme: 'tooltipster-noir'})
+								.tooltipster('show');
+						});
 
 				// Bind events to changes in the hash part of the URL
 				hashchange();
 
-				// When clear button is clicked, change URI to be only the URL
-				$('#clear').on('click', 
-					() => {window.location=window.location.pathname});
-				$('#clear').show(); // Show clear button
+				$('#clear')
+					.show()
+					.on('click',
+							function () {
+								// Remove hash
+								window.location = window.location.pathname;
+							});
 
+				// Bind events to changes in checkbox state.
 				checkboxes();
 
-				// Set up main drop-downs
+				// Set up main drop-downs.
 				dropdowns(
 					[
 						"server","dataset","parameters","start",
@@ -138,23 +144,9 @@
 					],
 					"#dropdowns");
 
-				// Set up examples drop-down
-				//dropdowns(["examples"],["Examples"],[examples],[],"#examples");
+				// Set up examples drop-down.
+				dropdowns(["examples"],["Examples"],[examples],[],"#examples");
 
-			}
-
-			// Highlight text area when clicked so that user can copy.
-			function highlight() {
-				// https://stackoverflow.com/a/5797700
-				var $this = $(this);
-				$this.select();
-
-				// Work around Chrome's little problem
-				$this.mouseup(function() {
-					// Prevent further mouseup intervention
-					$this.unbind("mouseup");
-					return false;
-				});						
 			}
 
 			// Monitor hash for changes via text entry in address bar.
@@ -238,7 +230,8 @@
 						if (!data.match(/^\s*\[|^\s*\{/)) {
 							console.log("get(): Non-JSON response. Converting response to an array of lines.");
 							xret = data.replace(/,$/,"").split("\n");
-							xret = xret.filter(x => x !== ""); // Remove empty lines
+							// Remove empty lines
+							xret = xret.filter(x => x !== ""); 
 						} else {
 							xret = $.parseJSON(data);
 						}
@@ -345,7 +338,12 @@
 						console.log("Did not find " 
 							+ SERVER_LIST + ".\n"
 							+ "Using fall-back of " + SERVER_LIST_FALLBACK);
+						ajaxerror(SERVER_LIST,"");
+						alert('Did not find ' 
+								+ SERVER_LIST + ". Will use " 
+								+ SERVER_LIST_FALLBACK);
 						SERVER_LIST = SERVER_LIST_FALLBACK;
+						get(SERVER_LIST, function (res) {process(res)});
 					}
 				});
 
@@ -1154,15 +1152,15 @@
 			</div>
 			<div id="cachecheckboxes" style="display:none">
 				<font size="-1">
-					<div class="tooltip" title="When requesting data, show download link and data in broswer (default is to show download link only)">
+					<div class="tooltip" title="When requesting data, show data in broswer.">
 						<input id="showdata" type="checkbox" value=""/>
 							&nbsp;Show data
 					</div>
-					<div class="tooltip" title="For fastest response time, use cached metadata (if available). Disable this for metadata that change frequently.">
+					<div class="tooltip" title="Use cached metadata (if available).">
 						<input id="usemetadatacache" type="checkbox" value=""/>
 							&nbsp;Use cached metadata
 					</div>
-					<div class="tooltip" title="For fastest response time, use cached images (if available).  Disable this for data that change frequently.">
+					<div class="tooltip" title="Use cached images (if available).">
 						<input id="useimagecache" type="checkbox" value=""/>
 							&nbsp;Use cached images
 					</div>

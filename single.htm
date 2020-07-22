@@ -45,7 +45,7 @@
 	<script>
 	$(document).ready(function () {
 	    if (!location.href.match('localhost')) {
-		$('#verifierp').hide();
+			$('#verifierp').append('Remove validation link on production sites.');
 	    }
 	    $("#verifier").attr("href",$("#verifier").attr("href") + "?url=" + window.location.href);
 		$("#viviz").attr("href",$("#viviz").attr("href") + "?server=" + window.location.href + "&format=gallery");

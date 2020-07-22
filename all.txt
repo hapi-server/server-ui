@@ -1,2 +1,0 @@
-# Format is HAPI server URL, server ID, server name, contact name, contact email
-http://localhost:9998/SSCWeb/hapi,SSCWeb,SSCWeb Data,Cat Stevens,peace@train.org

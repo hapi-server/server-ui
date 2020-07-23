@@ -216,7 +216,8 @@
 				}
 				if (get.cache[url]) {
 					console.log("get(): Client-side cache hit.");
-					cb($.parseJSON(get.cache[url]));
+					cb(get.cache[url]);
+					return;
 				}
 
 				$("#loading")

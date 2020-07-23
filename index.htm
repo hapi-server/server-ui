@@ -5,12 +5,15 @@
 
 		let debug = true; // Show log messages in console.
 
-		// Show all servers if all.txt not found
+		// Show all servers if SERVER_LIST not found
 		SERVER_LIST_FALLBACK = 
 			"https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
 		let SERVER_LIST = "";
-		if (location.href.match("hapi-server.org")) {
+		if  (location.href.match("localhost:") ||
+				location.href.match("hapi-server.org/servers-dev/")) {
+			SERVER_LIST = "all-dev.txt"; 
+		} else if (location.href.match("hapi-server.org/servers")) {
 			SERVER_LIST = SERVER_LIST_FALLBACK;
 		} else {
 			SERVER_LIST = "all.txt";
@@ -216,10 +219,12 @@
 					cb($.parseJSON(get.cache[url]));
 				}
 
-				$("#xstatus").append("Requesting " + link(url) + " ");
+				$("#loading")
+						.append("Requesting " + link(url) + " ")
+
 				// Append ● every 0.5 s
 				let interval = setInterval( 
-						() => $("#xstatus").append("●"), 500);
+						() => $("#loading").append("●"), 500);
 
 				$.ajax({
 					type: "GET",
@@ -236,14 +241,15 @@
 							xret = $.parseJSON(data);
 						}
 						clearInterval(interval);
+						$("#loading").empty();
 						console.log("get(): Parsed response from " + url + ":");
 						console.log(xret);
 						get.cache[url] = xret; // Cache response.
 						cb(xret);
-						$("#xstatus").empty();
 					},
 					error: function (xhr, textStatus, errorThrown) {
 						clearInterval(interval);
+						$("#loading").empty();
 						ajaxerror(url, xhr);
 					}
 				});
@@ -291,7 +297,8 @@
 							.css('font-weight', 'bold');
 	
 				if (showdots) {
-					$("#loading").text("Loading " + what + " ").show();
+					$("#loading")
+						.text("Loading " + what + " ")
 					let interval = setInterval( 
 										() => $("#loading").append("●"), 500);
 					return interval;
@@ -887,8 +894,8 @@
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							clearInterval(interval);
-							$('#downloadlink').empty();
 							$("#loading").empty();
+							$('#downloadlink').empty();
 							ajaxerror(jsonURL, xhr);
 						}
 					});
@@ -961,8 +968,8 @@
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							clearInterval(interval);
-							$('#downloadlink').empty();
 							$("#loading").empty();
+							$('#downloadlink').empty();
 							ajaxerror(url, xhr);
 						}
 					});
@@ -1183,6 +1190,7 @@
 		<div id="infodiv">
 			<div id="xstatus">
 			</div>
+			<div id="loading" style="height: 1.5em;"></div>
 			<div id="overviewinfo">
 				<b>Overview</b>
 				<ul>
@@ -1227,7 +1235,7 @@
 
 				<div id="scripttext" style="display:none;">
 				</div>
-				<div id="loading"></div>
+
 				<div id="image" style="display:none;">
 				</div>
 			</div>

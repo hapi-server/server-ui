@@ -1,16 +1,73 @@
-iframe, #previewimgs {
-	font-size: 100%;
-  	border: 1px solid green;
-	margin: 5px 0;
-	padding: 3px;
-}
 body {
 	font-family: Veranda, Arial, sans-serif;
 	font-size: 1em;
 }
+
 ul {
-	line-height:140%
+	line-height:140%;
 }
+
+ul.ui-menu {
+	display: inline-block;
+	padding-right: 1em;
+}
+
+li.ui-menu-item {
+	white-space: nowrap;
+}
+
+a {
+	text-decoration: underline;
+	text-decoration-color: blue;
+	cursor: pointer;
+}
+
+a:link {
+	color: rgb(0,0,0);
+}
+a:visited {
+	color: rgb(0,0,0);
+}
+
+button.simple {
+	background-color: white;
+	color: black;
+	border:1px solid black;
+	margin-top:5px;
+}
+
+textarea.script {
+	background-color: #f9f9f9;
+}
+
+textarea.data {
+	background-color: #f9f9f9;
+	max-height: 200px;
+	width: 100%;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: auto;
+	/* add padding to account for vertical scrollbar */
+	padding-right: 5px;
+	border: 1px solid rgb(0,0,0);
+}
+
+pre {
+	margin: 13px;	
+}
+
+pre.data {
+	background-color: #f9f9f9,
+	max-height: 200px;
+	width: 100%;
+	overflow-y: auto;
+	/* prevent horizontal scrollbar */
+	overflow-x: auto;
+	/* add padding to account for vertical scrollbar */
+	padding-right: 5px;
+	border: 1px solid rgb(0,0,0);
+}
+
 .ui-widget {
 	font-family: Veranda, Arial, sans-serif;
 	font-size: 1em;
@@ -18,7 +75,9 @@ ul {
 }
 
 .list {
-	display:table;width:100%;border:1px solid black;
+	display: table;
+	width: 100%;
+	border: 1px solid black;
 }
 
 .error {
@@ -59,33 +118,18 @@ ul {
   color: #006400;
 }
 
-button.simple {
-	background-color: white;
-	color: black;
-	border:1px solid black;
-	margin-top:5px;
-}
-
-a {
-	text-decoration: underline;
-	text-decoration-color: blue;
-	cursor: pointer;
-}
-
-a:link {
-	color: rgb(0,0,0);
-}
-a:visited {
-	color: rgb(0,0,0);
-}
-
 .dropdown-input {
-	width:100%;display:table-cell;color:black;font-weight:bold;text-align:center;
+	width: 100%;
+	display: table-cell;
+	color: black;
+	font-weight: bold;
+	text-align: center;
 }
 
 .dropdown {
 	display: none;
 }
+
 #scriptcopy {
 	float: left;
 	position: absolute;
@@ -95,10 +139,6 @@ a:visited {
 
 #scripttext {
 	border: 1px solid black;
-}
-
-pre {
-	margin: 13px;	
 }
 
 #output {
@@ -130,30 +170,5 @@ pre {
 	display: none;
 }
 
-textarea.script {
-	background-color: #f9f9f9;
-}
 
-textarea.data {
-	background-color: #f9f9f9;
-    max-height: 200px;
-    width: 100%;
-    overflow-y: auto;
-    /* prevent horizontal scrollbar */
-    overflow-x: auto;
-    /* add padding to account for vertical scrollbar */
-    padding-right: 5px;
-    border: 1px solid rgb(0,0,0);
-}
 
-pre.data {
-	background-color: #f9f9f9,
-    max-height: 200px;
-    width: 100%;
-    overflow-y: auto;
-    /* prevent horizontal scrollbar */
-    overflow-x: auto;
-    /* add padding to account for vertical scrollbar */
-    padding-right: 5px;
-    border: 1px solid rgb(0,0,0);
-}

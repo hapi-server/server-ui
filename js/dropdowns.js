@@ -382,9 +382,11 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 				.val(list[0].value).data("autocomplete")
 				._trigger("select", event, {item:list[0].value});
 
-			console.log("dropdowns.ac.select(): Drop-down with id = "
-						+ ids[i] + " has only one value. Hiding it.");
-			$(after+(i)).hide();
+			if (i == 0) {
+				console.log("dropdowns.ac.select(): First drop-down with id = "
+							+ ids[i] + " has only one value. Hiding it.");
+				$(after+(i)).hide();
+			}
 		}
 
 		if (list.length > 1) {

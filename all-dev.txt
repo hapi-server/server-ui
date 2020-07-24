@@ -1,5 +1,6 @@
 https://cdaweb.gsfc.nasa.gov/hapi, CDAWeb, CDAWeb, Nand Lal, voycrs@gmail.com
 http://hapi-server.org/servers-dev/SSCWeb/hapi, SSCWeb, SSCWeb (dev), Bob Weigel, rweigel@gmu.edu
+http://localhost:8998/INTERMAGNET/hapi,INTERMAGNET,INTERMAGNET (dev),Server Admin,admin@localhost
 http://datashop.elasticbeanstalk.com/hapi, DataShop, DataShop, Jon Vandegriff, jon.vandegriff@jhuapl.edu
 http://planet.physics.uiowa.edu/das/das2Server/hapi, DAS2, DAS2, Jeremy Faden, faden@cottagesystems.com
 https://iswa.gsfc.nasa.gov/IswaSystemWebApp/hapi, CCMC_ISWA, CCMC ISWA, Darren De Zeeuw, darrens@umich.edu

@@ -70,7 +70,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 							//				+ value + " and triggering close.");
 							console.log("dropdowns.ac.blur(): value and valuelast for "
 											+ id  + " are identical. No action taken.");
-							//$('input[id=' + id + ']').autocomplete("close");
+							$('input[id=' + id + ']').autocomplete("close");
 							//reset(this);
 						} else {
 							console.log("dropdowns.ac.blur(): value and valuelast are different."

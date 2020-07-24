@@ -540,9 +540,12 @@
 									.replace(/, $/,"")
 									.replace("1 days", "1 day")
 									.replace("1 hours", "1 hour")
-									.replace("1 minutes", "1 hour")
+									.replace("1 minutes", "1 minute")
 									.replace("1 seconds", "1 second")
 								+ '</li>');
+
+					$('#datasetinfo ul')
+						.append('<li>Description: ' + res['description'] + '</li>');
 
 					$('#datasetinfo ul')
 						.append('<li>' 
@@ -735,7 +738,8 @@
 					$('#output').children().hide();
 
 					if (selected("return") === "image" 
-						|| selected("return") === "script") {
+						|| selected("return") === "script"
+						|| selected("format") === "json") {
 						output();
 					}
 				};
@@ -743,8 +747,8 @@
 				if (selected("return").match("data")) {
 					var values = 
 								[
-									{label:"HAPI ASCII", value:"ascii"},
-									{label:"HAPI JSON", value:"json"}
+									{label:"ASCII", value:"ascii"},
+									{label:"JSON", value:"json"}
 								];
 				}
 				if (selected("return").match("image")) {
@@ -963,6 +967,7 @@
 								.append("<pre class='data'>" + data + "</pre>");
 							$("#downloadlink > pre")
 								.width($("#infodiv").width()-15)
+								.height($(window).height()/2)
 
 							clearInterval(interval);
 							$("#loading").empty();
@@ -1108,23 +1113,36 @@
 						setTimeout(() => $('#copied').tooltipster('close'), 800);
 					});
 
-					$("#scripttext")
-						.empty()
-						.append(
-							"<pre><code class='" + cclass + "'>" 
-							+ sText.replace('&param','&amp;param')
-							+ "</code></pre>")
-						.show();
-
-					let scriptFile = 'data:text/plain;base64;charset=utf-8,' 
-										+ btoa(sText);
-
 					let type = "script";
 					let fname = 'demo';
 					if (ext === 'json') {
 						type = 'json';
 						fname = 'hapi';
 					}
+
+					let h = '100%';
+					if (type === 'json') {
+						h = $(window).height()/2;
+					}					
+					let w = $("#infodiv").width()-15
+					$("#scripttext")
+						.empty()
+						.append(
+							"<pre class='text'></pre>")
+						.show()
+					
+					$("#scripttext > pre")
+						.append("<code class='" + cclass + "'>" 
+							+ sText.replace('&param','&amp;param')
+							+ "</code>")
+
+
+					$("#scripttext > pre")
+						.height(h)
+						.show();
+
+					let scriptFile = 'data:text/plain;base64;charset=utf-8,' 
+										+ btoa(sText);
 
 					//https://stackoverflow.com/a/30139435
 					var el = document.createElement('a');
@@ -1139,9 +1157,6 @@
 					document
 						.querySelectorAll('pre code')
 						.forEach((block) => {hljs.highlightBlock(block);});
-					$("#scripttext")
-						.width($("#infodiv").width()-15)
-						.height()
 					$("#output").show();
 				}
 
@@ -1234,7 +1249,7 @@
 					<span id="copied" class="tooltip" title="Copied!"></span>
 				</div>
 
-				<div id="scripttext" style="display:none;">
+				<div id="scripttext">
 				</div>
 
 				<div id="image" style="display:none;">

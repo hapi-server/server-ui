@@ -9,7 +9,6 @@ ul {
 
 ul.ui-menu {
 	display: inline-block;
-	padding-right: 1em;
 }
 
 li.ui-menu-item {
@@ -53,15 +52,27 @@ textarea.data {
 }
 
 pre {
-	margin: 13px;	
+	white-space: pre-wrap;
+}
+
+code {
+	white-space: pre-wrap;
+}
+
+li {right:10px;}
+pre.text {
+	margin: 10px;	
+	background-color: #f9f9f9;
+	overflow-y: auto;
+	overflow-x: auto;
+	/* add padding to account for vertical scrollbar */
+	padding-right: 5px;
+	//border: 1px solid rgb(0,0,0);	
 }
 
 pre.data {
-	background-color: #f9f9f9,
-	max-height: 200px;
-	width: 100%;
+	background-color: #f9f9f9;
 	overflow-y: auto;
-	/* prevent horizontal scrollbar */
 	overflow-x: auto;
 	/* add padding to account for vertical scrollbar */
 	padding-right: 5px;
@@ -71,7 +82,7 @@ pre.data {
 .ui-widget {
 	font-family: Veranda, Arial, sans-serif;
 	font-size: 1em;
-	padding: 1px;
+	padding: 0px;
 }
 
 .list {
@@ -83,6 +94,13 @@ pre.data {
 .error {
 	border: 2px solid red;
 	padding: 0.5em;
+}
+
+.ui-menu .ui-menu-item a {
+	padding-left: 5px;
+	padding-right: 15px;
+	padding-top: 2px;
+	padding-bottom: 2px;
 }
 
 .ui-autocomplete {

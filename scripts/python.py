@@ -3,7 +3,7 @@
 # https://github.com/hapi-server/client-python/issues
 # Report data server issues to CONTACT
 
-# Install hapiclient package from https://pypi.org/project/hapiclient/
+# Install latest hapiclient package from https://pypi.org/project/hapiclient/
 import os; print(os.popen('pip install hapiclient --upgrade').read())
 
 from hapiclient import hapi, hapiplot

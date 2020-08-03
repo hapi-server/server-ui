@@ -1141,13 +1141,15 @@
 						.height(h)
 						.show();
 
-					let scriptFile = 'data:text/plain;base64;charset=utf-8,' 
-										+ btoa(sText);
+					let blob = new Blob([sText], {type: 'octet/stream'});
+					let scriptFile = window.URL.createObjectURL(blob);
+					//let scriptFile = 'data:text/plain;base64;charset=utf-8,' + btoa(sText);
 
 					//https://stackoverflow.com/a/30139435
 					var el = document.createElement('a');
 					el.setAttribute('href', scriptFile);
 					el.setAttribute('download', fname + "." + ext);
+					window.URL.revokeObjectURL(scriptFile);
 
 					$("#downloadlink").empty().append(el).show();
 					$("#downloadlink > a")

@@ -10,8 +10,7 @@
 			"https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
 		let SERVER_LIST = "";
-		if  (location.href.match("localhost:") ||
-				location.href.match("hapi-server.org/servers-dev/")) {
+		if  (location.href.match("hapi-server.org/servers-dev/")) {
 			SERVER_LIST = "all-dev.txt"; 
 		} else if (location.href.match("hapi-server.org/servers")) {
 			SERVER_LIST = SERVER_LIST_FALLBACK;

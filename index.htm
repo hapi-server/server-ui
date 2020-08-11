@@ -1082,6 +1082,9 @@
 						sText = sText.replace(/START/gm,selected('start'));
 						sText = sText.replace(/STOP/gm,selected('stop'));
 
+						let timename = parameters.list[0]['value'];
+						sText = sText.replace(/TIMENAME/gm,timename);
+
 						let p = parameters.list.slice(0); // copy 
 						
 						p.forEach((el,i) => {p[i] = el.value});

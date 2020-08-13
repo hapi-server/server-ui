@@ -26,6 +26,7 @@ hapiplot(data, meta)
 # Notes:
 # 1. To convert the ISO 8601 strings in data['TIMENAME'] to Python
 #    datetimes, use
+#      from hapiclient import hapitime2datetime
 #      Time = hapitime2datetime(data['TIMENAME'])
 # 2. Details about the data and metadata structures `data`
 #    and `meta` are given at 

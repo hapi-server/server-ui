@@ -478,7 +478,8 @@
 						if (key !== "bins") {
 							$('#parameterinfo ul').append(""
 									+ '<li>' + key 
-									+ ": " + JSON.stringify(meta[key]) 
+									+ ": " + JSON.stringify(meta[key])
+												.replace("&parameters","&amp;parameters") 
 									+ '</li>');
 						}
 					}
@@ -544,7 +545,9 @@
 								+ '</li>');
 
 					$('#datasetinfo ul')
-						.append('<li>Description: ' + res['description'] + '</li>');
+						.append('<li>Description: ' 
+								+ res['description']
+									.replace("&parameters","&amp;parameters")  + '</li>');
 
 					$('#datasetinfo ul')
 						.append('<li>' 

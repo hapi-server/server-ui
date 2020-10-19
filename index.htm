@@ -202,7 +202,10 @@
 					"<div class='error'>Error encountered when attempting to retrieve "
 					+ "<a target='_blank' href='" + url + "'>"
 					+ url.replace("&para","&#38;para")+"</a>"
-					+ ".<br><br>Message: <pre>" + errmsg + "</pre></div>");
+					+ ".<br><br>Message: <pre>" + errmsg + "</pre>"
+					+ "<p>Javascript debugger console may have a more descriptive error message.</p></div>");
+				// Determining if CORS is cause of error is difficult:
+				// https://stackoverflow.com/q/19325314
 				console.log("ajaxerror():");
 				console.log(xhr);
 			}	
@@ -478,8 +481,7 @@
 						if (key !== "bins") {
 							$('#parameterinfo ul').append(""
 									+ '<li>' + key 
-									+ ": " + JSON.stringify(meta[key])
-												.replace("&parameters","&amp;parameters") 
+									+ ": " + JSON.stringify(meta[key]) 
 									+ '</li>');
 						}
 					}
@@ -545,9 +547,7 @@
 								+ '</li>');
 
 					$('#datasetinfo ul')
-						.append('<li>Description: ' 
-								+ res['description']
-									.replace("&parameters","&amp;parameters")  + '</li>');
+						.append('<li>Description: ' + res['description'] + '</li>');
 
 					$('#datasetinfo ul')
 						.append('<li>' 

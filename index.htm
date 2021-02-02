@@ -244,11 +244,13 @@
 							xret = $.parseJSON(data);
 						}
 						clearInterval(interval);
+						$('#xstatus').hide();
 						$("#loading").empty();
 						console.log("get(): Parsed response from " + url + ":");
 						console.log(xret);
 						get.cache[url] = xret; // Cache response.
 						cb(xret);
+
 					},
 					error: function (xhr, textStatus, errorThrown) {
 						clearInterval(interval);

@@ -210,24 +210,33 @@
 				console.log(xhr);
 			}	
 
-			function get(url,cb) {
+			function get(url, cb, proxyURL) {
+
+				var urlo = url;
+				if (!proxyURL) {
+					proxyURL = "";
+				} else {
+					url = encodeURIComponent(url);
+				}
+				url = proxyURL + url;
 
 				// Client-side cache of response.
 				if (typeof(get.cache) === "undefined") {
 					get.cache = {};
 				}
-				if (get.cache[url]) {
+				if (get.cache[urlo]) {
 					console.log("get(): Client-side cache hit.");
-					cb(get.cache[url]);
+					cb(get.cache[urlo]);
 					return;
 				}
 
 				$("#loading")
-						.append("Requesting " + link(url) + " ")
+						.html("Requesting " + link(url) + " ")
+						.show()
 
 				// Append ● every 0.5 s
 				let interval = setInterval( 
-						() => $("#loading").append("●"), 500);
+									() => $("#loading").append("●"), 500);
 
 				$.ajax({
 					type: "GET",
@@ -235,27 +244,24 @@
 					async: true,
 					dataType: "text",
 					success: function (data, textStatus, jqXHR) {
-						if (!data.match(/^\s*\[|^\s*\{/)) {
-							console.log("get(): Non-JSON response. Converting response to an array of lines.");
-							xret = data.replace(/,$/,"").split("\n");
-							// Remove empty lines
-							xret = xret.filter(x => x !== ""); 
-						} else {
-							xret = $.parseJSON(data);
-						}
 						clearInterval(interval);
-						$('#xstatus').hide();
 						$("#loading").empty();
-						console.log("get(): Parsed response from " + url + ":");
-						console.log(xret);
-						get.cache[url] = xret; // Cache response.
-						cb(xret);
-
+						//console.log("get(): Response from " + url + ":");
+						//console.log(data);
+						get.cache[urlo] = data; // Cache response.
+						cb(false, data);
 					},
 					error: function (xhr, textStatus, errorThrown) {
-						clearInterval(interval);
-						$("#loading").empty();
-						ajaxerror(url, xhr);
+						if (proxyURL === "") {
+							get(url, cb, "/proxy?url=");
+							clearInterval(interval);
+							$("#loading").empty();
+						} else {
+							clearInterval(interval);
+							$("#loading").empty();
+							ajaxerror(url, xhr);
+							cb(errorThrown, null);
+						}
 					}
 				});
 			}
@@ -340,13 +346,9 @@
 
 				console.log('servers(): Called.');
 
-				$.ajax({
-					type: "HEAD",
-					url: SERVER_LIST,
-					success: function (data, textStatus, jqXHR) {
-						get(SERVER_LIST, function (res) {process(res)});
-					},
-					error: function (xhr, textStatus, errorThrown) {
+				get(SERVER_LIST, function (err, res) {
+
+					if (err) {
 						console.log("Did not find " 
 							+ SERVER_LIST + ".\n"
 							+ "Using fall-back of " + SERVER_LIST_FALLBACK);
@@ -356,10 +358,17 @@
 								+ SERVER_LIST_FALLBACK);
 						SERVER_LIST = SERVER_LIST_FALLBACK;
 						get(SERVER_LIST, function (res) {process(res)});
+						return;					
 					}
+					process(res);			
 				});
 
 				function process(res) {
+
+					res = res.replace(/,$/,"").split("\n");
+					// Remove empty lines
+					res = res.filter(x => x !== ""); 
+
 					let list = [];
 					let info = {};
 					for (let i = 0; i < res.length; i++) {
@@ -414,7 +423,8 @@
 				console.log('datasets(): Called.');
 
 				let url = servers.info[selected('server')]['url'] + "/catalog";
-				get(url, function (res) {
+				get(url, function (err, res) {
+					res = $.parseJSON(res);
 					res = res.catalog;
 					// Show number of datasets
 					let plural = res.length > 1 ? "s" : "";
@@ -504,8 +514,9 @@
 							+ "/info?id=" 
 							+ selected('dataset');
 
-				get(url, function (res) {
+				get(url, function (err, res) {
 
+					res = $.parseJSON(res);
 					if (res['resourceURL']) {
 						$('#datasetinfo ul').append('<li>' 
 							+ link(res['resourceURL'], 
@@ -959,29 +970,15 @@
 						return;
 					}
 
-					let interval = downloadlink(url, "data", true);
+					downloadlink(url, "data", false);
 
-					$.ajax({
-						type: "GET",
-						url: url,
-						async: true,
-						dataType: "text",
-						success: function (data, textStatus, jqXHR) {
-							$("#downloadlink")
-								.append("<pre class='data'>" + data + "</pre>");
-							$("#downloadlink > pre")
-								.width($("#infodiv").width()-15)
-								.height($(window).height()/2)
-
-							clearInterval(interval);
-							$("#loading").empty();
-						},
-						error: function (xhr, textStatus, errorThrown) {
-							clearInterval(interval);
-							$("#loading").empty();
-							$('#downloadlink').empty();
-							ajaxerror(url, xhr);
-						}
+					get(url, function (err, data) {
+						$("#downloadlink")
+							.append("<pre class='data'>" + data + "</pre>");
+						$("#downloadlink > pre")
+							.width($("#infodiv").width()-15)
+							.height($(window).height()/2)	
+						$("#downloadlink").show();					
 					});
 
 				} else if (selected('return').match(/image/)) {
@@ -1215,7 +1212,7 @@
 		<div id="infodiv">
 			<div id="xstatus">
 			</div>
-			<div id="loading" style="height: 1.5em;"></div>
+			<div id="loading" style="height: 2.5em;"></div>
 			<div id="overviewinfo">
 			  <b>Overview</b>
 			  <p>

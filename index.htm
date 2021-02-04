@@ -5,17 +5,19 @@
 
 		let debug = true; // Show log messages in console.
 
+  		let SERVER_LIST = "all.txt";
+
 		// Show all servers if SERVER_LIST not found
-		SERVER_LIST_FALLBACK = 
+		let SERVER_LIST_FALLBACK = 
 			"https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
-		let SERVER_LIST = "";
-		if  (location.href.match("hapi-server.org/servers-dev/")) {
-			SERVER_LIST = "all-dev.txt"; 
+  		let devNote = "";
+		if  (location.href.match("hapi-server.org/servers-dev")) {
+		    SERVER_LIST = "all-dev.txt";
+		    devNote  = "<p style='background-color:yellow'>Testing server.";
+		    devNote += " Production server is at <a href='//hapi-server.org/server/'>.</p>"
 		} else if (location.href.match("hapi-server.org/servers")) {
-			SERVER_LIST = SERVER_LIST_FALLBACK;
-		} else {
-			SERVER_LIST = "all.txt";
+		    SERVER_LIST = SERVER_LIST_FALLBACK;
 		}
 
 		</script>
@@ -104,7 +106,8 @@
 					console.log = function() {};
 				}
 
-				$('.tooltip').tooltipster({theme: 'tooltipster-noir'})
+			    $('#infodiv').append(devNote);
+			    $('.tooltip').tooltipster({theme: 'tooltipster-noir'})
 
 				// https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
 				$('body')

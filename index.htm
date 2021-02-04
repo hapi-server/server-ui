@@ -444,8 +444,12 @@
 										+ res[i]['id'] 
 										+ " found in hash. Will select it.")
 						}
+						var title = res[i]['id'];
+						if (res[i]['title']) {
+							title = "<code style='font-size:80%'>[" + res[i]['id'] + "]</code> " + res[i]['title'];
+						}
 						list.push({
-							"label": res[i]['title'] || res[i]['id'],
+							"label": title,
 							"value": res[i]['id'], 
 							selected: qs['dataset'] === res[i]['id']
 						});
@@ -1185,11 +1189,11 @@
 						<input id="showdata" type="checkbox" value=""/>
 							&nbsp;Show data
 					</div>
-					<div class="tooltip" title="Use cached metadata (if available).">
+					<div class="tooltip" title="Use cached metadata in browser if available.">
 						<input id="usemetadatacache" type="checkbox" value=""/>
 							&nbsp;Use cached metadata
 					</div>
-					<div class="tooltip" title="Use cached images (if available).">
+					<div class="tooltip" title="Use cached images from plot server if available.">
 						<input id="useimagecache" type="checkbox" value=""/>
 							&nbsp;Use cached images
 					</div>

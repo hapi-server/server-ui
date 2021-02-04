@@ -83,6 +83,16 @@
 
 			var qs = parseQueryString();
 
+			console.log(qs);
+
+			var SERVER_LIST_HASH = "";
+			if (qs['server']) {
+				if (qs['server'].startsWith('http://') || qs['server'].startsWith('https://')) {
+					console.log("Server given in hash: " + qs['server']);
+					SERVER_LIST_HASH = qs['server'].split(",").join("\n");
+				}
+			}
+
 			$(function() {
 				main(); // DOM is loaded. Start execution.
 			})
@@ -119,7 +129,8 @@
 				// Bind events to changes in checkbox state.
 				checkboxes();
 
-				// Set up main drop-downs.
+				// Set up main drop-downs. When Servers drop-down is set
+				// the function servers() is called.
 				dropdowns(
 					[
 						"server","dataset","parameters","start",
@@ -333,35 +344,43 @@
 					$('#serverinfo ul').append(
 										'<li>Server URL: ' + link(url) + '</li>');
 					let email = servers.info[selected('server')]['contactEmail'];
-					$('#serverinfo ul').append(
-						'<li>Server Contact: ' 
-						+ servers.info[selected('server')]['contactName'] 
-						+ " &lt;"
-						+ link("mailto:" + email + "?subject=" + url,email)
-						+ "&gt;"
-						+ '</li>');
+					if (servers.info[selected('server')]['contactName'] !== "") {
+						$('#serverinfo ul').append(
+							'<li>Server Contact: ' 
+							+ servers.info[selected('server')]['contactName'] 
+							+ " &lt;"
+							+ link("mailto:" + email + "?subject=" + url,email)
+							+ "&gt;"
+							+ '</li>');
+					}
 
 					$('#serverinfo').show();
 				};
 
 				console.log('servers(): Called.');
 
-				get(SERVER_LIST, function (err, res) {
 
-					if (err) {
-						console.log("Did not find " 
-							+ SERVER_LIST + ".\n"
-							+ "Using fall-back of " + SERVER_LIST_FALLBACK);
-						ajaxerror(SERVER_LIST,"");
-						alert('Did not find ' 
-								+ SERVER_LIST + ". Will use " 
-								+ SERVER_LIST_FALLBACK);
-						SERVER_LIST = SERVER_LIST_FALLBACK;
-						get(SERVER_LIST, function (res) {process(res)});
-						return;					
-					}
-					process(res);			
-				});
+				console.log(SERVER_LIST_HASH);
+				if (SERVER_LIST_HASH !== "") {
+					process(SERVER_LIST_HASH);
+				} else {
+					get(SERVER_LIST, function (err, res) {
+
+						if (err) {
+							console.log("Did not find " 
+								+ SERVER_LIST + ".\n"
+								+ "Using fall-back of " + SERVER_LIST_FALLBACK);
+							ajaxerror(SERVER_LIST,"");
+							alert('Did not find ' 
+									+ SERVER_LIST + ". Will use " 
+									+ SERVER_LIST_FALLBACK);
+							SERVER_LIST = SERVER_LIST_FALLBACK;
+							get(SERVER_LIST, function (res) {process(res)});
+							return;					
+						}
+						process(res);			
+					});
+				}
 
 				function process(res) {
 
@@ -375,14 +394,26 @@
 						if (res[i].substring(0,1) === "#") {
 							continue;
 						}
-						let name = res[i].split(',')[2].trim();
-						let id = res[i].split(',')[1].trim();
-						info[id] = {};
-						info[id]['url'] = res[i].split(',')[0].trim();
-						info[id]['contactName'] = res[i].split(',')[3].trim();
-						info[id]['contactEmail'] = res[i].split(',')[4].trim();
-						if (info[id]['contactName'] == info[id]['contactEmail']) {
-							info[id]['contactName'] = '';
+						let id, name;
+						if (res[i].split(",").length == 1) {
+							// Only URL given. Will occur with SERVER_LIST_HASH given.
+							id = res[i].split(',')[0].trim()
+							name = id;
+							info[id] = {};
+							info[id]['url'] = id;
+							info[id]['contactName'] = "";
+							info[id]['contactEmail'] = "";
+							info[id]['contactName'] = "";
+						} else {
+							id = res[i].split(',')[1].trim();
+							name = res[i].split(',')[2].trim();
+							info[id] = {};
+							info[id]['url'] = res[i].split(',')[0].trim();
+							info[id]['contactName'] = res[i].split(',')[3].trim();
+							info[id]['contactEmail'] = res[i].split(',')[4].trim();
+							if (info[id]['contactName'] == info[id]['contactEmail']) {
+								info[id]['contactName'] = '';
+							}
 						}
 
 						if (qs['server'] === id) {
@@ -1169,7 +1200,6 @@
 						.forEach((block) => {hljs.highlightBlock(block);});
 					$("#output").show();
 				}
-
 			}
 
 		</script>

@@ -15,7 +15,7 @@
 		if  (location.href.match("hapi-server.org/servers-dev")) {
 		    SERVER_LIST = "all-dev.txt";
 		    devNote  = "<p style='background-color:yellow'>Testing server.";
-		    devNote += " Production server is at <a href='//hapi-server.org/server/'>hapi-server.org/server/</p>"
+		    devNote += " Production server is at <a href='//hapi-server.org/server/'>.</p>"
 		} else if (location.href.match("hapi-server.org/servers")) {
 		    SERVER_LIST = SERVER_LIST_FALLBACK;
 		}
@@ -106,7 +106,7 @@
 					console.log = function() {};
 				}
 
-			    $('#infodiv').append(devNote);
+			    $('#infodiv').append("<span>" + devNote + "</span>");
 			    $('.tooltip').tooltipster({theme: 'tooltipster-noir'})
 
 				// https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
@@ -597,8 +597,14 @@
 									.replace("1 seconds", "1 second")
 								+ '</li>');
 
+					var description = res['description'];
+					if (/\\n/.test(description)) {
+						// Preserve formatting in description.
+						description = "<pre>" + description.replace("\\n", "<br/>") + "</pre>";
+
+					}
 					$('#datasetinfo ul')
-						.append('<li>Description: ' + res['description'] + '</li>');
+						.append('<li>Description: ' + description + '</li>');
 
 					$('#datasetinfo ul')
 						.append('<li>' 

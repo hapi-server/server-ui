@@ -245,7 +245,7 @@
 				}
 
 				$("#loading")
-						.html("Requesting " + link(url) + " ")
+						.html("Requesting " + link(url.replace("&param","&amp;param")) + " ")
 						.show()
 
 				// Append ● every 0.5 s

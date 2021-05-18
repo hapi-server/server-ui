@@ -35,6 +35,10 @@ By default, the list of servers at `http://localhost:8000/` will be that in http
 
 To use your own server, edit the file `all_.txt` so that it contains the URL of your server and rename this file to `all.txt`.
 
+Alternatively, you can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.
+
+`http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi`
+
 # Reporting issues
 
 Please submit issues and feature requests to the [issue tracker](https://github.com/hapi-server/server-ui/issues).

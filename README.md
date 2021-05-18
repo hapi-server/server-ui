@@ -7,7 +7,7 @@ This repository contains
 
 # Installation
 
-To use 1., download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory ending in `hapi/`.
+To use 1. with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to the URL that ends in `hapi/`.
 
 To use 2.,
 
@@ -19,8 +19,6 @@ git clone https://github.com/hapi-server/server-ui
 
 or download and extract the [zip archive of the code](https://github.com/hapi-server/server-nodejs/archive/master.zip).
 
-Next, edit `all_.txt` following the instructions in the comments. Then
-
 ```
 cd server-ui; python3 -m http.server
 # or
@@ -30,6 +28,12 @@ cd server-ui; npm install; npm start
 ```
 
 and open `http://localhost:8000/` in a web browser.
+
+# Configuration
+
+By default, the list of servers at `http://localhost:8000/` will be that in https://github.com/hapi-server/servers/blob/master/all_.txt.
+
+To use your own server, edit the file `all_.txt` so that it contains the URL of your server and rename this file to `all.txt`.
 
 # Reporting issues
 

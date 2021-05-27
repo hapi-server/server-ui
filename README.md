@@ -33,11 +33,17 @@ and open `http://localhost:8000/` in a web browser.
 
 By default, the list of servers at `http://localhost:8000/` will be that in https://github.com/hapi-server/servers/blob/master/all_.txt.
 
-To use your own server, edit the file `all_.txt` so that it contains the URL of your server and rename this file to `all.txt`.
+To use your own list, edit the URLs in `all_.txt`.
 
 Alternatively, you can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.
 
 `http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi`
+
+# Proxy
+
+If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to create or use a proxy server to access resources from that server.
+
+By default, if an request to `URL` fails, an attempt to retrieve it is made via the proxy request `/proxy?url=URL`. The URL for the proxy is set in the header of `index.htm`.
 
 # Reporting issues
 

@@ -5,6 +5,8 @@ This repository contains
 1. a basic [entry/overview/landing web page](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md) template for a [HAPI server](http://hapi-server.org/) and
 2. code for a complex user interface for browsing servers and datasets, downloading data from your browser, generating \~10-line IDL/MATLAB/Python scripts to download data, and creating preview plots.
 
+[**Live Demo of 2.**](http://hapi-server.org/servers)
+
 # Installation
 
 To use 1. with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to the URL that ends in `hapi/`.
@@ -41,7 +43,9 @@ Alternatively, you can pass the URL of a server to create a menu for by passing 
 
 # Proxy
 
-If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to create or use a proxy server to access resources from that server. A very basic webserver with a proxy can be run using
+If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to use a proxy server to access resources from that server.
+
+A very basic webserver with a proxy can be run using
 
 ```
 npm run proxyserver
@@ -49,7 +53,7 @@ npm run proxyserver
 node proxy/proxy.js
 ```
 
-See the comments in `proxy/proxy.js` to constrain URLs that can be proxied.
+See the comments in [`proxy/proxy.js`](https://github.com/hapi-server/server-ui/blob/master/proxy/proxy.js) to constrain URLs that can be proxied.
 
 By default, if an request to `URL` fails, an attempt to retrieve it is made via the proxy request `/proxy?url=URL`. The URL for the proxy is set in the header of `index.htm`.
 

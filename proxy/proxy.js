@@ -1,11 +1,15 @@
-const PORT = 8000;
+const PORT = process.argv.length > 2 ? process.argv[2] : 8000;
 const fs   = require('fs');
 
 const superagent = require('superagent');
 const express    = require('express');
 const app        = express();
 
-serverlistURLs = []; // i.e., ["http://server1.com/hapi", "http://server2.com/path/hapi"]
+// Whitelist array. If URL to be proxied starts with any of these
+// URLs, it will be proxied. For example,
+// serverlistURLs = ["http://server1.com/hapi", "http://server2.com/path/hapi"]
+// If empty, all requests will be proxied.
+let serverlistURLs = []; 
 
 let indexFile = __dirname + "/../index.htm";
 app.get('/', function (req,res) {
@@ -52,7 +56,7 @@ app.get('/proxy', function (req, res) {
 });
 
 if (serverlistURLs.length == 0) {
-	console.log("Warning: Running open proxy. To prevent this, edit serverlistURLs array.");
+	console.log("**Warning: Running open proxy. To prevent this, edit serverlistURLs array in proxy.js.**");
 }
 
 app.listen(PORT, function () {

@@ -41,7 +41,15 @@ Alternatively, you can pass the URL of a server to create a menu for by passing 
 
 # Proxy
 
-If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to create or use a proxy server to access resources from that server.
+If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to create or use a proxy server to access resources from that server. A very basic webserver with a proxy can be run using
+
+```
+npm run proxyserver
+# or
+node proxy/proxy.js
+```
+
+See the comments in `proxy/proxy.js` to constrain URLs that can be proxied.
 
 By default, if an request to `URL` fails, an attempt to retrieve it is made via the proxy request `/proxy?url=URL`. The URL for the proxy is set in the header of `index.htm`.
 

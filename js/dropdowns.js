@@ -1,5 +1,7 @@
 function dropdowns(ids, names, funs, tips, after, i, callback) {
 
+	var console = {}; console.log = function(){};
+	
 	if (arguments.length < 6) {
 		i = 0;
 	}

@@ -5,6 +5,9 @@
 
 		let debug = true; // Show log messages in console.
 
+		// Set PROXY_URL to false or "" to not use proxy if AJAX request fails.
+		let PROXY_URL = "/proxy?url=";
+
   		let SERVER_LIST = "all.txt";
 
 		// Show all servers if SERVER_LIST not found
@@ -14,8 +17,8 @@
   		let devNote = "";
 		if  (location.href.match("hapi-server.org/servers-dev")) {
 		    SERVER_LIST = "all-dev.txt";
-		    devNote  = "<p style='background-color:yellow'>Testing server.";
-		    devNote += " Production server is at <a href='//hapi-server.org/server/'>.</p>"
+		    devNote  = "Testing server.";
+		    devNote += " Production server is at <a href='//hapi-server.org/server/'>."
 		} else if (location.href.match("hapi-server.org/servers")) {
 		    SERVER_LIST = SERVER_LIST_FALLBACK;
 		}
@@ -106,7 +109,7 @@
 					console.log = function() {};
 				}
 
-			    $('#infodiv').append("<span>" + devNote + "</span>");
+				$('#infodiv').append("<p><span style='background-color:yellow'>" + devNote + "</span></p>");
 			    $('.tooltip').tooltipster({theme: 'tooltipster-noir'})
 
 				// https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
@@ -210,29 +213,39 @@
 				});	
 			}
 
-			function ajaxerror(url, xhr) {
+			function ajaxerror(url, message, xhr) {
 				let errmsg = xhr.responseText || xhr.statusText;
 				$('#xstatus').show().html(
 					"<div class='error'>Error encountered when attempting to retrieve "
 					+ "<a target='_blank' href='" + url + "'>"
 					+ url.replace("&para","&#38;para")+"</a>"
-					+ ".<br><br>Message: <pre>" + errmsg + "</pre>"
-					+ "<p>Javascript debugger console may have a more descriptive error message.</p></div>");
+					+ ".<br><br>Message: <pre>" + message + "</pre>"
+					+ "<p>The Javascript debugger console may have a more descriptive error message.</p></div>");
 				// Determining if CORS is cause of error is difficult:
 				// https://stackoverflow.com/q/19325314
 				console.log("ajaxerror():");
 				console.log(xhr);
 			}	
 
-			function get(url, cb, proxyURL) {
+			function get(options, cb) {
+
+				console.log(options);
+
+				var url = options.url;
+
+				var tryProxy = options.tryProxy || true;
+				if (!url.startsWith("http")) {
+					tryProxy = false;
+				}					
+
+				var showAjaxError = options.showAjaxError || false;
+
+				var directURLFailed = options.directURLFailed || false;
 
 				var urlo = url;
-				if (!proxyURL) {
-					proxyURL = "";
-				} else {
-					url = encodeURIComponent(url);
+				if (tryProxy && PROXY_URL && directURLFailed) {
+					url = PROXY_URL + encodeURIComponent(url);
 				}
-				url = proxyURL + url;
 
 				// Client-side cache of response.
 				if (typeof(get.cache) === "undefined") {
@@ -243,6 +256,12 @@
 					cb(get.cache[urlo]);
 					return;
 				}
+
+				console.log("Requesting " + url);
+				console.log("tryProxy = " + tryProxy);
+				console.log("directURLFailed = " + directURLFailed);
+				console.log("PROXY_URL = " + PROXY_URL);
+				console.log("showAjaxError = " + showAjaxError);
 
 				$("#loading")
 						.html("Requesting " + link(url.replace("&param","&amp;param")) + " ")
@@ -266,15 +285,31 @@
 						cb(false, data);
 					},
 					error: function (xhr, textStatus, errorThrown) {
-						if (proxyURL === "") {
-							get(url, cb, "/proxy?url=");
+						if (tryProxy && directURLFailed == false && PROXY_URL) {
+							var opts = {
+											url: url,
+											directURLFailed: true,
+											tryProxy: false,
+											showAjaxError: true
+										};
+							console.log("Attempting to proxy retrieve " + url);
 							clearInterval(interval);
 							$("#loading").empty();
+							get(opts, cb);
 						} else {
+							console.log("here")
+							if (showAjaxError) {
+								var message = "";
+								if (directURLFailed && PROXY_URL) {
+									message = "Failed to retrieve\n" + urlo + "\nand\n" + url;
+								} else {
+									message = "Failed to retrieve " + url;
+								}
+								ajaxerror(url, message, xhr);
+							}
 							clearInterval(interval);
 							$("#loading").empty();
-							ajaxerror(url, xhr);
-							cb(errorThrown, null);
+							cb("Error", null);
 						}
 					}
 				});
@@ -362,26 +397,31 @@
 
 				console.log('servers(): Called.');
 
-
-				console.log(SERVER_LIST_HASH);
 				if (SERVER_LIST_HASH !== "") {
+					console.log('servers(): Server list given in hash as URL.')
 					process(SERVER_LIST_HASH);
 				} else {
-					get(SERVER_LIST, function (err, res) {
+					get({url: SERVER_LIST, showAjaxError: false}, function (err, res) {
 
 						if (err) {
 							console.log("Did not find " 
 								+ SERVER_LIST + ".\n"
-								+ "Using fall-back of " + SERVER_LIST_FALLBACK);
-							ajaxerror(SERVER_LIST,"");
-							alert('Did not find ' 
-									+ SERVER_LIST + ". Will use " 
-									+ SERVER_LIST_FALLBACK);
+								+ "Trying fall-back of " + SERVER_LIST_FALLBACK);
+							var warning = 'Did not find ' 
+											+ SERVER_LIST + ". Will use " 
+											+ SERVER_LIST_FALLBACK
+							$('#infodiv').append("<span style='background-color:yellow'>" + warning + "</span>");
 							SERVER_LIST = SERVER_LIST_FALLBACK;
-							get(SERVER_LIST, function (res) {process(res)});
+							get({url: SERVER_LIST}, function (err, res) {
+								if (!err) {
+									process(res);
+								}	
+							});
 							return;					
 						}
+
 						process(res);			
+
 					});
 				}
 
@@ -457,7 +497,10 @@
 				console.log('datasets(): Called.');
 
 				let url = servers.info[selected('server')]['url'] + "/catalog";
-				get(url, function (err, res) {
+				get({url: url}, function (err, res) {
+					if (err) {
+						return;
+					}
 					res = $.parseJSON(res);
 					res = res.catalog;
 					// Show number of datasets
@@ -552,9 +595,12 @@
 							+ "/info?id=" 
 							+ selected('dataset');
 
-				get(url, function (err, res) {
+				get({url: url}, function (err, res) {
 
-					res = $.parseJSON(res);
+					if (err) {
+						return;
+					}
+					res = JSON.parse(res);//$.parseJSON(res);
 					if (res['resourceURL']) {
 						$('#datasetinfo ul').append('<li>' 
 							+ link(res['resourceURL'], 
@@ -960,7 +1006,7 @@
 							clearInterval(interval);
 							$("#loading").empty();
 							$('#downloadlink').empty();
-							ajaxerror(jsonURL, xhr);
+							ajaxerror(jsonURL, "Failed to retrieve " + url, xhr);
 						}
 					});
 					return;		
@@ -1016,7 +1062,7 @@
 
 					downloadlink(url, "data", false);
 
-					get(url, function (err, data) {
+					get({url: url}, function (err, data) {
 						$("#downloadlink")
 							.append("<pre class='data'>" + data + "</pre>");
 						$("#downloadlink > pre")

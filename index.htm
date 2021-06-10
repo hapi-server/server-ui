@@ -270,7 +270,7 @@
 						.show()
 
 				// Append ● every 0.5 s
-				let interval = setInterval( 
+				main.getDots = setInterval( 
 									() => $("#loading").append("●"), 500);
 
 				$.ajax({
@@ -279,7 +279,7 @@
 					async: true,
 					dataType: "text",
 					success: function (data, textStatus, jqXHR) {
-						clearInterval(interval);
+						clearInterval(main.getDots);
 						$("#loading").empty();
 						//console.log("get(): Response from " + url + ":");
 						//console.log(data);
@@ -295,7 +295,7 @@
 											showAjaxError: true
 										};
 							console.log("get(): Attempting to proxy retrieve " + url);
-							clearInterval(interval);
+							clearInterval(main.getDots);
 							$("#loading").empty();
 							get(opts, cb);
 						} else {
@@ -308,7 +308,7 @@
 								}
 								ajaxerror(url, message, xhr);
 							}
-							clearInterval(interval);
+							clearInterval(main.getDots);
 							$("#loading").empty();
 							cb("Error", null);
 						}
@@ -318,6 +318,8 @@
 
 			// Determine selected value for a drop-down.	
 			function selected(name) {
+
+				clearInterval(main.getDots);
 
 				// When drop-down value is selected, URL should be up-to-date.
 				// Use value in URL.
@@ -1087,7 +1089,7 @@
 
 					if (selected('format').match(/png|svg/)) {
 
-						let interval = downloadlink(url,selected('format'),true);
+						main.imageDots = downloadlink(url,selected('format'),true);
 
 						$("#image")
 							.empty()
@@ -1099,7 +1101,7 @@
 							.find('img')
 							.width($("#infodiv").width()-15)
 							.load( () => {
-								clearInterval(interval);
+								clearInterval(main.imageDots);
 								$("#loading").empty();
 							})
 					}

@@ -855,7 +855,7 @@
 				if (selected("return").match("data")) {
 					var values = 
 								[
-									{label:"ASCII", value:"ascii"},
+									{label:"CSV", value:"csv"},
 									{label:"JSON", value:"json"}
 								];
 				}
@@ -937,7 +937,7 @@
 
 				if (selected("return") === "data") {
 					var values = [];						
-					if (selected('format') == 'ascii') {
+					if (selected('format') == 'csv') {
 						var values = 
 							[
 								{
@@ -1047,7 +1047,7 @@
 								+ "&time.min=" + selected('start')
 								+ "&time.max=" + selected('stop')
 
-					if (selected('format') === 'ascii') {
+					if (selected('format') === 'csv') {
 						if (selected('style') === 'header') {
 							url = url + "&include=header";
 						}

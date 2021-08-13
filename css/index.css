@@ -104,7 +104,7 @@ pre.data {
 }
 
 .ui-autocomplete {
-    max-height: 200px;
+    max-height: 70vh; /* May need to set with JS */
     overflow-y: auto;
     /* prevent horizontal scrollbar */
     overflow-x: hidden;

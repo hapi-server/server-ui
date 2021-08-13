@@ -1,3 +1,5 @@
+[**Live Demo**](http://hapi-server.org/servers)
+
 # About
 
 This repository contains
@@ -19,7 +21,7 @@ First,
 git clone https://github.com/hapi-server/server-ui
 ```
 
-or download and extract the [zip archive of the code](https://github.com/hapi-server/server-nodejs/archive/master.zip).
+or download and extract the [zip archive of the code](https://github.com/hapi-server/server-ui/archive/refs/heads/master.zip) (and replace `server-ui` with `server-ui-master` in the following).
 
 ```
 cd server-ui; python3 -m http.server

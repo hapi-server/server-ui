@@ -1,6 +1,9 @@
 ; Report software bugs/issues/feature requests at
-; https://github.com/hapi-server/client-matlab/issues
+; https://github.com/hapi-server/client-idl/issues
 ; Report data server issues to CONTACT
+
+; First, install an IDL HAPI client - see
+; https://github.com/hapi-server/client-idl
 
 server     = 'SERVER';
 dataset    = 'DATASET';

@@ -17,10 +17,10 @@ end
 
 %% Get data and metadata
 server     = 'SERVER';
-dataset    = 'DATASET';
+dataset    = 'DATASET'; % UNICODE_NOTE_DATASET
 % Use parameters='' to request all data. Multiple parameters
 % can be requested using a comma-separated listCSV_EXAMPLE
-parameters = 'PARAMETERS';
+parameters = 'PARAMETERS'; % UNICODE_NOTE_PARAMETERS
 start      = 'START';
 stop       = 'STOP';
 opts       = struct('logging',1);

@@ -1170,11 +1170,33 @@
 							}
 						}
 
+						function isDoubleByte(str) {
+							// https://stackoverflow.com/a/148613
+							for (var i = 0, n = str.length; i < n; i++) {
+								if (str.charCodeAt( i ) > 255) { return true; }
+							}
+							return false;
+						}
+
+						let unicodeNote = " contains Unicode UTF-8. See https://github.com/hapi-server/client-matlab/blob/master/README.md#notes.";
+						let unicodeNoteDataset = "";
+						let unicodeNoteParameters = "";
+						if (isDoubleByte(selected('dataset'))) {
+							unicodeNoteDataset = "Dataset name" + unicodeNote;
+						}
+						if (isDoubleByte(selectedParameters)) {
+							unicodeNoteParameters = "One or more parameters"
+												+ unicodeNote;							
+						}
+						sText = sText.replace(/UNICODE_NOTE_DATASET/gm,unicodeNoteDataset);
+						sText = sText.replace(/UNICODE_NOTE_PARAMETERS/gm,unicodeNoteParameters);
+
 						let server = servers.info[selected('server')]['url']
 						sText = sText.replace(/SERVER/gm,server);
 						sText = sText.replace(/DATASET/gm,selected('dataset'));
 						sText = sText.replace(/PARAMETERS/gm,selectedParameters);
 						sText = sText.replace(/START/gm,selected('start'));
+						sText = sText.replace(/STOP/gm,selected('stop'));
 						sText = sText.replace(/STOP/gm,selected('stop'));
 
 						let timename = parameters.list[0]['value'];

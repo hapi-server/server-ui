@@ -473,6 +473,17 @@
 							selected: qs['server'] === id
 						});
 					}
+
+					let len = list.length;
+					// Move TestData servers to end of list
+					for (i = 0; i < len; i++) {
+						if (list[i]["value"].startsWith("TestData")) {
+							let tmp = list[i];
+							list.splice(i,1)
+							list.push(tmp);
+						}
+					}
+
 					$('#overviewinfo > ul').append(
 								'<li>' 
 								+ (list.length) 

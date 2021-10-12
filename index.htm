@@ -23,6 +23,7 @@
 		} else if (location.href.match("hapi-server.org/servers")) {
 			SERVER_LIST = "all-combined.txt";
 		}
+			SERVER_LIST = "all-combined.txt";
 
 		if (!debug) {
 			// Suppress console logging.
@@ -474,15 +475,18 @@
 						});
 					}
 
-					let len = list.length;
 					// Move TestData servers to end of list
+					let len = list.length;
 					for (i = 0; i < len; i++) {
 						if (list[i]["value"].startsWith("TestData")) {
 							let tmp = list[i];
-							list.splice(i,1)
+							delete list[i];
 							list.push(tmp);
 						}
 					}
+					list = list.filter(function( element ) {
+						return element !== undefined;
+					});
 
 					$('#overviewinfo > ul').append(
 								'<li>' 

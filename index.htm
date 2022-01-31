@@ -889,7 +889,9 @@
 									{label:"IDL",value:"idl"},
 									{label:"MATLAB",value:"matlab"},
 									{label:"Python",value:"python"},
-									{label:"Autoplot",value:"autoplot"}
+									{label:"Autoplot",value:"autoplot"},
+									{label:"curl",value:"curl"},
+									{label:"wget",value:"wget"}
 								];
 				}
 
@@ -1048,6 +1050,14 @@
 					if (selected('format') === 'idl') {
 						cclass = 'matlab';
 						ext = 'pro';
+					}
+					if (selected('format') === 'curl') {
+						cclass = 'curl';
+						ext = 'sh';
+					}
+					if (selected('format') === 'wget') {
+						cclass = 'wget';
+						ext = 'sh';
 					}
 
 					script(cclass, selected('format') + "." + ext, 

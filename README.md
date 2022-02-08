@@ -43,6 +43,12 @@ Alternatively, you can pass the URL of a server to create a menu for by passing 
 
 `http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi`
 
+Several servers may be listed, e.g.,
+
+`http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi,https://cdaweb.gsfc.nasa.gov/hapi`
+
+Note that this will only work if the servers allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing).
+
 # Proxy
 
 If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to use a proxy server to access resources from that server.

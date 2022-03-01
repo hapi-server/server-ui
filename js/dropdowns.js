@@ -36,6 +36,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 			.autocomplete({
 				source: list,
 				scroll: true,
+				minLength: 0,
 				open: function (event, ui) {
 
 					var id = $(this).attr('id');
@@ -85,13 +86,18 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 										._trigger("select",event,{item:value});
 						}	
 					});
-
 				},
-				minLength: 0,
 				close: function(event,ui) {
 					// If no value is set, use the default definition.
 					var id = $(this).attr('id');
 					console.log("dropdowns.ac.close(): Close event on drop-down with id = " + id + ".");
+					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
+					var value = $('input[id=' + id + ']').attr('value');
+					if (value == "") {
+						console.log("dropdowns.ac.close(): Value is empty. Setting it to valuelast = " + valuelast);
+						$('input[id=' + id + ']').attr('value',valuelast);
+						$('input[id=' + id + ']').parent().parent().attr('value',valuelast);
+					}
 				},
 				change: function(event, ui) {
 					var id = $(this).attr('id');
@@ -104,7 +110,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 					$('input[id=' + id + ']').unbind('blur');
 
 					var valuelast = $('input[id=' + id + ']')
-						.parent().parent().attr('valuelast');
+										.parent().parent().attr('valuelast');
 					
 					console.log("dropdowns.ac.change(): valuelast = " + valuelast);
 					if (valuelast === "") {
@@ -152,6 +158,11 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 					id = $(this).attr('id');
 
 					console.log("dropdowns.ac.select(): Select event triggered on drop-down with id = " + id);
+
+					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
+					if (valuelast.startsWith("-") && valuelast.endsWith("-")) {
+						//return;
+					}
 
 					var i = parseInt($(this)
 										.parent()
@@ -233,13 +244,12 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 						console.log("dropdowns.ac.select(): New value is not same as old."
 									+ " Clearing values in all drop-downs after " + id + ".");
 						
-
 						$("input[id='"+id+"']")
 							.parent().parent()
 							.nextAll("span")
-							.hide().html('')
-							.attr('value','')
-							.attr('valuelast','');
+							.hide()
+							.html('')
+							.attr('value','');
 
 						console.log("dropdowns.ac.select(): Getting drop-down "
 									+ "values on all remaing drop-downs.");
@@ -305,8 +315,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 
 		$(after+(i)).empty();
 		$(after+(i)).parent().parent().attr("valuelast","");
-		$(after+(i))
-			.append('<span class="ui-widget list"></span>');
+		$(after+(i)).append('<span class="ui-widget list"></span>');
 
 		let iclass = "";
 		let tip1 = "";
@@ -321,7 +330,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 						+ ' class="dropdown-input ' + iclass + '"'
 						+ ' id="' + ids[i] + '"'
 						+ ' title="' + tip1 + '"'
-						+ ' value="-'+ names[i] +'-"/>')
+						+ ' value="-'+ names[i] + '-"/>')
 			.append('<span'
 						+ ' class="spacer"'
 						+ ' style="width:0.5em;display:table-cell"></span>')
@@ -335,9 +344,11 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 		$(el).click(() => {
 			// Clear value if bounded by hypens
 			if ($(el).attr('value').match(/^\-.*\-$/)) {
-				$(el).attr('value','');
+				//$(el).attr('value','');
 			}
 		});
+
+		$(after + (i)).attr('valuelast', '-' + names[i] + '-');
 
 		console.log("dropdowns(): Calling dropdowns.ac() for drop-down with id = " + ids[i]);
 		ac(i, list);
@@ -359,16 +370,18 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 				});
 
 		$('input[id=' + ids[i] + ']').keypress(function(e) {
-			  	console.log( "dropdowns(): Handler for .keypress() called." );
+			  	console.log( "dropdowns(): Handler for .keypress() called.");
 			    var value = $(this).parent().parent().attr('value');
-			    if(e.keyCode == 13) { // Return
+			    if(e.keyCode == 13) { 
+			    	// Return
 			    	console.log("dropdowns(): Triggering keyCode " + e.keyCode);
 			    	$('input[id=' + ids[i] + ']')
 			    		.val(value).data("autocomplete")
 			    		._trigger("select", event, {item: value});
 			    }
-			    if (e.keyCode == 9) { // TAB
-			    	console.log("dropdowns(): TAB Pressed.")
+			    if (e.keyCode == 9) {
+			    	// TAB
+			    	console.log("dropdowns(): TAB Pressed.");
 			    	//e.preventDefault();
 			    	//$('input[id=' + ids[i+1] + ']').click();
 			    }

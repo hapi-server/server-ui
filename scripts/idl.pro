@@ -7,7 +7,7 @@
 
 server     = 'SERVER';
 dataset    = 'DATASET';
-parameters = PARAMETERS;
+parameters = 'PARAMETERS';
 ; Use parameters=[''] to request all data. Multiple parameters
 ; can be requested using a comma-separated listCSV_EXAMPLE
 start      = 'START';

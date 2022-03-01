@@ -7,20 +7,22 @@
 # Only needs to be executed once.
 import os; print(os.popen('pip install hapiclient --upgrade').read())
 
-from hapiclient import hapi, hapiplot
+from hapiclient import hapi
 
-server     = 'SERVER';
-dataset    = 'DATASET';
+server     = 'SERVER'
+dataset    = 'DATASET'
 # Notes:
 # 1. Use parameters='' to request all parameters from DATASET.
 # 2. Multiple parameters can be requested using a comma-separated
 #    listCSV_EXAMPLE
-parameters = 'PARAMETERS'; 
-start      = 'START';
-stop       = 'STOP';
+parameters = 'PARAMETERS'
+start      = 'START'
+stop       = 'STOP'
 
 data, meta = hapi(server, dataset, parameters, start, stop)
 
+import os; print(os.popen('pip install hapiplot --upgrade').read())
+from hapiplot import hapiplot
 hapiplot(data, meta)
 
 # Notes:

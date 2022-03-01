@@ -1,6 +1,6 @@
 function dropdowns(ids, names, funs, tips, after, i, callback) {
 
-	var console = {}; console.log = function(){};
+	//var console = {}; console.log = function(){};
 	
 	if (arguments.length < 6) {
 		i = 0;
@@ -159,9 +159,12 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 
 					console.log("dropdowns.ac.select(): Select event triggered on drop-down with id = " + id);
 
+					var label = $('input[id=' + id + ']').attr('label');
+					var value = ui.item.value || event.target.value;
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
-					if (valuelast.startsWith("-") && valuelast.endsWith("-")) {
-						//return;
+					if (value == label) {
+						console.log("dropdowns.ac.select(): Select was for label. Taking no action.");
+						return;
 					}
 
 					var i = parseInt($(this)
@@ -325,10 +328,12 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 			tip1 = tips[i][0];
 			tip2 = tips[i][1];
 		}
+		var label = '-' + names[i] + '-';
 		$(after + (i) + " .ui-widget")
 			.append('<input'
 						+ ' class="dropdown-input ' + iclass + '"'
 						+ ' id="' + ids[i] + '"'
+						+ ' label="' + label + '"'
 						+ ' title="' + tip1 + '"'
 						+ ' value="-'+ names[i] + '-"/>')
 			.append('<span'
@@ -348,7 +353,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 			}
 		});
 
-		$(after + (i)).attr('valuelast', '-' + names[i] + '-');
+		$(after + (i)).attr('valuelast', label);
 
 		console.log("dropdowns(): Calling dropdowns.ac() for drop-down with id = " + ids[i]);
 		ac(i, list);

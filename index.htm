@@ -26,8 +26,8 @@
 			SERVER_LIST = "all-combined.txt";
 		}
 
-		//let PLOTSERVER = "http://hapi-server.org/plot";
-		let PLOTSERVER = "http://localhost:5000";
+		let PLOTSERVER = "http://hapi-server.org/plot";
+		//let PLOTSERVER = "http://localhost:5000";
 
 		if (!debug) {
 			// Suppress console logging.
@@ -1145,8 +1145,7 @@
 					}
 					let SERVER = servers.info[selected('server')]['url'];
 					if (!SERVER.startsWith("http")) {
-						SERVER = location.origin + "/" + SERVER;
-					}
+						SERVER = location.origin + location.pathname + SERVER;					}
 					url = PLOTSERVER
 							+ "?server=" + SERVER
 							+ "&id=" + selected('dataset')
@@ -1363,7 +1362,7 @@
 		
 	</head>
 
-	<body>
+	<body style="height:100vh">
 		<div id="options">
 			<div id="cacheoptions">
 				<a id="cachecheckboxeslink">
@@ -1508,7 +1507,8 @@
 				</ul>
 			</div>
 		</div>
-		<div id="footer" style="font-size: 80%;position: absolute; margin-bottom: 0.5em;bottom: 0">
+<br><br><br><br>
+		<div id="footer" style="font-size: 80%;position:absolute;bottom:0.5em;">
 			The code for this interface is available on <a href="https://github.com/hapi-server/server-ui">GitHub</a>. Report any issues in its <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.
 		</div>
 	</body>

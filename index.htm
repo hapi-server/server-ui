@@ -2,37 +2,36 @@
 <html>
 	<head>
 		<script>
+			let debug = true; // Show log messages in console.
 
-		let debug = true; // Show log messages in console.
+			// Set PROXY_URL to false to not use proxy if AJAX request fails.
+			let PROXY_URL = "proxy?url=";
 
-		// Set PROXY_URL to false to not use proxy if AJAX request fails.
-		let PROXY_URL = "proxy?url=";
+			// Will use server list at ./all.txt if found 
+			let SERVER_LIST = "all.txt";
 
-		// Will use server list at ./all.txt if found 
-		let SERVER_LIST = "all.txt";
+			// Show all servers if SERVER_LIST if ./all.txt not found
+			let SERVER_LIST_FALLBACK = 
+				"https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
-		// Show all servers if SERVER_LIST if ./all.txt not found
-		let SERVER_LIST_FALLBACK = 
-			"https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
+			let devNote = "";
+			if (location.href.match("hapi-server.org/servers-dev")) {
+				SERVER_LIST = "all-combined.txt";
+				devNote  = "Development server.";
+				devNote += " Production server is at <a href='//hapi-server.org/servers/'>hapi-server.org/servers/</a>."
+			} else if (location.href.match("hapi-server.org/servers")) {
+				SERVER_LIST = "all-combined.txt";
+			} else if (location.href.match("//localhost")) {
+				SERVER_LIST = "all-combined.txt";
+			}
 
-		let devNote = "";
-		if (location.href.match("hapi-server.org/servers-dev")) {
-			SERVER_LIST = "all-combined.txt";
-			devNote  = "Development server.";
-			devNote += " Production server is at <a href='//hapi-server.org/servers/'>hapi-server.org/servers/</a>."
-		} else if (location.href.match("hapi-server.org/servers")) {
-			SERVER_LIST = "all-combined.txt";
-		} else if (location.href.match("//localhost")) {
-			SERVER_LIST = "all-combined.txt";
-		}
+			let PLOTSERVER = "http://hapi-server.org/plot";
+			//let PLOTSERVER = "http://localhost:5000";
 
-		let PLOTSERVER = "http://hapi-server.org/plot";
-		//let PLOTSERVER = "http://localhost:5000";
-
-		if (!debug) {
-			// Suppress console logging.
-			console = {};console.log = function() {};
-		}
+			if (!debug) {
+				// Suppress console logging.
+				console = {};console.log = function() {};
+			}
 		</script>
 
 		<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
@@ -84,7 +83,6 @@
 		</script>
 
 		<script type="text/javascript" src="js/deps/clipboard.min.js"></script>
-
 		<script type="text/javascript" src="js/parseQueryString.js"></script>
 		<script type="text/javascript" src="js/checkboxes.js"></script>
 		<script type="text/javascript" src="js/dropdowns.js"></script>
@@ -201,7 +199,7 @@
 					// remove all parameters after that. Otherwise user could
 					// change the server and the parameter list will not be
 					// updated.
-					console.log("hashchange(): Hash change; by user edit = "
+					console.log("hashchange(): Hash change; by url edit = "
 								+ $(window).hashchange.byurledit);
 					var qs = parseQueryString();
 
@@ -539,8 +537,6 @@
 					$('#output').hide();
 					$('#datasetinfo').nextAll().hide();
 
-					let url = servers.info[selected('server')]['url'] 
-								+ "/info?id=" + selected('dataset');
 					$('#datasetinfo ul').empty();
 					$('#datasetinfo').show();
 				};
@@ -593,7 +589,7 @@
 				console.log('parameters(): Called.');
 
 				parameters.clearfollowing = function () {
-					if (selected('return')) {
+					if (selected('format')) {
 						output();
 						return false;
 					} else {
@@ -605,8 +601,10 @@
 
 					console.log('parameters.onselect(): Called.');
 
+					if (!selected('format')) {
+						$('#output').hide();
+					}
 					$('#parameterinfo').nextAll().hide();
-					$('#output').hide();
 					$('#parameterinfo ul').empty();
 
 					if (0) {
@@ -637,7 +635,7 @@
 								+ '</a>'
 								+ '</li>');
 
-					(function(url) {$('#parameterjson').click(() => output(url));})(url)
+					//(function(url) {$('#parameterjson').click(() => output(url));})(url)
 
 					$('#parameterinfo').show();
 				};
@@ -755,6 +753,25 @@
 				});	
 			}
 
+			function checktimes(which) {
+				if (selected('start') && selected('stop')) {
+					console.log("stoptime select event.")
+					console.log("starttime = " + selected('start'))					
+					console.log("stoptime = " + selected('stop'))
+					var t = dayjs(selected('start').replace("Z","")) 
+							< dayjs(selected('stop').replace("Z",""));
+					console.log("---> start < stop? " + t);
+					if (t == false) {
+						console.log(which + " changed; start >= stop. Setting color of " + which + " to red.");
+						$('#' + which + 'list').css('color','red');
+						return "Error";
+					} else {
+						console.log(which + " changed; start < stop. Setting color of " + which + " to black.");
+						$('#' + which + 'list').css('color','black');
+					}
+				}
+			}
+
 			// Handle start time drop-down.
 			function starttime(cb) {
 
@@ -768,7 +785,9 @@
 						return true;
 					}
 				}	
-				starttime.onselect = function () {};
+				starttime.onselect = function () {
+					return checktimes('start');
+				};
 
 				let meta = datasets.info[selected('dataset')]['info'];				
 				let start = meta['sampleStartDate'];
@@ -802,7 +821,9 @@
 					}
 				}
 
-				stoptime.onselect = function () {};
+				stoptime.onselect = function () {
+					return checktimes('stop');
+				};
 
 				let meta = datasets.info[selected('dataset')]['info'];				
 				let start = meta['sampleStartDate'];
@@ -823,6 +844,7 @@
 					return;
 				}
 
+				//alert('here')
 				start = meta['startDate'];
 				let cadenceString = meta['cadence'] || "PT1M";
 				let cadenceMillis = dayjs.duration(cadenceString)['$ms'];
@@ -1179,6 +1201,9 @@
 							.load( () => {
 								clearInterval(main.imageDots);
 								$("#loading").empty();
+							}).error( () => {
+								clearInterval(main.imageDots);
+								$("#loading").empty();								
 							})
 					}
 					if (selected('format').match(/pdf/)) {
@@ -1268,6 +1293,9 @@
 						sText = sText.replace(/UNICODE_NOTE_PARAMETERS/gm,unicodeNoteParameters);
 
 						let server = servers.info[selected('server')]['url']
+						if (!server.startsWith("http")) {
+							server = location.protocol + '//' + location.host + location.pathname + server;
+						}
 						sText = sText.replace(/SERVER/gm,server);
 						sText = sText.replace(/DATASET/gm,selected('dataset'));
 						sText = sText.replace(/PARAMETERS/gm,selectedParameters);
@@ -1407,7 +1435,7 @@
 			</button>
 		</div>
 
-		<div id="infodiv">
+		<div id="infodiv" style="max-width: 1024px">
 			<div id="xstatus">
 			</div>
 			<div id="loading" style="height: 2.5em;"></div>
@@ -1430,9 +1458,8 @@
 				  plot data from a HAPI server, and
 				</li>
 				<li>generate
-				  <a title="https://github.com/hapi-server/client-idl" href="https://github.com/hapi-server/client-idl">IDL</a>
-				  /<a title="https://github.com/hapi-server/client-matlab" href="https://github.com/hapi-server/client-matlab">MATLAB</a>
-				  /<a title="https://github.com/hapi-server/client-python" href="https://github.com/hapi-server/client-python">Python</a> scripts that read and plot the selected parameter.
+				  <a title="https://curl.se/" href="https://curl.se/">cURL</a> / <a title="http://spedas.org/" href="http://spedas.org/">IDL</a> / <a title="https://github.com/hapi-server/client-idl" href="https://github.com/hapi-server/client-idl">IDL SPEDAS</a> / <a title="https://github.com/hapi-server/client-matlab" href="https://github.com/hapi-server/client-matlab">MATLAB</a> / <a title="https://github.com/hapi-server/client-python" href="https://github.com/hapi-server/client-python">Python</a> / <a title="https://github.com/spedas/pyspedas" href="https://github.com/spedas/pyspedas">Python SPEDAS</a> / <a title="https://www.gnu.org/software/wget/" href="https://www.gnu.org/software/wget/">Wget</a>
+				   scripts that read and plot the selected parameter.
 				</li>
 			      </ul>
 			    </li>

@@ -19,6 +19,8 @@ parameters = 'PARAMETERS';
 start      = 'START'
 stop       = 'STOP'
 
-x = hapi(trange=[start, stop], server=server, dataset=dataset, parameters=parameters)
+param_list = hapi(trange=[start, stop], server=server, dataset=dataset, parameters=parameters)
 
-print(x)
+print(os.popen('pip install pytplot --upgrade').read())
+from pytplot import tplot
+tplot(param_list)

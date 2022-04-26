@@ -240,6 +240,13 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 							if (funs[i].clearfollowing() == false) {
 								console.log("dropdowns.ac.select(): Not clearing values "
 											+ "in all drop-downs after " + id + ".");
+
+								if (funs[i].onselect) {
+									console.log("dropdowns.ac.select(): Triggering "
+													+ "onselect callback for current drop-down.");
+									var err = funs[i].onselect();
+								}
+
 								return;
 							}
 						}
@@ -256,6 +263,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 
 						console.log("dropdowns.ac.select(): Getting drop-down "
 									+ "values on all remaing drop-downs.");
+
 						qs = {};
 						for (j = 0;j < i+1;j++) {
 							if ($(after+j).val()) {

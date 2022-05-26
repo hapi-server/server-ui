@@ -9,7 +9,11 @@ This repository contains
 
 # Installation/Use
 
+## Basic
+
 To use the basic landing page with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to the URL that ends in `hapi/`.
+
+## Advanced
 
 To use the landing page with an advanced user interface,
 
@@ -31,13 +35,13 @@ cd server-ui; npm install; npm start
 
 and open `http://localhost:8000/` in a web browser.
 
-# Advanced UI Configuration
+### UI Configuration
 
 By default, the list of servers at `http://localhost:8000/` will be that in https://github.com/hapi-server/servers/blob/master/all_.txt.
 
 To use your own list, rename `all_.txt` to `all.txt` and enter the URL of your HAPI server.
 
-# Advanced UI Use
+### UI Use
 
 You can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.
 

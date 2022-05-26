@@ -1,13 +1,11 @@
-[**Live Demo**](http://hapi-server.org/servers)
+Demos: [Basic](https://hapi-server.org/servers/TestData2.0/hapi) | ([Advanced](http://hapi-server.org/servers)
 
 # About
 
 This repository contains
 
-1. a basic [entry/overview/landing web page](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md) template for a [HAPI server](http://hapi-server.org/) and
-2. code for a landing page with a advanced user interface for browsing servers and datasets, downloading data from your browser, generating \~10-line IDL/MATLAB/Python scripts to download data, and creating preview plots.
-
-[**Live Demo of 2.**](http://hapi-server.org/servers)
+1. a basic [entry/overview/landing web page](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md) template for a [HAPI server](http://hapi-server.org/) ([** Demo **](https://hapi-server.org/servers/TestData2.0/hapi)) and
+2. code for a landing page with a advanced user interface for browsing servers and datasets, downloading data from your browser, generating \~10-line IDL/MATLAB/Python scripts to download data, and creating preview plots ([** Demo **](http://hapi-server.org/servers))
 
 # Installation/Use
 

@@ -23,7 +23,9 @@ git clone https://github.com/hapi-server/server-ui
 
 or download and extract the [zip archive of the code](https://github.com/hapi-server/server-ui/archive/refs/heads/master.zip) (and replace `server-ui` with `server-ui-master` in the following).
 
-Then copy the contents of `server-ui` into your root HAPI server directory. Or,
+Then [edit `all.txt`](#ui-configuration) and copy the contents of `server-ui` into your root HAPI server directory.
+
+Or, for testing, edit [edit `all.txt`](#ui-configuration), cd to `server-ui`, and execute
 
 ```
 cd server-ui; python3 -m http.server

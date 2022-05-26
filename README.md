@@ -5,23 +5,23 @@
 This repository contains
 
 1. a basic [entry/overview/landing web page](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md) template for a [HAPI server](http://hapi-server.org/) and
-2. code for a complex user interface for browsing servers and datasets, downloading data from your browser, generating \~10-line IDL/MATLAB/Python scripts to download data, and creating preview plots.
+2. code for a landing page with a advanced user interface for browsing servers and datasets, downloading data from your browser, generating \~10-line IDL/MATLAB/Python scripts to download data, and creating preview plots.
 
 [**Live Demo of 2.**](http://hapi-server.org/servers)
 
-# Installation
+# Installation/Use
 
-To use 1. with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to the URL that ends in `hapi/`.
+To use the basic landing page with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to the URL that ends in `hapi/`.
 
-To use 2.,
-
-First,
+To use the landing page with an advanced user interface,
 
 ```bash
 git clone https://github.com/hapi-server/server-ui
 ```
 
 or download and extract the [zip archive of the code](https://github.com/hapi-server/server-ui/archive/refs/heads/master.zip) (and replace `server-ui` with `server-ui-master` in the following).
+
+Then copy the contents of `server-ui` into your root HAPI server directory. Or,
 
 ```
 cd server-ui; python3 -m http.server
@@ -33,13 +33,15 @@ cd server-ui; npm install; npm start
 
 and open `http://localhost:8000/` in a web browser.
 
-# Configuration
+# Advanced UI Configuration
 
 By default, the list of servers at `http://localhost:8000/` will be that in https://github.com/hapi-server/servers/blob/master/all_.txt.
 
 To use your own list, rename `all_.txt` to `all.txt` and enter the URL of your HAPI server.
 
-Alternatively, you can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.
+# Advanced UI Use
+
+You can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.
 
 `http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi`
 

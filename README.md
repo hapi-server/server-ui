@@ -1,4 +1,4 @@
-Demos: [Basic](https://hapi-server.org/servers/TestData2.0/hapi) | ([Advanced](http://hapi-server.org/servers)
+Demos: [Basic](https://hapi-server.org/servers/TestData2.0/hapi) | [Advanced](http://hapi-server.org/servers)
 
 # About
 

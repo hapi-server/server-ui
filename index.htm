@@ -635,7 +635,18 @@
 								+ '</a>'
 								+ '</li>');
 
-					//(function(url) {$('#parameterjson').click(() => output(url));})(url)
+
+					$('#parameterjson').off("click", "**");
+					(
+						function(url) {
+										$('#parameterjson').click(() => 
+											{
+												window.scrollTo(0, 0);
+												output(url);
+											}
+										);
+								}
+					)(url)
 
 					$('#parameterinfo').show();
 				};

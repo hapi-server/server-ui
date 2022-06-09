@@ -22,7 +22,7 @@
 			} else if (location.href.match("hapi-server.org/servers")) {
 				SERVER_LIST = "all-combined.txt";
 			} else if (location.href.match("//localhost")) {
-				SERVER_LIST = "all-combined.txt";
+				SERVER_LIST = "all.txt";
 			}
 
 			let PLOTSERVER = "http://hapi-server.org/plot";
@@ -445,7 +445,7 @@
 							var warning = 'Did not find ' 
 											+ SERVER_LIST + ". Will use " 
 											+ SERVER_LIST_FALLBACK
-							$('#infodiv').append("<span style='background-color:yellow'>" + warning + "</span>");
+							$('#xstatus').append("<span style='background-color:yellow'>" + warning + "</span>");
 							SERVER_LIST = SERVER_LIST_FALLBACK;
 							get({url: SERVER_LIST}, function (err, res) {
 								if (!err) {
@@ -1410,7 +1410,7 @@
 			</div>
 			<div id="cachecheckboxes" style="display:none;padding-bottom: 5px">
 				<font size="-1">
-					<div class="tooltip" title="When requesting data, show data in broswer.">
+					<div class="tooltip" title="When requesting data, show data in broswer instead of only providing a download link.">
 						<input id="showdata" type="checkbox" value=""/>
 							&nbsp;Show data
 					</div>
@@ -1425,6 +1425,10 @@
 					<div class="tooltip" title="Use cached data from plot server if available.">
 						<input id="usedatacache" type="checkbox" value=""/>
 							&nbsp;Use cached data for images
+					</div>
+					<div class="tooltip" title="Show verifier links (for debugging)">
+						<input id="showverifierlink" type="checkbox" value=""/>
+							&nbsp;For verifier links
 					</div>
 					<div class="tooltip" title="URL of server to use for plots">
 						Plotserver<br>
@@ -1446,9 +1450,8 @@
 			</button>
 		</div>
 
-		<div id="infodiv" style="max-width: 1024px">
-			<div id="xstatus">
-			</div>
+		<div id="infodiv" style="min-height: 100vh; max-width: 1024px">
+			<div id="xstatus"></div>
 			<div id="loading" style="height: 2.5em;"></div>
 			<div id="overviewinfo">
 			  <b>Overview</b>
@@ -1544,11 +1547,10 @@
 				<ul>
 				</ul>
 			</div>
-		<div id="footer" style="font-size: 80%;position:absolute;bottom:0.5em;">
-			The code for this interface is available on <a href="https://github.com/hapi-server/server-ui">GitHub</a>. Report any issues in its <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.
+			<div id="footer" style="margin-top:4em;font-size: 80%;">
+				The code for this interface is available on <a href="https://github.com/hapi-server/server-ui">GitHub</a>. Please report any issues in its <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.
+			</div>
 		</div>
-		</div>
-<br><br><br><br>
 	</body>
 	
 </html>

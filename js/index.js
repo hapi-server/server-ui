@@ -1,7 +1,7 @@
-function main() {
+var qs = parseQueryString();
+console.log('Initial query string: ' + JSON.stringify(qs));
 
-    var qs = parseQueryString();
-    console.log('Initial query string: ' + JSON.stringify(qs));
+function main() {
 
     $('#plotserver').val(PLOTSERVER);
     $('#infodiv').append("<p><span style='background-color:yellow'>" + devNote + "</span></p>");
@@ -210,7 +210,8 @@ function get(options, cb) {
                 if (showAjaxError) {
                     var message = "";
                     if (directURLFailed && PROXY_URL) {
-                        message = "Failed to retrieve\n<a href='" + urlo + "'>" + urlo + "</a>\nand\n<a href='" + url + "'>" + url + "</a>\n\nThis can happen if the URL is invalid or the server does not <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>respond with CORS headers</a>.";
+                        message = "Failed to retrieve\n<a href='" + urlo + "'>" + urlo + "</a>\nand\n<a href='" + url + "'>" 
+                                  + url + "</a>\n\nThis can happen if the URL is invalid or the server does not <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>respond with CORS headers</a>.";
                     } else {
                         message = "Failed to retrieve " + url;
                     }
@@ -295,7 +296,7 @@ function servers(cb) {
         let text = "Server URL";
         $('#serverinfo ul').empty();
         $('#serverinfo ul').append(
-                            '<li>Server URL: ' + link(url) + '</li>');
+                            '<li>Server URL: <code>' + link(url) + '</code></li>');
         let email = servers.info[selected('server')]['contactEmail'];
         if (servers.info[selected('server')]['contactName'] !== "") {
             $('#serverinfo ul').append(
@@ -429,6 +430,10 @@ function datasets(cb) {
         if (err) {
             return;
         }
+        process(res);
+    });
+
+    function process(res) {
         res = $.parseJSON(res);
         res = res.catalog;
         // Show number of datasets
@@ -461,7 +466,7 @@ function datasets(cb) {
         }
         datasets.info = info;
         cb(list);
-    });
+    }
 }
 
 // Handle parameters drop-down.         
@@ -500,6 +505,9 @@ function parameters(cb) {
         let url = servers.info[selected('server')]['url'] 
                     + "/info?id=" + selected('dataset') 
                     + "&parameters=" + selected('parameters');
+
+        $('#parameterinfo ul').append("<li>id: <code>" + selected('parameters') + "</code></li>");
+
         for (key of Object.keys(meta)) {
             if (key !== "bins") {
                 $('#parameterinfo ul').append(""
@@ -532,16 +540,20 @@ function parameters(cb) {
         $('#parameterinfo').show();
     };
 
-    let url = servers.info[selected('server')]['url'] 
-                + "/info?id=" 
-                + selected('dataset');
+    let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
 
     get({url: url}, function (err, res) {
-
         if (err) {
             return;
         }
+        process(res, url);
+    }); 
+
+    function process(res, url) {
         res = JSON.parse(res);//$.parseJSON(res);
+
+        $('#datasetinfo ul')
+            .append('<li>id: <code>' + selected('dataset') + '</code></li>');
 
         var description = res['description']
         if (description && /\\n/.test(description)) {
@@ -604,7 +616,30 @@ function parameters(cb) {
                     + '</a>'
                     + '</li>');
 
-        (function(url) {$('#datasetjson').click(() => output(url));})(url)
+        $('#datasetjson').off("click", "**");
+        (
+            function(url) {
+                    console.log(url)
+                            $('#datasetjson').click(() => 
+                                {
+                                    window.scrollTo(0, 0);
+                                    output(url);
+                                }
+                            );
+                    }
+        )(url)
+
+        //(function(url) {$('#datasetjson').click(() => {console.log(url);output(url)})(url)
+
+        let vurl = 'https://hapi-server.org/verify/?'
+                  + 'url=' + servers.info[selected('server')]['url']
+                  + '&id=' + datasets.info[selected('dataset')]['id'];
+
+        $('#datasetinfo ul')
+            .append('<li id="verifierlink" style="display:none"><a target="_blank" href=' + vurl + '>Check this dataset using the HAPI Verifier</a></li>');
+        if ($("#showverifierlink").prop('checked')) {
+            $('#verifierlink').show()
+        }
 
         datasets.info[selected('dataset')]['info'] = res;
 
@@ -642,7 +677,7 @@ function parameters(cb) {
         parameters.list = list;
 
         cb(list);
-    }); 
+    }
 }
 
 function checktimes(which) {
@@ -954,6 +989,10 @@ function output(jsonURL) {
 
     console.log('output(): Called.')
 
+    if (!selected('return')) {
+        return;
+    }
+
     let selectedParameters = selected('parameters');
     if (0) {
         if (selectedParameters === '*all*') {
@@ -1034,16 +1073,15 @@ function output(jsonURL) {
 
         $('#output').show();
 
+        downloadlink(url, "data", false);
+
         if (!$("#showdata").prop('checked')) {
-            downloadlink(url, "data", false);
             return;
         }
 
-        downloadlink(url, "data", false);
-
         get({url: url}, function (err, data) {
             $("#downloadlink")
-                .append("<pre class='data'>" + data + "</pre>");
+                .append("<pre id='data' class='data'>" + data + "</pre>");
             $("#downloadlink > pre")
                 .width($("#infodiv").width()-15)
                 .height($(window).height()/2)   

@@ -174,18 +174,17 @@ pre.data {
  margin-top: 0em;
 }
 
-#cacheoptions {
+#options {
 	margin-bottom: 5px;
 }
 
-#options {
+#selections {
 	float: left;
 	width: 12em;
 	margin-right: 14px;
 	margin-top: 0em;
 	padding-right: 1em;
 	border-right: 1px solid black;
-	display: none;
 }
 
 

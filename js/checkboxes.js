@@ -1,31 +1,90 @@
 function checkboxes() {
 
-	$('#options').show(); // Show checkboxes
+  function savedefaults() {
+    var state = {};
+    var values = $('input[type="checkbox"]').map(function() {
+            state[this.id] = this.checked;
+    })
+    localStorage.setItem("server-ui-defaults", JSON.stringify(state));
+  }
 
-	// Show/Hide cache checkboxes link
-	$('#cachecheckboxeslink').click(function () {
-		$("#cachecheckboxes").toggle();
-	})
-	
-	// Default for show checkbox.
-	$('#showdata').each(function(){ this.checked = false });
-	
-	// Default for usemetadatacache checkbox.
-	$('#usemetadatacache').each(function(){ this.checked = true });
+  let defaults = localStorage.getItem("server-ui-defaults");
 
-	// Default for useimagecache checkbox.
-	$('#useimagecache').each(function(){ this.checked = true });
+  if (defaults) {
+    defaults = JSON.parse(defaults);
+  } else {
+    defaults = {
+                  showdata: true,
+                  showverifierlink: true,
+                  useimagecache: true, 
+                  usedatacache: true,
+                  plotserver: "http://hapi-server.org/plot"
+              }
+  }
 
-	// Deal with checkboxes.
-	// https://stackoverflow.com/a/5916151
-	$(':checkbox').prop('checked', true);
+  // Show checkboxes
+  $('#options').show();
 
-	// Un-check
-	$(':checkbox').prop('checked', false);
+  // Show/Hide cache checkboxes link
+  $('#optionslink').click(function () {
+      $("#optionscheckboxes").toggle();
+  })
 
-	// Toggle
-	$(':checkbox').prop('checked', function (i, value) {
-		return !value;
-	});
+  // Set initial state based on options.
+  $('#showverifierlink').attr('checked', defaults['showverifierlink']);
+  $('#showverifierlink').change(function() {
+    savedefaults();
+    if (this.checked) {
+      $('#verifierlink').show();
+    } else {
+      $('#verifierlink').hide();
+    }
+  })
+
+  $('#showdata').attr('checked', defaults['showdata']);
+  $('#showdata').change(function() {
+    savedefaults();
+    if (this.checked) {
+      output();
+    } else {
+      $('#data').remove();
+    }
+  })
+
+  $('#useimagecache').attr('checked', defaults['useimagecache']);
+  $('#useimagecache').change(function() {
+    savedefaults();
+    let url = $("#image > img").attr('src');
+    if (!url) return;
+    if (this.checked) {
+      if (!/usecache=true/.test(url)) {
+        url = url.replace("usecache=false","usecache=true");
+        $("#image > img").attr('src',url)
+      }
+    } else {
+      if (!/usecache=false/.test(url)) {
+        url = url.replace("usecache=true","usecache=false");
+        $("#image > img").attr('src',url)
+      }
+    }
+  })
+
+  $('#usedatacache').attr('checked', defaults['usedatacache']);
+  $('#usedatacache').change(function() { 
+    savedefaults();
+    let url = $("#image > img").attr('src');
+    if (!url) return;
+    if (this.checked) {
+      if (!/usedatacache=true/.test(url)) {
+        url = url.replace("usedatacache=false","usedatacache=true");
+        $("#image > img").attr('src',url)
+      }
+    } else {
+      if (!/usedatacache=false/.test(url)) {
+        url = url.replace("usedatacache=true","usedatacache=false");
+        $("#image > img").attr('src',url)
+      }
+    }
+  })
 
 }

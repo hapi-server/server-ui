@@ -93,21 +93,30 @@
 	</head>
 
 	<body style="height:100vh">
-		<div id="options">
-			<div id="cacheoptions">
-				<a id="cachecheckboxeslink">
+		<div id="selections">
+			<div id="options">
+				<a id="optionslink">
 					Options
 				</a>
 			</div>
-			<div id="cachecheckboxes" style="display:none;padding-bottom: 5px">
+			<div id="optionscheckboxes" style="display:none;padding-bottom: 5px">
 				<font size="-1">
 					<div class="tooltip" title="When requesting data, show data in broswer instead of only providing a download link.">
 						<input id="showdata" type="checkbox" value=""/>
 							&nbsp;Show data
 					</div>
-					<div class="tooltip" title="Use cached metadata in browser if available.">
+					<div class="tooltip" title="Show verifier links (for debugging server responses)">
+						<input id="showverifierlink" type="checkbox" value=""/>
+							&nbsp;Show verifier links
+					</div>
+					<!--div class="tooltip" title="Use cached metadata in browser if available.">
 						<input id="usemetadatacache" type="checkbox" value=""/>
 							&nbsp;Use cached metadata
+					</div-->
+					<br/>
+					<div class="tooltip" title="URL of server to use for plots">
+						<span><b>Plotserver</b><br/>
+						<input id="plotserver" type="text" value="" style="width:100%"/>
 					</div>
 					<div class="tooltip" title="Use cached images from plot server if available.">
 						<input id="useimagecache" type="checkbox" value=""/>
@@ -116,14 +125,6 @@
 					<div class="tooltip" title="Use cached data from plot server if available.">
 						<input id="usedatacache" type="checkbox" value=""/>
 							&nbsp;Use cached data for images
-					</div>
-					<div class="tooltip" title="Show verifier links (for debugging)">
-						<input id="showverifierlink" type="checkbox" value=""/>
-							&nbsp;Show verifier links
-					</div>
-					<div class="tooltip" title="URL of server to use for plots">
-						Plotserver<br>
-						<input id="plotserver" type="text" value="" style="width:100%"/>
 					</div>
 				</font>
 			</div>

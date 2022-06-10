@@ -293,6 +293,9 @@ function servers(cb) {
         $('#serverinfo').nextAll().hide();
 
         let url = servers.info[selected('server')]['url'];
+        if (!url.startsWith("http")) {
+            url = window.location.origin + window.location.pathname + url;
+        }
         let text = "Server URL";
         $('#serverinfo ul').empty();
         $('#serverinfo ul').append(

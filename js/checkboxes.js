@@ -31,6 +31,26 @@ function checkboxes() {
   })
 
   // Set initial state based on options.
+  $('#showrequests').attr('checked', defaults['showrequests']);
+  $('#showrequests').change(function() {
+    savedefaults();
+    if (!this.checked) {
+      $('#loading').empty();
+    }
+  })
+
+  // Set initial state based on options.
+  $('#showstatuslink').attr('checked', defaults['showstatuslink']);
+  $('#showstatuslink').change(function() {
+    savedefaults();
+    if (this.checked) {
+      $('#statuslink').show();
+    } else {
+      $('#statuslink').hide();
+    }
+  })
+
+  // Set initial state based on options.
   $('#showverifierlink').attr('checked', defaults['showverifierlink']);
   $('#showverifierlink').change(function() {
     savedefaults();
@@ -40,6 +60,18 @@ function checkboxes() {
       $('#verifierlink').hide();
     }
   })
+
+  // Set initial state based on options.
+  $('#showtestdatalink').attr('checked', defaults['showtestdatalink']);
+  $('#showtestdatalink').change(function() {
+    savedefaults();
+    if (this.checked) {
+      $('#testdatalink').show();
+    } else {
+      $('#testdatalink').hide();
+    }
+  })
+
 
   $('#showdata').attr('checked', defaults['showdata']);
   $('#showdata').change(function() {

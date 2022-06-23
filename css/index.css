@@ -21,6 +21,16 @@ a {
 	cursor: pointer;
 }
 
+
+#loading, #xstatus {
+	font-size: 80%;
+}
+#loading {
+	min-height: 1em;
+	max-height: 2em;
+	overflow-y: auto;
+}
+
 a:link {
 	color: rgb(0,0,0);
 }

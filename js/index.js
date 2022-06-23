@@ -173,13 +173,14 @@ function get(options, cb) {
     //console.log("get(): PROXY_URL = " + PROXY_URL);
     //console.log("get(): showAjaxError = " + showAjaxError);
 
-    $("#loading")
-            .html("Requesting " + link(url.replace("&param","&amp;param")) + " ")
-            .show()
+    if (directURLFailed == false) {
+        $("#loading").empty();
+    }
+    let msg = "Requesting " + link(url.replace("&param","&amp;param")) + " ";
+    $("#loading").append(msg).show();
 
     // Append ● every 0.5 s
-    main.getDots = setInterval( 
-                        () => $("#loading").append("●"), 500);
+    main.getDots = setInterval(() => $("#loading").append("●"), 500);
 
     $.ajax({
         type: "GET",
@@ -188,9 +189,11 @@ function get(options, cb) {
         dataType: "text",
         success: function (data, textStatus, jqXHR) {
             clearInterval(main.getDots);
-            $("#loading").empty();
-            //console.log("get(): Response from " + url + ":");
-            //console.log(data);
+            if ($("#showrequests").prop('checked')) {
+                $("#loading").append("Done.");
+            } else {
+                $("#loading").empty();
+            }
             get.cache[urlo] = data; // Cache response.
             cb(false, data);
         },
@@ -204,14 +207,18 @@ function get(options, cb) {
                             };
                 console.log("get(): Attempting to proxy retrieve " + url);
                 clearInterval(main.getDots);
-                $("#loading").empty();
+                if ($("#showrequests").prop('checked')) {
+                    $("#loading").append("Failed.<br/>");
+                } else {
+                    $("#loading").empty();
+                }
                 get(opts, cb);
             } else {
                 if (showAjaxError) {
                     var message = "";
                     if (directURLFailed && PROXY_URL) {
                         message = "Failed to retrieve\n<a href='" + urlo + "'>" + urlo + "</a>\nand\n<a href='" + url + "'>" 
-                                  + url + "</a>\n\nThis can happen if the URL is invalid or the server does not <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>respond with CORS headers</a>.";
+                                  + url + "</a>\n\nThe first URL failure may be due to the server not supporting <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>CORS headers</a>. The second URL failure is usually a result of a server issue.";
                     } else {
                         message = "Failed to retrieve " + url;
                     }
@@ -368,8 +375,8 @@ function servers(cb) {
                 info[id]['contactEmail'] = "";
                 info[id]['contactName'] = "";
             } else {
-                id = res[i].split(',')[1].trim();
-                name = res[i].split(',')[2].trim();
+                id = res[i].split(',')[2].trim();
+                name = res[i].split(',')[1].trim();
                 info[id] = {};
                 info[id]['url'] = res[i].split(',')[0].trim();
                 info[id]['contactName'] = res[i].split(',')[3].trim();
@@ -391,13 +398,15 @@ function servers(cb) {
             });
         }
 
-        // Move TestData servers to end of list
+        // Move TestData servers to end of list and possibly remove based on checkbox.
         let len = list.length;
         for (i = 0; i < len; i++) {
-            if (list[i]["value"].startsWith("TestData")) {
+            if (list[i]["label"].startsWith("TestData")) {
                 let tmp = list[i];
                 delete list[i];
-                list.push(tmp);
+                if ($('#showtestdatalink').prop('checked')) {
+                    list.push(tmp);
+                }
             }
         }
         list = list.filter(function( element ) {
@@ -408,6 +417,8 @@ function servers(cb) {
                     '<li>' 
                     + (list.length) 
                     + " servers available.</li>");
+
+        console.log(list);
         servers.info = info;
         cb(list);
     }
@@ -445,6 +456,11 @@ function datasets(cb) {
                             '<li>' 
                             + (res.length) 
                             + ' dataset' + plural + '</li>');
+        $('#serverinfo ul').append('<li id="statuslink" style="display:none"><a target="_blank" href="' + URLWATCHER + '#category='+ selected('server') +'">View server response tests.</a></li>');
+        if ($("#showstatuslink").prop('checked')) {
+          $('#statuslink').show();
+        }
+
         let info = {};
         let list = [];
         for (var i = 0; i < res.length; i++) {
@@ -640,8 +656,9 @@ function parameters(cb) {
 
         $('#datasetinfo ul')
             .append('<li id="verifierlink" style="display:none"><a target="_blank" href=' + vurl + '>Check this dataset using the HAPI Verifier</a></li>');
+
         if ($("#showverifierlink").prop('checked')) {
-            $('#verifierlink').show()
+          $('#verifierlink').show();
         }
 
         datasets.info[selected('dataset')]['info'] = res;
@@ -992,10 +1009,6 @@ function output(jsonURL) {
 
     console.log('output(): Called.')
 
-    if (!selected('return')) {
-        return;
-    }
-
     let selectedParameters = selected('parameters');
     if (0) {
         if (selectedParameters === '*all*') {
@@ -1023,6 +1036,10 @@ function output(jsonURL) {
             }
         });
         return;     
+    }
+
+    if (!selected('return')) {
+        return;
     }
 
     if (selected('return').match(/script/)) {
@@ -1100,7 +1117,8 @@ function output(jsonURL) {
         }
         let SERVER = servers.info[selected('server')]['url'];
         if (!SERVER.startsWith("http")) {
-            SERVER = location.origin + location.pathname + SERVER;                  }
+            SERVER = location.origin + location.pathname + SERVER;
+        }
         url = PLOTSERVER
                 + "?server=" + SERVER
                 + "&id=" + selected('dataset')
@@ -1110,6 +1128,12 @@ function output(jsonURL) {
                 + "&format=" + selected('format')
                 + "&usecache=" + $("#useimagecache").prop('checked')
                 + "&usedatacache=" + $("#usedatacache").prop('checked')
+
+        APLOTSERVER = "https://jfaden.net/AutoplotServlet/SimpleServlet?url=";
+        aurl = "vap+hapi:http://hapi-server.org/servers/SSCWeb/hapi?id=";
+        aurl = aurl + `${selected('dataset')}&parameters=Time,${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
+        aurl = APLOTSERVER + encodeURIComponent(aurl);
+        console.log(aurl)
 
         $('#output').show();
 

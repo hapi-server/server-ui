@@ -77,6 +77,7 @@
 				SERVER_LIST = "all.txt";
 			}
 
+			let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
 			let PLOTSERVER = "http://hapi-server.org/plot";
 			//let PLOTSERVER = "http://localhost:5000";
 
@@ -102,13 +103,36 @@
 			<div id="optionscheckboxes" style="display:none;padding-bottom: 5px">
 				<font size="-1">
 					<div class="tooltip" title="When requesting data, show data in broswer instead of only providing a download link.">
-						<input id="showdata" type="checkbox" value=""/>
+						<label>
+							<input id="showdata" type="checkbox" value=""/>
 							&nbsp;Show data
+						</label>
+					</div>
+					<div class="tooltip" title="Keep requested URLs in view after request has succeeded.">
+						<label>
+							<input id="showrequests" type="checkbox" value=""/>
+							&nbsp;Show requested URLs
+						</label>
+					</div>
+					<div class="tooltip" title="Show link to server status monitoring results (for debugging server responses)">
+						<label>
+							<input id="showstatuslink" type="checkbox" value=""/>
+							&nbsp;Show server status link
+						</label>
 					</div>
 					<div class="tooltip" title="Show verifier links (for debugging server responses)">
-						<input id="showverifierlink" type="checkbox" value=""/>
+						<label>
+							<input id="showverifierlink" type="checkbox" value=""/>
 							&nbsp;Show verifier links
+						</label>
 					</div>
+					<div class="tooltip" title="Show TestData servers (for testing clients)">
+						<label>
+							<input id="showtestdatalink" type="checkbox" value=""/>
+							&nbsp;Show TestData servers
+						</label>
+					</div>
+
 					<!--div class="tooltip" title="Use cached metadata in browser if available.">
 						<input id="usemetadatacache" type="checkbox" value=""/>
 							&nbsp;Use cached metadata
@@ -119,12 +143,16 @@
 						<input id="plotserver" type="text" value="" style="width:100%"/>
 					</div>
 					<div class="tooltip" title="Use cached images from plot server if available.">
-						<input id="useimagecache" type="checkbox" value=""/>
+						<label>
+							<input id="useimagecache" type="checkbox" value=""/>
 							&nbsp;Use cached images
+						</label>
 					</div>
 					<div class="tooltip" title="Use cached data from plot server if available.">
-						<input id="usedatacache" type="checkbox" value=""/>
+						<label>
+							<input id="usedatacache" type="checkbox" value=""/>
 							&nbsp;Use cached data for images
+						</label>
 					</div>
 				</font>
 			</div>
@@ -144,7 +172,7 @@
 
 		<div id="infodiv" style="min-height: 100vh; max-width: 1024px">
 			<div id="xstatus"></div>
-			<div id="loading" style="height: 2.5em;"></div>
+			<div id="loading"></div>
 			<div id="overviewinfo">
 			  <b>Overview</b>
 			  <p>

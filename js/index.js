@@ -650,9 +650,14 @@ function parameters(cb) {
 
         //(function(url) {$('#datasetjson').click(() => {console.log(url);output(url)})(url)
 
+        let surl = servers.info[selected('server')]['url'];
+        if (!surl.startsWith("http")) {
+            surl = window.location.origin + window.location.pathname + surl;
+        }
         let vurl = 'https://hapi-server.org/verify/?'
-                  + 'url=' + servers.info[selected('server')]['url']
+                  + 'url=' + surl
                   + '&id=' + datasets.info[selected('dataset')]['id'];
+
 
         $('#datasetinfo ul')
             .append('<li id="verifierlink" style="display:none"><a target="_blank" href=' + vurl + '>Check this dataset using the HAPI Verifier</a></li>');

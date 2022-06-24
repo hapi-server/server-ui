@@ -1,0 +1,29 @@
+<html>
+<body>
+  <pre id="console"></pre>
+  <script src="//hapi-server.github.io/client-javascript/0.0.1/moment-2.29.3.min.js"></script>
+  <script src="//hapi-server.github.io/client-javascript/0.0.1/hapi-0.0.1.js"></script>
+  <script>
+    server     = 'SERVER';
+    dataset    = 'DATASET';
+    // Use parameters='' to request all data. Multiple parameters
+    // can be requested using a comma-separated list, e.g., parameters='X_TOD,Y_TOD'
+    parameters = 'PARAMETERS';
+    start      = 'START';
+    stop       = 'STOP';
+
+    function cb(data, meta) {
+      let c = document.getElementById('console');
+      c.insertAdjacentText('beforeend','\ndata = ' + JSON.stringify(data, null, 4));
+      c.insertAdjacentText('beforeend','\n\nmeta = ' + JSON.stringify(meta, null, 4));
+      console.log(data);
+      console.log(meta);      
+    }
+
+    // All options set to their default values
+    opts = {'renameTime': true, 'raw': false, 'jsTimeNumber': false, 'jsDateObject': false};
+    hapi(server, dataset, parameters, start, stop, cb, opts);
+
+  </script>
+</body>
+</html>

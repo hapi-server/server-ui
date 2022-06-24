@@ -898,6 +898,7 @@ function format(cb) {
         var values =
                     [
                         {label:"IDL",value:"idl"},
+                        {label:"Javascript",value:"javascript"},
                         {label:"MATLAB",value:"matlab"},
                         {label:"Python",value:"python"},
                         {label:"Autoplot",value:"autoplot"},
@@ -1053,6 +1054,10 @@ function output(jsonURL) {
         if (selected('format') === 'python') {
             cclass = 'python';
             ext = 'py';
+        }
+        if (selected('format') === 'javascript') {
+            cclass = 'javascript';
+            ext = 'html';
         }
         if (selected('format') === 'matlab') {
             cclass = 'matlab';
@@ -1316,11 +1321,9 @@ function output(jsonURL) {
                 "<pre class='text'></pre>")
             .show()
         
-        $("#scripttext > pre")
-            .append("<code class='" + cclass + "'>" 
-                + sText.replace('&param','&amp;param')
-                + "</code>")
-
+        sText = sText.replace('&param','&amp;param')
+        $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>") 
+        $("#script").text(sText);
 
         $("#scripttext > pre")
             .height(h)

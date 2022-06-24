@@ -20,6 +20,7 @@ app.get('/', function (req,res) {
 // Serve static files in ./css and ./js dirs
 app.use("/css", express.static(__dirname + '/../css'));
 app.use("/js", express.static(__dirname + '/../js'));
+app.use("/scripts", express.static(__dirname + '/../scripts'));
 
 app.get('/proxy', function (req, res) {
 	console.log("Proxying " + req.query.url);

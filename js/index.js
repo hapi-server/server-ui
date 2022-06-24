@@ -1337,7 +1337,13 @@ function output(jsonURL) {
         var el = document.createElement('a');
         el.setAttribute('href', scriptFile);
         el.setAttribute('download', fname + "." + ext);
-        window.URL.revokeObjectURL(scriptFile);
+
+        if (showText.scriptFile) {
+            // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
+            // Remove previous reference (frees memory)
+            window.URL.revokeObjectURL(scriptFile);
+        }
+        showText.scriptFile = scriptFile;
 
         $("#downloadlink").empty().append(el).show();
         $("#downloadlink > a")

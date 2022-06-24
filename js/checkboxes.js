@@ -65,6 +65,7 @@ function checkboxes() {
   $('#showtestdatalink').attr('checked', defaults['showtestdatalink']);
   $('#showtestdatalink').change(function() {
     savedefaults();
+    location.reload();
     if (this.checked) {
       $('#testdatalink').show();
     } else {

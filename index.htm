@@ -66,6 +66,10 @@
             let SERVER_LIST_FALLBACK = 
             "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
+            let PLOTSERVER = "http://hapi-server.org/plot";
+
+            let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
+
             let devNote = "";
             if (location.href.match("hapi-server.org/servers-dev")) {
                 SERVER_LIST = "all-combined.txt";
@@ -75,11 +79,8 @@
                 SERVER_LIST = "all-combined.txt";
             } else if (location.href.match("//localhost")) {
                 SERVER_LIST = "all.txt";
+            	PLOTSERVER = "http://localhost:5000";
             }
-
-            let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
-            let PLOTSERVER = "http://hapi-server.org/plot";
-            //let PLOTSERVER = "http://localhost:5000";
 
             let debug = true; // Show log messages in console.
             if (!debug) {
@@ -253,6 +254,9 @@
                 </li>
                 <li>
                     <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=idl">Create IDL script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+                </li>
+                <li>
+                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=AL_INDEX&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=gallery">Plot <code>AL Index</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
                 </li>
                 <li>
                     <a href="#server=https://pds-ppi.igpp.ucla.edu/hapi">Use this interface to test a server not in server list drop-down menu.</a>

@@ -399,6 +399,7 @@ function servers(cb) {
         }
 
         // Move TestData servers to end of list and possibly remove based on checkbox.
+        let listCopy = list.slice(); // Shallow copy.
         let len = list.length;
         for (i = 0; i < len; i++) {
             if (list[i]["label"].startsWith("TestData")) {
@@ -412,7 +413,10 @@ function servers(cb) {
         list = list.filter(function( element ) {
             return element !== undefined;
         });
-
+        if (list.length == 0) {
+            console.log("All server names start with TestData and show TestData servers option unchecked. Ignoring option so at least one server in server drop-down list.");
+            list = listCopy;
+        }
         $('#overviewul').append(
                     '<li>' 
                     + (list.length) 

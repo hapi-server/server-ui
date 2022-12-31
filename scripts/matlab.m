@@ -9,8 +9,8 @@ if exist('hapi','file') ~= 2
     u = sprintf('%s/hapi.m',u);
     urlwrite(u,'hapi.m');
 end
-% Download hapi_plot.m if not found in path.
-if exist('hapi','file') ~= 2
+% Download hapiplot.m if not found in path.
+if exist('hapiplot','file') ~= 2
     u = sprintf('%s/hapi_plot.m',u);
     urlwrite(u,'hapi_plot.m');
 end

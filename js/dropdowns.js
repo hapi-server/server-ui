@@ -1,6 +1,6 @@
-function dropdowns(ids, names, funs, tips, after, i, callback) {
+function dropdowns(ids, names, funs, tips, after, i) {
 
-	var console = {}; console.log = function(){};
+	//var console = {}; console.log = function(){};
 	
 	if (arguments.length < 6) {
 		i = 0;
@@ -32,6 +32,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 	}
 		
 	function ac(i, list) {	
+
 		$("#" + ids[i])
 			.autocomplete({
 				source: list,
@@ -87,7 +88,7 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 						}	
 					});
 				},
-				close: function(event,ui) {
+				close: function(event, ui) {
 					// If no value is set, use the default definition.
 					var id = $(this).attr('id');
 					console.log("dropdowns.ac.close(): Close event on drop-down with id = " + id + ".");
@@ -290,14 +291,46 @@ function dropdowns(ids, names, funs, tips, after, i, callback) {
 						}
 
 					}
+				},
+			}).data("autocomplete")
+				._renderMenu = function( ul, items ) {
+					let txt = "";
+					let title = "";
+					if (this.term.length == 0) {
+						for (let i = 0; i < items.length; i++) {
+							title = "";
+							if (items[i].title) {
+								title = `title='${items[i].title}'`;
+							}
+							txt = txt + "<li id='" 
+										+ items[i].value 
+										+ `' class='ui-menu-item tooltip' ${title} role='presentation'>`
+										+ "<a id='ui-id-" + (i) + "' class='ui-corner-all tooltip' tabindex='-1'>" 
+										+ items[i].label
+										+ "</a></li>";
+						}
+					} else {
+						var re = new RegExp( "(" + this.term + ")", "gi" );
+						cls = "ui-state-highlight";
+						template = "<span class='" + cls + "'>$1</span>";
+						for (let i = 0; i < items.length; i++) {
+							txt = txt + "<li id='" 
+										+ items[i].value 
+										+ `' class='ui-menu-item tooltip' role='presentation'>`
+										+ "<a id='ui-id-" + (i) + "' class='ui-corner-all tooltip' tabindex='-1'>" 
+										+ items[i].label.replace(re,template)
+										+ "</a></li>";
+						}
+					}
+					$(ul).append(txt);
 				}
-			})
 	}
 
 	console.log("dropdowns(): Calling " 
 					+ funs[i].toString().split("{")[0].trim() 
 					+ " to get drop-down list entries.");
 
+	// Call dropdown function, which generates list then calls cb().
 	let list = funs[i](cb);
 
 	function cb(list) {

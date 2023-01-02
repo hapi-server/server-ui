@@ -687,9 +687,10 @@ function parameters(cb) {
                             + " found in hash. Will select it.")
             }
             list.push({
-                "label": res[k]['label'] || res[k]['name'],
+                "label": res[k]['name'],
                 "value": res[k]['name'], 
-                "selected": qs['parameters'] === res[k]['name']
+                "selected": qs['parameters'] === res[k]['name'],
+                "title": res[k]['description'] || ""
             });
         }
 

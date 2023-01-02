@@ -3,8 +3,6 @@
 * Includes: jquery.ui.core.js, jquery.ui.widget.js, jquery.ui.position.js, jquery.ui.autocomplete.js, jquery.ui.datepicker.js, jquery.ui.menu.js
 * Copyright jQuery Foundation and other contributors; Licensed MIT */
 
-var fastmode = true; // Speed up rendering of drop-down lists.
-
 (function( $, undefined ) {
 
 var uuid = 0,
@@ -1622,10 +1620,6 @@ $.widget( "ui.autocomplete", {
 				var item = ui.item.data( "ui-autocomplete-item" ) || ui.item.data( "item.autocomplete" ),
 					previous = this.previous;
 
-				if (fastmode) {
-					item = {value: $(ui.item[0]).attr('id')};
-				}
-
 				// only trigger when focus was lost (click on menu)
 				if ( this.element[0] !== this.document[0].activeElement ) {
 					this.element.focus();
@@ -1849,9 +1843,7 @@ $.widget( "ui.autocomplete", {
 			.empty()
 			.zIndex( this.element.zIndex() + 1 );
 		this._renderMenu( ul, items );
-		if (!fastmode) {
-			this.menu.refresh();
-		}
+		this.menu.refresh();
 
 		// size and position menu
 		ul.show();

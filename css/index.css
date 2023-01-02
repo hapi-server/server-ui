@@ -4,7 +4,7 @@ body {
 }
 
 ul {
-	line-height:140%;
+	line-height: 140%;
 }
 
 ul.ui-menu {
@@ -27,7 +27,7 @@ a {
 }
 #loading {
 	min-height: 1em;
-	max-height: 2em;
+	max-height: 2.5em;
 	overflow-y: auto;
 }
 

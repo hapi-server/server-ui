@@ -60,236 +60,236 @@
     <script type="text/javascript" src="js/examplelist.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script>
-            // Set PROXY_URL to false to not use proxy if AJAX request fails.
-            let PROXY_URL = "proxy?url=";
+        // Set PROXY_URL to false to not use proxy if AJAX request fails.
+        let PROXY_URL = "proxy?url=";
 
-            // Will use server list at ./all.txt if found 
-            let SERVER_LIST = "all.txt";
+        // Will use server list at ./all.txt if found 
+        let SERVER_LIST = "all.txt";
 
-            // Show all servers if SERVER_LIST if ./all.txt not found
-            let SERVER_LIST_FALLBACK = 
+        // Show all servers if SERVER_LIST if ./all.txt not found
+        let SERVER_LIST_FALLBACK = 
             "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
-            let PLOTSERVER = "http://hapi-server.org/plot";
+        let PLOTSERVER = "http://hapi-server.org/plot";
 
-            let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
+        let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
 
-            let devNote = "";
-            if (location.href.match("hapi-server.org/servers-dev")) {
-                SERVER_LIST = "all-combined.txt";
-                devNote  = "Development server.";
-                devNote += " Production server is at <a href='//hapi-server.org/servers/'>hapi-server.org/servers/</a>."
-            } else if (location.href.match("hapi-server.org/servers")) {
-                SERVER_LIST = "all-combined.txt";
-            } else if (location.href.match("//localhost")) {
-                SERVER_LIST = "all.txt";
-            	PLOTSERVER = "http://localhost:5000";
-            }
+        let devNote = "";
+        if (location.href.match("hapi-server.org/servers-dev")) {
+            SERVER_LIST = "all-combined.txt";
+            devNote  = "Development server.";
+            devNote += " Production server is at <a href='//hapi-server.org/servers/'>hapi-server.org/servers/</a>."
+        } else if (location.href.match("hapi-server.org/servers")) {
+            SERVER_LIST = "all-combined.txt";
+        } else if (location.href.match("//localhost")) {
+            SERVER_LIST = "all.txt";
+        	PLOTSERVER = "http://localhost:5000";
+        }
 
-            let debug = true; // Show log messages in console.
-            if (!debug) {
-                // Suppress console logging.
-                console = {};console.log = function() {};
-            }
+        let debug = true; // Show log messages in console.
+        if (!debug) {
+            // Suppress console logging.
+            console = {};console.log = function() {};
+        }
 
-            $(function() {
-                main(); // DOM is loaded. Call main() in js/index.js.
-            })
-        </script>
-    </head>
+        $(function() {
+            main(); // DOM is loaded. Call main() in js/index.js.
+        })
+    </script>
+</head>
 
-    <body style="height:100vh">
-        <div id="selections">
-            <div id="options">
-                <a id="optionslink">
-                    Options
-                </a>
-            </div>
-            <div id="optionscheckboxes" style="display:none;padding-bottom: 5px">
-                <font size="-1">
-                    <div class="tooltip" title="When requesting data, show data in broswer instead of only providing a download link.">
-                        <label>
-                            <input id="showdata" type="checkbox" value=""/>
-                            &nbsp;Show data
-                        </label>
-                    </div>
-                    <div class="tooltip" title="Keep requested URLs in view after request has succeeded.">
-                        <label>
-                            <input id="showrequests" type="checkbox" value=""/>
-                            &nbsp;Show requested URLs
-                        </label>
-                    </div>
-                    <div class="tooltip" title="Show link to server status monitoring results (for debugging server responses)">
-                        <label>
-                            <input id="showstatuslink" type="checkbox" value=""/>
-                            &nbsp;Show server status link
-                        </label>
-                    </div>
-                    <div class="tooltip" title="Show verifier links (for debugging server responses)">
-                        <label>
-                            <input id="showverifierlink" type="checkbox" value=""/>
-                            &nbsp;Show verifier links
-                        </label>
-                    </div>
-                    <div class="tooltip" title="Show TestData servers (for testing clients)">
-                        <label>
-                            <input id="showtestdatalink" type="checkbox" value=""/>
-                            &nbsp;Show TestData servers
-                        </label>
-                    </div>
-
-                    <!--div class="tooltip" title="Use cached metadata in browser if available.">
-                        <input id="usemetadatacache" type="checkbox" value=""/>
-                            &nbsp;Use cached metadata
-                        </div-->
-                        <br/>
-                        <div class="tooltip" title="URL of server to use for plots">
-                            <span><b>Plotserver</b><br/>
-                                <input id="plotserver" type="text" value="" style="width:100%"/>
-                            </div>
-                            <div class="tooltip" title="Use cached images from plot server if available.">
-                                <label>
-                                    <input id="useimagecache" type="checkbox" value=""/>
-                                    &nbsp;Use cached images
-                                </label>
-                            </div>
-                            <div class="tooltip" title="Use cached data from plot server if available.">
-                                <label>
-                                    <input id="usedatacache" type="checkbox" value=""/>
-                                    &nbsp;Use cached data for images
-                                </label>
-                            </div>
-                        </font>
-                    </div>
-                    <span id="dropdowns0" class="dropdown"></span>
-                    <span id="dropdowns1" class="dropdown"></span>
-                    <span id="dropdowns2" class="dropdown"></span>
-                    <span id="dropdowns3" class="dropdown"></span>
-                    <span id="dropdowns4" class="dropdown"></span>
-                    <span id="dropdowns5" class="dropdown"></span>
-                    <span id="dropdowns6" class="dropdown"></span>
-                    <span id="dropdowns7" class="dropdown"></span>
-                    <span id="dropdowns8" class="dropdown"></span>
-                    <button id="clear" class='simple' type="button" title="re-set drop-downs">
-                        Clear
-                    </button>
+<body style="height:100vh">
+    <div id="selections">
+        <div id="options">
+            <a id="optionslink">
+                Options
+            </a>
+        </div>
+        <div id="optionscheckboxes" style="display:none;padding-bottom: 5px">
+            <font size="-1">
+                <div class="tooltip" title="When requesting data, show data in broswer instead of only providing a download link.">
+                    <label>
+                        <input id="showdata" type="checkbox" value=""/>
+                        &nbsp;Show data
+                    </label>
+                </div>
+                <div class="tooltip" title="Keep requested URLs in view after request has succeeded.">
+                    <label>
+                        <input id="showrequests" type="checkbox" value=""/>
+                        &nbsp;Show requested URLs
+                    </label>
+                </div>
+                <div class="tooltip" title="Show link to server status monitoring results (for debugging server responses)">
+                    <label>
+                        <input id="showstatuslink" type="checkbox" value=""/>
+                        &nbsp;Show server status link
+                    </label>
+                </div>
+                <div class="tooltip" title="Show verifier links (for debugging server responses)">
+                    <label>
+                        <input id="showverifierlink" type="checkbox" value=""/>
+                        &nbsp;Show verifier links
+                    </label>
+                </div>
+                <div class="tooltip" title="Show TestData servers (for testing clients)">
+                    <label>
+                        <input id="showtestdatalink" type="checkbox" value=""/>
+                        &nbsp;Show TestData servers
+                    </label>
                 </div>
 
-                <div id="infodiv" style="min-height: 100vh; max-width: 1024px">
-                    <div id="xstatus"></div>
-                    <div id="loading"></div>
-                    <div id="overviewinfo">
-                      <b>Overview</b>
-                      <p>
-                        The Heliophysics Data Application Programmer's Interface (HAPI) specification is a time series download and streaming format specification.
-
-                        When data are available from a HAPI server, there is no need to download data files and write custom file reader programs. Using a HAPI client library, data can be loaded into an array using a single command in IDL, Javascript, MATLAB, and Python.
-                    </p>
-                    <ul id="overviewul">
-                        <li>
-                          Use this interface to 
-                          <ul>
-                            <li>generate a 
-                                <a class="tooltip"
-                                    title="Heliphysics Data Application Interface: http://hapi-server.org/"
-                                    href="http://hapi-server.org/">HAPI
-                                </a> 
-                              URL to download data,
-                          </li>
-                          <li>
-                              plot data from a HAPI server, and
-                          </li>
-                          <li>generate
-                              <a title="https://curl.se/"
-                              href="https://curl.se/">cURL</a> / 
-
-                              <a title="http://spedas.org/"
-                              href="http://spedas.org/">IDL</a> / 
-
-                              <a title="https://github.com/hapi-server/client-idl"
-                              href="https://github.com/hapi-server/client-idl">IDL SPEDAS</a> / 
-
-                              <a title="https://github.com/hapi-server/client-javascript"
-                              href="https://github.com/hapi-server/client-javascript">Javascript</a> /
-
-                              <a title="https://github.com/hapi-server/client-matlab"
-                              href="https://github.com/hapi-server/client-matlab">MATLAB</a> /
-
-                              <a title="https://github.com/hapi-server/client-python"
-                              href="https://github.com/hapi-server/client-python">Python</a> / 
-
-                              <a title="https://github.com/spedas/pyspedas"
-                              href="https://github.com/spedas/pyspedas">Python SPEDAS</a> / 
-
-                              <a title="https://www.gnu.org/software/wget/"
-                              href="https://www.gnu.org/software/wget/">Wget</a>
-
-                              scripts that read and plot the selected parameter.
-                          </li>
-                      </ul>
-                  </li>
-                  <li>
-                      Begin by selecting a HAPI data server on the left or selecting an example below.
-                  </li>
-              </ul>
-
-              <b>Example Queries</b>
-              <ul>
-                <li>
-                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=svg">Plot <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=LISIRD&dataset=empire_tsi&parameters=irradiance&start=1947-02-14T00:00:00.000Z&stop=1997-02-16T00:00:00.000Z&return=image&format=svg">Plot <code>empire_tsi</code> timeseries</a> from <a href="#server=LISIRD">LASP/LiSIRD HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=AMDA&dataset=c2-t96-model&parameters=b_t96gse_c2_xyz_gse&start=2003-10-20T00:00:00Z&stop=2003-10-30T00:00:00.000Z&return=image&format=svg">Plot <b>B</b> from T96 model at Cluster 2 location</a> from <a href="#server=AMDA">AMDA HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=DataShop&dataset=CHEMS_PHA_BOX_FLUXES_FULL_TIME_RES&parameters=HPlus_BEST_T1&start=2004-07-01T04:00:00Z&stop=2004-07-01T06:00:00Z&return=image&format=svg"">Plot <code>HPlus_BEST_T1</code> energy spectra in <code>CHEMS_PHA_BOX_FLUXES_FULL_TIME_RES</code> dataset</a> from <a href="#server=DataShop">DataShop</a>
-                </li>
-                <li>
-                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=data&format=csv&style=noheader">List <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=python">Create Python script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=matlab">Create MATLAB script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=idl">Create IDL script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=AL_INDEX&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=gallery">Plot <code>AL Index</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-                </li>
-                <li>
-                    <a href="#server=https://pds-ppi.igpp.ucla.edu/hapi">Use this interface to test a server not in server list drop-down menu.</a>
-                </li>
-            </ul>
-              <!--div id="examplelist">
-                <span id="examples0"></span>
-            </div>-->
-        </div>
-        <div id="output" style="display:none;">
-            <div id="downloadlink" style="display:none;">
+                <!--div class="tooltip" title="Use cached metadata in browser if available.">
+                    <input id="usemetadatacache" type="checkbox" value=""/>
+                        &nbsp;Use cached metadata
+                    </div-->
+                    <br/>
+                    <div class="tooltip" title="URL of server to use for plots">
+                        <span><b>Plotserver</b><br/>
+                            <input id="plotserver" type="text" value="" style="width:100%"/>
+                        </div>
+                        <div class="tooltip" title="Use cached images from plot server if available.">
+                            <label>
+                                <input id="useimagecache" type="checkbox" value=""/>
+                                &nbsp;Use cached images
+                            </label>
+                        </div>
+                        <div class="tooltip" title="Use cached data from plot server if available.">
+                            <label>
+                                <input id="usedatacache" type="checkbox" value=""/>
+                                &nbsp;Use cached data for images
+                            </label>
+                        </div>
+                    </font>
+                </div>
+                <span id="dropdowns0" class="dropdown"></span>
+                <span id="dropdowns1" class="dropdown"></span>
+                <span id="dropdowns2" class="dropdown"></span>
+                <span id="dropdowns3" class="dropdown"></span>
+                <span id="dropdowns4" class="dropdown"></span>
+                <span id="dropdowns5" class="dropdown"></span>
+                <span id="dropdowns6" class="dropdown"></span>
+                <span id="dropdowns7" class="dropdown"></span>
+                <span id="dropdowns8" class="dropdown"></span>
+                <button id="clear" class='simple' type="button" title="re-set drop-downs">
+                    Clear
+                </button>
             </div>
 
-            <div id="scriptcopy"
-            class='tooltip' 
-            title='Copy to clipboard'
-            alt='Copy to clipboard'>
-            <button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
-                <img class='clippy' width='20px' src='css/clippy.png' />
-            </button>
-            <span id="copied" class="tooltip" title="Copied!"></span>
-        </div>
+            <div id="infodiv" style="min-height: 100vh; max-width: 1024px">
+                <div id="xstatus"></div>
+                <div id="loading"></div>
+                <div id="overviewinfo">
+                  <b>Overview</b>
+                  <p>
+                    The Heliophysics Data Application Programmer's Interface (HAPI) specification is a time series download and streaming format specification.
 
-        <div id="scripttext">
-        </div>
+                    When data are available from a HAPI server, there is no need to download data files and write custom file reader programs. Using a HAPI client library, data can be loaded into an array using a single command in IDL, Javascript, MATLAB, and Python.
+                </p>
+                <ul id="overviewul">
+                    <li>
+                      Use this interface to 
+                      <ul>
+                        <li>generate a 
+                            <a class="tooltip"
+                                title="Heliphysics Data Application Interface: http://hapi-server.org/"
+                                href="http://hapi-server.org/">HAPI
+                            </a> 
+                          URL to download data,
+                      </li>
+                      <li>
+                          plot data from a HAPI server, and
+                      </li>
+                      <li>generate
+                          <a title="https://curl.se/"
+                          href="https://curl.se/">cURL</a> / 
 
-        <div id="image" style="display:none;">
-        </div>
+                          <a title="http://spedas.org/"
+                          href="http://spedas.org/">IDL</a> / 
+
+                          <a title="https://github.com/hapi-server/client-idl"
+                          href="https://github.com/hapi-server/client-idl">IDL SPEDAS</a> / 
+
+                          <a title="https://github.com/hapi-server/client-javascript"
+                          href="https://github.com/hapi-server/client-javascript">Javascript</a> /
+
+                          <a title="https://github.com/hapi-server/client-matlab"
+                          href="https://github.com/hapi-server/client-matlab">MATLAB</a> /
+
+                          <a title="https://github.com/hapi-server/client-python"
+                          href="https://github.com/hapi-server/client-python">Python</a> / 
+
+                          <a title="https://github.com/spedas/pyspedas"
+                          href="https://github.com/spedas/pyspedas">Python SPEDAS</a> / 
+
+                          <a title="https://www.gnu.org/software/wget/"
+                          href="https://www.gnu.org/software/wget/">Wget</a>
+
+                          scripts that read and plot the selected parameter.
+                      </li>
+                  </ul>
+              </li>
+              <li>
+                  Begin by selecting a HAPI data server on the left or selecting an example below.
+              </li>
+          </ul>
+
+          <b>Example Queries</b>
+          <ul>
+            <li>
+                <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=svg">Plot <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=LISIRD&dataset=empire_tsi&parameters=irradiance&start=1947-02-14T00:00:00.000Z&stop=1997-02-16T00:00:00.000Z&return=image&format=svg">Plot <code>empire_tsi</code> timeseries</a> from <a href="#server=LISIRD">LASP/LiSIRD HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=AMDA&dataset=c2-t96-model&parameters=b_t96gse_c2_xyz_gse&start=2003-10-20T00:00:00Z&stop=2003-10-30T00:00:00.000Z&return=image&format=svg">Plot <b>B</b> from T96 model at Cluster 2 location</a> from <a href="#server=AMDA">AMDA HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=DataShop&dataset=CHEMS_PHA_BOX_FLUXES_FULL_TIME_RES&parameters=HPlus_BEST_T1&start=2004-07-01T04:00:00Z&stop=2004-07-01T06:00:00Z&return=image&format=svg"">Plot <code>HPlus_BEST_T1</code> energy spectra in <code>CHEMS_PHA_BOX_FLUXES_FULL_TIME_RES</code> dataset</a> from <a href="#server=DataShop">DataShop</a>
+            </li>
+            <li>
+                <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=data&format=csv&style=noheader">List <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=python">Create Python script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=matlab">Create MATLAB script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=idl">Create IDL script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=AL_INDEX&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=gallery">Plot <code>AL Index</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+            </li>
+            <li>
+                <a href="#server=https://pds-ppi.igpp.ucla.edu/hapi">Use this interface to test a server not in server list drop-down menu.</a>
+            </li>
+        </ul>
+          <!--div id="examplelist">
+            <span id="examples0"></span>
+        </div>-->
     </div>
+    <div id="output" style="display:none;">
+        <div id="downloadlink" style="display:none;">
+        </div>
+
+        <div id="scriptcopy"
+        class='tooltip' 
+        title='Copy to clipboard'
+        alt='Copy to clipboard'>
+        <button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
+            <img class='clippy' width='20px' src='css/clippy.png' />
+        </button>
+        <span id="copied" class="tooltip" title="Copied!"></span>
+    </div>
+
+    <div id="scripttext">
+    </div>
+
+    <div id="image" style="display:none;">
+    </div>
+
     <div id="serverinfo" style="display:none;">
         <b>Server information</b>
         <ul>
@@ -304,11 +304,12 @@
         <b>Parameter information</b>
         <ul>
         </ul>
+
     </div>
     <div id="footer" style="margin-top:4em;font-size: 80%;">
         The code for this interface is available on <a href="https://github.com/hapi-server/server-ui">GitHub</a>. Please report any issues in its <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.
     </div>
-</div>
+
 </body>
 
 </html>

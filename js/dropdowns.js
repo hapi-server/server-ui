@@ -1,6 +1,6 @@
 function dropdowns(ids, names, funs, tips, after, i) {
 
-	//var console = {}; console.log = function(){};
+	var console = {}; console.log = function(){};
 	
 	if (arguments.length < 6) {
 		i = 0;

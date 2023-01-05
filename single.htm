@@ -17,10 +17,10 @@
 		</p>
 		<ul>
 			<li>
-				<a href="./hapi/capabilities"><code>capabilities</code></a> - list the API version and output options
+				<a href="hapi/capabilities"><code>capabilities</code></a> - list the API version and output options
 			</li>
 			<li>
-				<a href="./hapi/catalog"><code>catalog</code></a> - list the datasets that are available (<span id="Ndatasets"></span> total)
+				<a href="hapi/catalog"><code>catalog</code></a> - list the datasets that are available (<span id="Ndatasets"></span> total)
 			</li>
 			<li>
 				<code>info</code> - list information about parameters in a dataset, e.g,:
@@ -43,8 +43,20 @@
 
 	</body>
 	<script>
+	let ROOT = "";
 	$(document).ready(function () {
 
+		if (location.href.endsWith("/")) {
+			// This page should be served from a URL that ends in "hapi".
+			// If this page is also served from a URL ending with "hapi/",
+			// we need to fix the links. (The server should 301
+			// redirect "hapi/" to "hapi" so this fix is not needed.)
+			ROOT = "../"
+			$("[href]").each(function(idx,el) {
+				let href = el.href.replace();
+				$(el).attr('href',ROOT+el.href);
+			})
+		}
 	    if (!location.href.match('localhost')) {
 			$('#verifierp').append('Remove validation link on production sites.');
 	    }
@@ -52,14 +64,14 @@
 		$("#viviz").attr("href",$("#viviz").attr("href") + "?server=" + window.location.href + "&format=gallery");
 
 		if (window.location.hostname == 'localhost') {
-	 		if (!$("#viviz").attr("href").match('localhost')) {
-				$('#viviz').after(" <span style='background-color:yellow'>If HAPI server URL domain name is localhost, plot server must be run on localhost. See server startup message for instructions.</span>");
+			if ($("#viviz").attr("href").match('localhost')) {
+				$('#viviz').after(" <span style='background-color:yellow'>If HAPI server URL domain name is localhost, plot server must be run on localhost for this link to work. See server startup message for instructions.</span>");
 			}
-	 		if (!$("#verifier").attr("href").match('localhost')) {
-				$('#verifier').after(" <span style='background-color:yellow'>If HAPI server URL domain name is localhost, verfifier server must be run on localhost. See server startup message for instructions.</span>");
+			if ($("#verifier").attr("href").match('localhost')) {
+				$('#verifier').after(" <span style='background-color:yellow'>If HAPI server URL domain name is localhost, verfifier server must be run on localhost for this link to work. See server startup message for instructions.</span>");
 			}
 		}
-		$.ajax("./hapi/catalog").done(info);
+		$.ajax(ROOT+"hapi/catalog").done(info);
 	})
 
 	function info(json) {
@@ -68,7 +80,7 @@
 		$("#Ndatasets").text(json["catalog"].length);
 		var N = Math.min(5,json["catalog"].length);
 		for (var i = 0;i < N;i++) {
-			var url = "./hapi/info?id="+json["catalog"][i]["id"];
+			var url = ROOT+"hapi/info?id="+json["catalog"][i]["id"];
 			var link = $("<a>")
 						.attr("href", url)
 						.attr("title", url)
@@ -82,7 +94,7 @@
 
 	function data(id) {
 		// Get /hapi/info response for first dataset
-		var url = "./hapi/info?id=" + id;
+		var url = ROOT+"hapi/info?id=" + id;
 
 		$.ajax(url).done(process);
 
@@ -99,7 +111,7 @@
 				start = json["startDate"];
 			}
 			for (var i = 1; i < json.parameters.length; i++) {
-				var url = "./hapi/data?id=" + id + "&parameters=" 
+				var url = ROOT+"hapi/data?id=" + id + "&parameters=" 
 						+ json["parameters"][i]["name"]
 						+ "&time.min=" + start + "&time.max=" + stop;
 				var link = $("<a>")

@@ -1326,8 +1326,11 @@ function output(jsonURL) {
                 "<pre class='text'></pre>")
             .show()
         
-        sText = sText.replace('&param','&amp;param')
-        $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>") 
+        // Common browser bug: &param is interpreted as &para;m: ¶m
+        if (!["wget","curl"].includes(selected('format'))) {
+            sText = sText.replace('&param','&amp;param');
+        }
+        $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>");
         $("#script").text(sText);
 
         $("#scripttext > pre")

@@ -251,8 +251,8 @@ function selected(name) {
 // Create a HTML link.
 function link(url, text) {
 
-    if (!url.startsWith("http://") || !url.startsWith("https://") || !url.startsWith("//")) {
-        url = "//" + url;
+    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("//") && !url.startsWith("mailto")) {
+        //url = "//" + url;
     }
     if (arguments.length > 1) {
         return "<a target='_blank' title='" 

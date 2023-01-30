@@ -1,20 +1,26 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
   <head>
-    <!-- For HAPI 2.0 and 2.1 servers, replace string 'dataset=' with 'id=' -->
     <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
     <title>__CATALOG__</title>
     <link rel="icon" href="//hapi-server.org/favicon.ico" type="image/x-icon">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-    <script>VERIFIER = "__VERIFIER__"</script>
+    <script>
+      VERIFIER = "__VERIFIER__";
+      PLOTSERVER = "__PLOTSERVER__";
+      if (window.location.hostname === "localhost") {
+        VERIFIER = "http://localhost:9999";
+        PLOTSERVER = "http://localhost:5000";
+      }
+    </script>
   </head>
   <body>
     <h2>HAPI Server for __CATALOG__ datasets</h2>
     <p>
-      This server supports the <a href="https://github.com/hapi-server/data-specification">HAPI __VERSION__ API</a> specification for delivery of time series data.
+      This server supports the <a href="https://github.com/hapi-server/data-specification">HAPI __VERSION__ API</a> specification for streaming of time series data.
     </p>
     <p>
-      The server responds to GET requests to the following <a href="https://github.com/hapi-server/data-specification/tree/v1.1.0#endpoints">HAPI endpoints</a>:
+      The server responds to <code>GET</code> requests to the following <a href="https://github.com/hapi-server/data-specification/tree/v1.1.0#endpoints">HAPI endpoints</a>:
     </p>
     <ul>
       <li>
@@ -24,7 +30,7 @@
         <a href="hapi/catalog"><code>catalog</code></a> - list the datasets that are available (<span id="Ndatasets"></span> total)
       </li>
       <li>
-        <code>info</code> - list information about parameters in a dataset, e.g,:
+        <code>info</code> - list information about parameters in a dataset, e.g,
         <ul id="info">
         </ul>
       </li>
@@ -34,16 +40,21 @@
         </ul>
       </li>
     </ul>
-    <a id="viviz" href="__PLOTSERVER__">Plots</a>
+    <a id="viviz" href="">Plots</a>
     <p>
-      Contact: __CONTACT__
+      Server contact: __SERVERCONTACT__; Data contact __DATACONTACT__
     </p>
     <p id="verifierp">
-      <a id="verifier" href="__VERIFIER__">Run validation tests</a>
+      <a id="verifier" href="">Run validation tests</a>
     </p>
 
     <script>
     let ROOT = "";
+    let VERSION = '__VERSION__';
+    let datasetKey = "id";
+    if (parseInt(VERSION.substring(0)) >= 3) {
+      datasetKey = "dataset";
+    }
     $(document).ready(function () {
 
       if (location.href.endsWith("/")) {
@@ -57,18 +68,24 @@
           $(el).attr('href',ROOT+el.href);
         })
       }
-        if (!location.href.match('localhost')) {
-        $('#verifierp').append('Remove validation link on production sites.');
-        }
-        $("#verifier").attr("href",$("#verifier").attr("href") + "?url=" + window.location.href);
-      $("#viviz").attr("href",$("#viviz").attr("href") + "?server=" + window.location.href + "&format=gallery");
 
-      if (window.location.hostname == 'localhost') {
+      let vargs = "?url=" + window.location.href;
+      $("#verifier").attr("href",VERIFIER + vargs);
+
+      let pargs = "?server=" + window.location.href + "&format=gallery";
+      $("#viviz").attr("href",PLOTSERVER + pargs);
+
+      if (!window.location.hostname == 'localhost') {
+        $('#verifierp')
+          .append('Remove validation link on production sites.');
+      } else {
+        let note = " <span style='background-color:yellow'>If HAPI server URL domain name is localhost, plot server must be run on localhost for this link to work. See <code>hapi-server -h</code>.</span>"
         if ($("#viviz").attr("href").match('localhost')) {
-          $('#viviz').after(" <span style='background-color:yellow'>If HAPI server URL domain name is localhost, plot server must be run on localhost for this link to work. See server startup message for instructions.</span>");
+          $('#viviz').after(note);
         }
         if ($("#verifier").attr("href").match('localhost')) {
-          $('#verifier').after(" <span style='background-color:yellow'>If HAPI server URL domain name is localhost, verfifier server must be run on localhost for this link to work. See server startup message for instructions.</span>");
+          $('#verifier')
+            .after(note.replace("plot server","verifier server"));
         }
       }
       $.ajax(ROOT+"hapi/catalog").done(info);
@@ -80,7 +97,7 @@
       $("#Ndatasets").text(json["catalog"].length);
       var N = Math.min(5,json["catalog"].length);
       for (var i = 0;i < N;i++) {
-        var url = ROOT+"hapi/info?dataset="+json["catalog"][i]["id"];
+        var url = ROOT+"hapi/info?"+datasetKey+"="+json["catalog"][i]["id"];
         var link = $("<a>")
               .attr("href", url)
               .attr("title", url)
@@ -94,7 +111,7 @@
 
     function data(id) {
       // Get /hapi/info response for first dataset
-      var url = ROOT+"hapi/info?dataset=" + id;
+      var url = ROOT+"hapi/info?"+datasetKey+"=" + id;
 
       $.ajax(url).done(process);
 
@@ -111,7 +128,7 @@
           start = json["startDate"];
         }
         for (var i = 1; i < json.parameters.length; i++) {
-          var url = ROOT+"hapi/data?dataset=" + id + "&parameters=" 
+          var url = ROOT+"hapi/data?"+datasetKey+"=" + id + "&parameters=" 
               + json["parameters"][i]["name"]
               + "&time.min=" + start + "&time.max=" + stop;
           var link = $("<a>")

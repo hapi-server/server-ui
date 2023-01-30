@@ -21,6 +21,11 @@ a {
 	cursor: pointer;
 }
 
+#optionscheckboxes {
+  display: none;
+  padding-bottom: 5px;
+  font-size: 80%;
+}
 
 #loading, #xstatus {
 	font-size: 80%;

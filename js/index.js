@@ -662,8 +662,8 @@ function parameters(cb) {
         if (!surl.startsWith("http")) {
             surl = window.location.origin + window.location.pathname + surl;
         }
-        let vurl = 'https://hapi-server.org/verify/?'
-                  + 'url=' + surl
+        let vurl = VERIFIER
+                  + '?url=' + surl
                   + '&id=' + datasets.info[selected('dataset')]['id'];
 
 

@@ -70,8 +70,21 @@
     let SERVER_LIST_FALLBACK = 
     "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
-    let PLOTSERVER = "http://hapi-server.org/plot";
-    let VERIFIER = "http://hapi-server.org/verify";
+    let VERIFIER = '__VERIFIER__';
+    let VERIFIER_EXTERNALLY_SET = true;
+    // If a server replaced __VERIFIER__, use it. Otherwise
+    // set here. Similar for PLOTSERVER.
+    if (VERIFIER.startsWith('__')) {
+      VERIFIER_EXTERNALLY_SET = false;
+      VERIFIER = "http://hapi-server.org/verify";
+    }
+
+    let PLOTSERVER = '__PLOTSERVER__';
+    let PLOTSERVER_EXTERNALLY_SET = true;
+    if (PLOTSERVER.startsWith('__')) {
+      let PLOTSERVER_EXTERNALLY_SET = false;
+      let PLOTSERVER = "http://hapi-server.org/plot";
+    }
 
     let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
 
@@ -84,9 +97,15 @@
       SERVER_LIST = "all-combined.txt";
     } else if (location.href.match("//localhost")) {
       SERVER_LIST = "all.txt";
-    	PLOTSERVER = "http://localhost:5000";
-      VERIFIER = "http://localhost:9999";
+      if (PLOTSERVER_EXTERNALLY_SET == false) {
+      	PLOTSERVER = "http://localhost:5000";
+      }
+      if (VERIFIER_EXTERNALLY_SET == false) {
+        VERIFIER = "http://localhost:9999";
+      }
     }
+
+    SERVER_LIST = "all-combined.txt";
 
     let debug = true; // Show log messages in console.
     if (!debug) {
@@ -144,6 +163,13 @@
           </label>
       </div>
 
+      <div class="tooltip" title="Show debug statements in console.">
+        <label>
+          <input id="console" type="checkbox" value="">
+          &nbsp;Log to console
+        </label>
+      </div>
+
       <br>
 
       <div class="tooltip" title="URL of server to use for plots">
@@ -164,6 +190,7 @@
           &nbsp;Use cached data for images
         </label>
       </div>
+
     </div>
 
     <div>

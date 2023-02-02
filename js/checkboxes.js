@@ -15,9 +15,10 @@ function checkboxes() {
   } else {
     defaults = {
                   showdata: true,
-                  showverifierlink: true,
+                  showverifierlink: false,
                   useimagecache: true, 
                   usedatacache: true,
+                  console: false,
                   plotserver: "http://hapi-server.org/plot"
               }
   }
@@ -73,7 +74,6 @@ function checkboxes() {
     }
   })
 
-
   $('#showdata').attr('checked', defaults['showdata']);
   $('#showdata').change(function() {
     savedefaults();
@@ -119,5 +119,9 @@ function checkboxes() {
       }
     }
   })
+
+  $('#console').change(function() {
+    savedefaults();
+  });
 
 }

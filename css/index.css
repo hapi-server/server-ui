@@ -17,7 +17,7 @@ li.ui-menu-item {
 
 a {
 	text-decoration: underline;
-	text-decoration-color: blue;
+	text-decoration-color: black;
 	cursor: pointer;
 }
 
@@ -118,9 +118,20 @@ pre.data {
 	padding-bottom: 2px;
 }
 
+/* https://simurai.com/blog/2011/07/26/webkit-scrollbar */
+.ui-autocomplete::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+.ui-autocomplete::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0,0,0,.5);
+    box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
 .ui-autocomplete {
     max-height: 70vh; /* May need to set with JS */
-    overflow-y: auto;
+    overflow-y: scroll;
     /* prevent horizontal scrollbar */
     overflow-x: hidden;
     /* add padding to account for vertical scrollbar */

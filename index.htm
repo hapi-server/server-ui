@@ -81,8 +81,8 @@
 
     let VERIFIER = '__VERIFIER__';
     let VERIFIER_EXTERNALLY_SET = true;
-    // If a server replaced __VERIFIER__, use it. Otherwise
-    // set here. Similar for PLOTSERVER.
+    // If a server of this file replaced __VERIFIER__, use it.
+    // Otherwise set here. Similar for PLOTSERVER.
     if (VERIFIER.startsWith('__')) {
       VERIFIER_EXTERNALLY_SET = false;
       VERIFIER = "http://hapi-server.org/verify";
@@ -91,15 +91,14 @@
     let PLOTSERVER = '__PLOTSERVER__';
     let PLOTSERVER_EXTERNALLY_SET = true;
     if (PLOTSERVER.startsWith('__')) {
-      let PLOTSERVER_EXTERNALLY_SET = false;
-      let PLOTSERVER = "http://hapi-server.org/plot";
+      PLOTSERVER_EXTERNALLY_SET = false;
+      PLOTSERVER = "http://hapi-server.org/plot";
     }
 
     let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
 
     let devNote = "";
-    if (location.host.match(/^[0-9]/)
-        || location.href.match("hapi-server.org/servers-dev")) {
+    if (location.href.match("hapi-server.org/servers-dev")) {
       SERVER_LIST = "all-combined.txt";
       devNote  = "Development server.<br>";
     } else if (location.href.match("hapi-server.org/servers")) {
@@ -112,9 +111,9 @@
       if (VERIFIER_EXTERNALLY_SET == false) {
         VERIFIER = "http://localhost:9999";
       }
+    } else if (location.host.match(/^[0-9]/)) {
+      SERVER_LIST = "all.txt";
     }
-
-    SERVER_LIST = "all-combined.txt";
 
     let debug = true; // Show log messages in console.
     if (!debug) {
@@ -241,11 +240,12 @@
         <li>
           Use this interface to 
           <ul>
-            <li>generate a 
+            <li>
+              generate a 
               <a class="tooltip"
                   title="Heliphysics Data Application Interface: http://hapi-server.org/"
                   href="http://hapi-server.org/">HAPI
-              a</a> 
+              </a>
               URL to download data,
             </li>
             <li>

@@ -451,7 +451,8 @@ function servers(cb) {
     let listCopy = list.slice(); // Shallow copy.
     let len = list.length;
     for (i = 0; i < len; i++) {
-      if (list[i]["label"].startsWith("TestData")) {
+      if (list[i]["label"].startsWith("TestData") ||
+          list[i]["label"].startsWith("URLWatcher")) {
         let tmp = list[i];
         delete list[i];
         if ($('#showtestdatalink').prop('checked')) {
@@ -463,7 +464,7 @@ function servers(cb) {
       return element !== undefined;
     });
     if (list.length == 0) {
-      log("All server names start with TestData and show TestData servers option unchecked. Ignoring option so at least one server in server drop-down list.");
+      log("All server names start with {TestData,URLWatcher} and 'show TestData servers' option unchecked. Ignoring option so at least one server in server drop-down list.");
       list = listCopy;
     }
     $('#overviewul')
@@ -589,10 +590,10 @@ function parameters(cb) {
 
     $('#parameterinfo ul')
         .append('<li>' 
-                + '<a id="parameterjson" title=' + url + '>'
-                + 'HAPI JSON for parameter'
-                + '</a>'
-                + '</li>');
+              + '<a id="parameterjson" title=' + url + '>'
+              + 'HAPI JSON for parameter'
+              + '</a>'
+              + '</li>');
 
 
     $('#parameterjson').off("click", "**");
@@ -733,7 +734,7 @@ function parameters(cb) {
               + " found in hash. Will select it.")
         }
         list.push({
-            "label": res[k]['name'],
+            "label": res[k]['label'],
             "value": res[k]['name'], 
             "selected": qs['parameters'] === res[k]['name'],
             "title": res[k]['description'] || ""

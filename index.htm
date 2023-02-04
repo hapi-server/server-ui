@@ -5,9 +5,18 @@
   <meta name="keywords" content="HAPI Heliophysics Data UI">
   <meta name="description"
   content="HAPI Server UI; https://github.com/hapi-server/server-ui">
+  <meta name="keywords" content="CDAWeb, SSCWeb, INTERMAGNET, Cluster Active Archive, LISIRD, AMDA, ViRES, SWARM, Space Weather">
   <title>HAPI Browser</title>
-  <link rel="icon"
-  href="//hapi-server.org/favicon.ico" type="image/x-icon">
+
+  <link rel="apple-touch-icon" sizes="180x180"
+    href="//hapi-server.org/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32"
+    href="//hapi-server.org/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16"
+    href="//hapi-server.org/favicon-16x16.png">
+  <link rel="manifest"
+    href="//hapi-server.org/site.webmanifest">
+
 
   <link rel="stylesheet"
       type="text/css" href="css/jquery-ui-1.9.2.custom.css"/>
@@ -89,10 +98,10 @@
     let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
 
     let devNote = "";
-    if (location.href.match("hapi-server.org/servers-dev")) {
+    if (location.host.match(/^[0-9]/)
+        || location.href.match("hapi-server.org/servers-dev")) {
       SERVER_LIST = "all-combined.txt";
-      devNote  = "Development server.";
-      devNote += " Production server is at <a href='//hapi-server.org/servers/'>hapi-server.org/servers/</a>."
+      devNote  = "Development server.<br>";
     } else if (location.href.match("hapi-server.org/servers")) {
       SERVER_LIST = "all-combined.txt";
     } else if (location.href.match("//localhost")) {
@@ -225,7 +234,9 @@
       <p>
         When data are available from a HAPI server, there is no need to download data files and write custom file reader programs. Using a HAPI client library, data can be loaded into an array using a single command in IDL, Javascript, MATLAB, and Python.
       </p>
-
+      <p>
+        Space Weather-related data are available through HAPI software from AMDA (Automated Multi-Dataset Analysis), CAA (Cluster Active Archive), CCMC (Community Coordinated Modeling Center), CDAWeb (Coordinated Data Analysis Web), DAS2, INTERMAGNET (International Real-time Magnetic Observatory Network), LISIRD (LASP Interactive Solar Irradiance Data Center), SSCWeb (Satellite Situation Center Web), and ViRES (Virtual Research Service) for Swarm.
+      </p>
       <ul id="overviewul">
         <li>
           Use this interface to 
@@ -335,9 +346,10 @@
       <b>Parameter information</b>
       <ul></ul>
     </div>
-    <div id="footer" style="margin-top:4em;font-size: 80%;">
+    <div id="footer" style="margin-top:2em;font-size: 80%;">
       The code for this interface is available on <a href="https://github.com/hapi-server/server-ui">GitHub</a>. Please report any issues in its <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.
     </div>
+
   </div>
 
 </body>

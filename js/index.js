@@ -15,7 +15,7 @@ function log(msg) {
 function main() {
 
   $('#plotserver').val(PLOTSERVER);
-  $('#infodiv').append("<p><span style='background-color:yellow'>" + devNote + "</span></p>");
+  $('#selections').append("<p><span style='font-size:80%;background-color:yellow'>" + devNote + "</span></p>");
 
   $('#plotserver').change(function (){
     if (qs["return"] && qs["return"] === "image" && qs["format"]) {

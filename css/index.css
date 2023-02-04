@@ -5,6 +5,12 @@ body {
 
 ul {
 	line-height: 140%;
+  padding-inline-start: 1em;
+}
+
+ul ul {
+  line-height: 140%;
+  padding-inline-start: 1em;
 }
 
 ul.ui-menu {

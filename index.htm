@@ -85,17 +85,17 @@
     // Otherwise set here. Similar for PLOTSERVER.
     if (VERIFIER.startsWith('__')) {
       VERIFIER_EXTERNALLY_SET = false;
-      VERIFIER = "http://hapi-server.org/verify";
+      VERIFIER = "https://hapi-server.org/verify";
     }
 
     let PLOTSERVER = '__PLOTSERVER__';
     let PLOTSERVER_EXTERNALLY_SET = true;
     if (PLOTSERVER.startsWith('__')) {
       PLOTSERVER_EXTERNALLY_SET = false;
-      PLOTSERVER = "http://hapi-server.org/plot";
+      PLOTSERVER = "https://hapi-server.org/plot";
     }
 
-    let URLWATCHER = 'http://hapi-server.org/urlwatcher/';
+    let URLWATCHER = 'https://hapi-server.org/urlwatcher/';
 
     let devNote = "";
     if (location.href.match("hapi-server.org/servers-dev")) {

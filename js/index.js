@@ -1333,7 +1333,7 @@ function output(jsonURL) {
       let startDate = datasets.info[selected('dataset')]['info']['startDate'];
       let stopDate = datasets.info[selected('dataset')]['info']['stopDate'];
       sText = sText.replace(/STARTMIN/gm,startDate);
-      sText = sText.replace(/STARTMAX/gm,stopDate);
+      sText = sText.replace(/STOPMAX/gm,stopDate);
 
       sText = sText.replace(/START/gm,selected('start'));
       sText = sText.replace(/STOP/gm,selected('stop'));
@@ -1387,7 +1387,7 @@ function showText(sText,cclass,ext) {
   let w = $("#infodiv").width()-15
   $("#scripttext")
       .empty()
-      .append(xx"<pre class='text'></pre>")
+      .append("<pre class='text'></pre>")
       .show()
   
   // Common browser bug: &param is interpreted as &para;m: ¶m

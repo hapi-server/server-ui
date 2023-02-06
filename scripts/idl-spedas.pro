@@ -12,8 +12,8 @@ dataset    = 'DATASET';
 parameters = 'PARAMETERS';
 ; Use parameters=[''] to request all data. Multiple parameters
 ; can be requested using a comma-separated listCSV_EXAMPLE
-start      = 'START';
-stop       = 'STOP';
+start      = 'START';  min STARTMIN
+stop       = 'STOP'; max STOPMAX
 
 hapi_load_data, trange=[start, end], dataset=‘dataset name’, server=’server name’, parameters=‘parameter’
 

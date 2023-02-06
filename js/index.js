@@ -602,7 +602,11 @@ function parameters(cb) {
                         $('#parameterjson').click(() => 
                             {
                                 window.scrollTo(0, 0);
-                                output(url);
+                                get({"url": url}, (err, data) =>
+                                  {
+                                    showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
+                                  });
+                                //output(url);
                             }
                         );
                 }
@@ -692,7 +696,11 @@ function parameters(cb) {
                         $('#datasetjson').click(() => 
                             {
                                 window.scrollTo(0, 0);
-                                output(url);
+                                get({"url": url}, (err, data) =>
+                                  {
+                                    showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
+                                  });
+                                //output(url);
                             }
                         );
                 }
@@ -782,12 +790,12 @@ function starttime(cb) {
   log('starttime(): Called.');
 
   starttime.clearfollowing = function () {
-      if (selected('return')) {
-          output();
-          return false;
-      } else {
-          return true;
-      }
+    if (selected('return')) {
+      output();
+      return false;
+    } else {
+      return true;
+    }
   }
   starttime.onselect = function () {
     return checktimes('start');
@@ -1279,7 +1287,7 @@ function output(jsonURL) {
         async: true,
         dataType: "text",
         success: function (data, textStatus, jqXHR) {
-            process_(data);
+          process_(data);
         }
     });
 
@@ -1289,17 +1297,17 @@ function output(jsonURL) {
 
       let selectedParameters = selected('parameters');
       if (0) {
-          if (selectedParameters === '*all*') {
-              selectedParameters = "";
-          }
+        if (selectedParameters === '*all*') {
+          selectedParameters = "";
+        }
       }
 
       function isDoubleByte(str) {
-          // https://stackoverflow.com/a/148613
-          for (var i = 0, n = str.length; i < n; i++) {
-              if (str.charCodeAt( i ) > 255) { return true; }
-          }
-          return false;
+        // https://stackoverflow.com/a/148613
+        for (var i = 0, n = str.length; i < n; i++) {
+            if (str.charCodeAt( i ) > 255) { return true; }
+        }
+        return false;
       }
 
       let unicodeNote = " contains Unicode UTF-8. See https://github.com/hapi-server/client-matlab/blob/master/README.md#notes.";
@@ -1309,21 +1317,25 @@ function output(jsonURL) {
           unicodeNoteDataset = "Dataset name" + unicodeNote;
       }
       if (isDoubleByte(selectedParameters)) {
-          unicodeNoteParameters = "One or more parameters"
-                              + unicodeNote;                          
+          unicodeNoteParameters = "One or more parameters" + unicodeNote;
       }
       sText = sText.replace(/UNICODE_NOTE_DATASET/gm,unicodeNoteDataset);
       sText = sText.replace(/UNICODE_NOTE_PARAMETERS/gm,unicodeNoteParameters);
 
       let server = servers.info[selected('server')]['url']
       if (!server.startsWith("http")) {
-          server = location.protocol + '//' + location.host + location.pathname + server;
+        server = location.protocol + '//' + location.host + location.pathname + server;
       }
       sText = sText.replace(/SERVER/gm,server);
       sText = sText.replace(/DATASET/gm,selected('dataset'));
       sText = sText.replace(/PARAMETERS/gm,selectedParameters);
+
+      let startDate = datasets.info[selected('dataset')]['info']['startDate'];
+      let stopDate = datasets.info[selected('dataset')]['info']['stopDate'];
+      sText = sText.replace(/STARTMIN/gm,startDate);
+      sText = sText.replace(/STARTMAX/gm,stopDate);
+
       sText = sText.replace(/START/gm,selected('start'));
-      sText = sText.replace(/STOP/gm,selected('stop'));
       sText = sText.replace(/STOP/gm,selected('stop'));
 
       let timename = parameters.list[0]['value'];
@@ -1347,71 +1359,71 @@ function output(jsonURL) {
     }
   }
 
-  function showText(sText,cclass,ext) {
-    $('#scriptcopy > button')
-        .attr("data-clipboard-text",sText)
-    $('#scriptcopy').show()
-
-    var clipboard = new ClipboardJS('.btn');
-    clipboard.on('success', function () {
-        log('Copied script to clipboard.');
-        $('#copied').tooltipster('open');
-        setTimeout(() => $('#copied').tooltipster('close'), 800);
-    });
-
-    let type = "script";
-    let fname = 'demo';
-    if (ext === 'json') {
-        type = 'json';
-        fname = 'hapi';
-    }
-
-    let h = '100%';
-    if (type === 'json') {
-        h = $(window).height()/2;
-    }                   
-    let w = $("#infodiv").width()-15
-    $("#scripttext")
-        .empty()
-        .append(
-            "<pre class='text'></pre>")
-        .show()
-    
-    // Common browser bug: &param is interpreted as &para;m: ¶m
-    if (!["wget","curl"].includes(selected('format'))) {
-        sText = sText.replace('&param','&amp;param');
-    }
-    $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>");
-    $("#script").text(sText);
-
-    $("#scripttext > pre")
-        .height(h)
-        .show();
-
-    let blob = new Blob([sText], {type: 'octet/stream'});
-    let scriptFile = window.URL.createObjectURL(blob);
-    //let scriptFile = 'data:text/plain;base64;charset=utf-8,' + btoa(sText);
-
-    //https://stackoverflow.com/a/30139435
-    var el = document.createElement('a');
-    el.setAttribute('href', scriptFile);
-    el.setAttribute('download', fname + "." + ext);
-
-    if (showText.scriptFile) {
-        // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-        // Remove previous reference (frees memory)
-        window.URL.revokeObjectURL(scriptFile);
-    }
-    showText.scriptFile = scriptFile;
-
-    $("#downloadlink").empty().append(el).show();
-    $("#downloadlink > a")
-        .html('Download ' + type)
-        .css('font-weight', 'bold');
-
-    document
-        .querySelectorAll('pre code')
-        .forEach((block) => {hljs.highlightBlock(block);});
-    $("#output").show();
 }
+
+function showText(sText,cclass,ext) {
+  $('#scriptcopy > button')
+      .attr("data-clipboard-text",sText)
+  $('#scriptcopy').show()
+
+  var clipboard = new ClipboardJS('.btn');
+  clipboard.on('success', function () {
+      log('Copied script to clipboard.');
+      $('#copied').tooltipster('open');
+      setTimeout(() => $('#copied').tooltipster('close'), 800);
+  });
+
+  let type = "script";
+  let fname = 'demo';
+  if (ext === 'json') {
+      type = 'json';
+      fname = 'hapi';
+  }
+
+  let h = '100%';
+  if (type === 'json') {
+      h = $(window).height()/2;
+  }                   
+  let w = $("#infodiv").width()-15
+  $("#scripttext")
+      .empty()
+      .append(xx"<pre class='text'></pre>")
+      .show()
+  
+  // Common browser bug: &param is interpreted as &para;m: ¶m
+  if (!["wget","curl"].includes(selected('format'))) {
+      sText = sText.replace('&param','&amp;param');
+  }
+  $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>");
+  $("#script").text(sText);
+
+  $("#scripttext > pre")
+      .height(h)
+      .show();
+
+  let blob = new Blob([sText], {type: 'octet/stream'});
+  let scriptFile = window.URL.createObjectURL(blob);
+  //let scriptFile = 'data:text/plain;base64;charset=utf-8,' + btoa(sText);
+
+  //https://stackoverflow.com/a/30139435
+  var el = document.createElement('a');
+  el.setAttribute('href', scriptFile);
+  el.setAttribute('download', fname + "." + ext);
+
+  if (showText.scriptFile) {
+      // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
+      // Remove previous reference (frees memory)
+      window.URL.revokeObjectURL(scriptFile);
+  }
+  showText.scriptFile = scriptFile;
+
+  $("#downloadlink").empty().append(el).show();
+  $("#downloadlink > a")
+      .html('Download ' + type)
+      .css('font-weight', 'bold');
+
+  document
+      .querySelectorAll('pre code')
+      .forEach((block) => {hljs.highlightBlock(block);});
+  $("#output").show();
 }

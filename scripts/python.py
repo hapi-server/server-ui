@@ -16,8 +16,8 @@ dataset    = 'DATASET'
 # 2. Multiple parameters can be requested using a comma-separated
 #    listCSV_EXAMPLE
 parameters = 'PARAMETERS'
-start      = 'START'
-stop       = 'STOP'
+start      = 'START' # min STARTMIN
+stop       = 'STOP'  # max STOPMAX
 
 data, meta = hapi(server, dataset, parameters, start, stop)
 

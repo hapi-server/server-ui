@@ -1,21 +1,21 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
   <meta name="keywords" content="HAPI Heliophysics Data UI">
   <meta name="description"
-  content="HAPI Server UI; https://github.com/hapi-server/server-ui">
+    content="HAPI Server UI; https://github.com/hapi-server/server-ui">
   <meta name="keywords" content="CDAWeb, SSCWeb, INTERMAGNET, Cluster Active Archive, LISIRD, AMDA, ViRES, SWARM, Space Weather">
   <title>HAPI Browser</title>
 
   <link rel="apple-touch-icon" sizes="180x180"
-    href="//hapi-server.org/apple-touch-icon.png">
+        href="//hapi-server.org/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32"
-    href="//hapi-server.org/favicon-32x32.png">
+        href="//hapi-server.org/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16"
-    href="//hapi-server.org/favicon-16x16.png">
+        href="//hapi-server.org/favicon-16x16.png">
   <link rel="manifest"
-    href="//hapi-server.org/site.webmanifest">
+        href="//hapi-server.org/site.webmanifest">
 
 
   <link rel="stylesheet"
@@ -77,7 +77,7 @@
 
     // Show all servers if SERVER_LIST if ./all.txt not found
     let SERVER_LIST_FALLBACK = 
-    "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
+      "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
 
     let VERIFIER = '__VERIFIER__';
     let VERIFIER_EXTERNALLY_SET = true;
@@ -103,22 +103,18 @@
       devNote  = "Development server.<br>";
     } else if (location.href.match("hapi-server.org/servers")) {
       SERVER_LIST = "all-combined.txt";
-    } else if (location.href.match("//localhost")) {
-      SERVER_LIST = "all.txt";
+    } else if (location.href.match("//localhost") || location.host.match(/^[0-9]/)) {
+      if (location.href.match("//localhost")) {
+        SERVER_LIST = "all.txt";
+      } else {
+        SERVER_LIST = "all-combined.txt";        
+      }
       if (PLOTSERVER_EXTERNALLY_SET == false) {
       	PLOTSERVER = "http://localhost:5000";
       }
       if (VERIFIER_EXTERNALLY_SET == false) {
         VERIFIER = "http://localhost:9999";
       }
-    } else if (location.host.match(/^[0-9]/)) {
-      SERVER_LIST = "all-combined.txt";
-    }
-
-    let debug = true; // Show log messages in console.
-    if (!debug) {
-      // Suppress console logging.
-      console = {}; console.log = function() {};
     }
 
     $(function() {
@@ -243,8 +239,8 @@
             <li>
               generate a 
               <a class="tooltip"
-                  title="Heliphysics Data Application Interface: http://hapi-server.org/"
-                  href="http://hapi-server.org/">HAPI
+                  title="Heliphysics Data Application Interface: https://hapi-server.org/"
+                  href="https://hapi-server.org/">HAPI
               </a>
               URL to download data,
             </li>
@@ -286,28 +282,28 @@
       <b>Example Queries</b>
       <ul>
         <li>
-          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=svg">Plot <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=svg">Plot <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
         </li>
         <li>
-          <a href="#server=LISIRD&dataset=empire_tsi&parameters=irradiance&start=1947-02-14T00:00:00.000Z&stop=1997-02-16T00:00:00.000Z&return=image&format=svg">Plot <code>empire_tsi</code> timeseries</a> from <a href="#server=LISIRD">LASP/LiSIRD HAPI server</a>
+          <a href="#server=LISIRD&dataset=empire_tsi&parameters=irradiance&start=1947-02-14T00:00:00.000Z&stop=1997-02-16T00:00:00.000Z&return=image&format=svg">Plot <code>empire_tsi</code> timeseries</a> from the <a href="#server=LISIRD">LASP/LiSIRD HAPI server</a>
         </li>
         <li>
-          <a href="#server=AMDA&dataset=c2-t96-model&parameters=b_t96gse_c2_xyz_gse&start=2003-10-20T00:00:00Z&stop=2003-10-30T00:00:00.000Z&return=image&format=svg">Plot <b>B</b> from T96 model at Cluster 2 location</a> from <a href="#server=AMDA">AMDA HAPI server</a>
+          <a href="#server=AMDA&dataset=c2-t96-model&parameters=b_t96gse_c2_xyz_gse&start=2003-10-20T00:00:00Z&stop=2003-10-30T00:00:00.000Z&return=image&format=svg">Plot <b>B</b> from T96 model at Cluster 2 location</a> from the <a href="#server=AMDA">AMDA HAPI server</a>
         </li>
         <li>
-          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=data&format=csv&style=noheader">List <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=data&format=csv&style=noheader">List <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
         </li>
         <li>
-          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=python">Create Python script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=python">Create Python script to read <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
         </li>
         <li>
-          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=matlab">Create MATLAB script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=matlab">Create MATLAB script to read <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
         </li>
         <li>
-          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=idl">Create IDL script to read <code>SYM-H</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=idl">Create IDL script to read <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
         </li>
         <li>
-          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=AL_INDEX&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=gallery">Plot <code>AL Index</code> timeseries</a> from <a href="#server=CDAWeb">CDAWeb HAPI server</a>
+          <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=AL_INDEX&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=gallery">Plot <code>AL Index</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
         </li>
         <li>
           <a href="#server=https://pds-ppi.igpp.ucla.edu/hapi">Use this interface to test a server not in server list drop-down menu.</a>
@@ -331,6 +327,8 @@
       </div>
 
       <div id="image" style="display:none;">
+      </div>
+      <div id="image2" style="display:none;">
       </div>
     </div>
 

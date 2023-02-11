@@ -461,7 +461,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 		if (list.length > 1) {
 			// Select first item with attribute selected=true.
 			for (var k = 0;k < list.length; k++) {
-				if (list[k].selected) {
+				if (list[k].selected == true) {
 					log("dropdowns(): Triggering select on drop-down with id = " 
 							+ ids[i] + " because it has selected=true.");
 					$('input[id=' + ids[i] + ']')

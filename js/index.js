@@ -7,11 +7,6 @@ if (false) {
 
 var qs = parseQueryString();
 
-function log(msg) {
-  if (!$('#console').is(":checked")) return;
-  log(msg);
-}
-
 function main() {
 
   $('#plotserver').val(PLOTSERVER);
@@ -58,6 +53,11 @@ function main() {
 
   //Set up examples drop-down.
   //dropdowns(["examples"],["Other Examples"],[examples],[],"#examples");
+}
+
+function log(msg) {
+  if (!$('#console').is(":checked")) return;
+  console.log(msg);
 }
 
 function hapi2to3(url) {
@@ -207,6 +207,7 @@ function get(options, cb) {
 
   // Append ● every 0.5 s
   main.getDots = setInterval(() => $("#loading").append("●"), 500);
+  get.start = (new Date()).getTime();
 
   $.ajax({
       type: "GET",
@@ -216,9 +217,10 @@ function get(options, cb) {
       success: function (data, textStatus, jqXHR) {
         clearInterval(main.getDots);
         if ($("#showrequests").prop('checked')) {
-            $("#loading").append("Done.");
+          let elapsed =  ((new Date()).getTime() - get.start);
+          $("#loading").append("| Time: " + (elapsed) + " [ms] |");
         } else {
-            $("#loading").empty();
+          $("#loading").empty();
         }
         get.cache[urlo] = data; // Cache response.
         cb(false, data);
@@ -276,24 +278,23 @@ function selected(name) {
 
 // Create a HTML link.
 function link(url, text) {
-
-    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("//") && !url.startsWith("mailto")) {
-        //url = "//" + url;
-    }
-    if (arguments.length > 1) {
-      return "<a target='_blank' title='" 
-              + url + "' href='" 
-              + url + "'>" 
-              + text + "</a>";
-    } else {
-      return "<a target='_blank' title='" 
-              + url + "' href='" 
-              + url + "'>" 
-              + url + "</a>";
-    }
+  if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("//") && !url.startsWith("mailto")) {
+      //url = "//" + url;
+  }
+  if (arguments.length > 1) {
+    return "<a target='_blank' title='" 
+            + url + "' href='" 
+            + url + "'>" 
+            + text + "</a>";
+  } else {
+    return "<a target='_blank' title='" 
+            + url + "' href='" 
+            + url + "'>" 
+            + url + "</a>";
+  }
 }
 
-function downloadlink(url, what, showdots) {
+function downloadlink(url, what, showElapsed) {
 
     $("#downloadlink")
       .empty()
@@ -306,14 +307,14 @@ function downloadlink(url, what, showdots) {
       .css('font-weight', 'bold');
     
     downloadlink.start = (new Date()).getTime();
-    if (showdots) {
+    if (showElapsed) {
       $("#loading")
           .text("Requesting " + what + " ")
       let interval = setInterval( 
-                          () => {
-                              let elapsed =  ((new Date()).getTime() - downloadlink.start);
-                              $("#loading").html("Requesting " + what + ". Elapsed time: " + elapsed + " ms");    
-                          }, 500);
+                      () => {
+                          let elapsed =  ((new Date()).getTime() - downloadlink.start);
+                          $("#loading").html("Requesting " + what + ". Elapsed time: " + elapsed + " ms");    
+                      }, 500);
       return interval;
     }
 }
@@ -427,8 +428,7 @@ function servers(cb) {
         found = true;
       }
       if (qs['server'] === id) {
-        log("servers(): server value for " 
-            + id + " found in hash. Will select it.")
+        log("servers(): server value for " + id + " found in hash. Selecting it.")
       }
       list.push({
           "label": name,
@@ -438,6 +438,7 @@ function servers(cb) {
     }
 
     if (selectedServer && found == false && !server_list_in_hash()) {
+      alert('here')
       $('#xstatus')
         .append("<span style='background-color:yellow'>Server with id=" + selectedServer + " is not available from this interface.</span>");
       $(window).hashchange.byurledit = false;
@@ -455,7 +456,7 @@ function servers(cb) {
           list[i]["label"].startsWith("URLWatcher")) {
         let tmp = list[i];
         delete list[i];
-        if ($('#showtestdatalink').prop('checked')) {
+        if ($('#showtestdatalink').prop('checked') || found == true) {
           list.push(tmp);
         }
       }
@@ -1008,7 +1009,7 @@ function type(cb) {
 // Handle style drop-down.
 function style(cb) {
 
-  log('type(): Called.');
+  log('style(): Called.');
 
   style.onselect = function () {
     output();
@@ -1038,12 +1039,15 @@ function style(cb) {
           ];
     }
   }
+
   for (var i = 0; i < values.length; i++) {
     if (qs['style'] === values[i]['value']) {
       values[i]['selected'] = true;
     }
   }
+
   cb(values);
+
 }
 
 // Examples drop-down.
@@ -1070,7 +1074,7 @@ function examples(cb) {
   cb(list);
 }
 
-// Form URL and place it in DOM based on drop-down state.
+// Form URL and place it in DOM based on drop-down change.
 function output(jsonURL) {
 
   log('output(): Called.')
@@ -1083,24 +1087,9 @@ function output(jsonURL) {
   }
 
   if (jsonURL) {
-    let interval = downloadlink(jsonURL, "json", true);
-    $.ajax({
-        type: "GET",
-        url: jsonURL,
-        async: true,
-        dataType: "json",
-        success: function (data, textStatus, jqXHR) {
-            showText(JSON.stringify(data,null,4),'','json')
-            clearInterval(interval);
-            $("#loading").empty();
-        },
-        error: function (xhr, textStatus, errorThrown) {
-            clearInterval(interval);
-            $("#loading").empty();
-            $('#downloadlink').empty();
-            ajaxerror(jsonURL, "Failed to retrieve " + url, xhr);
-        }
-    });
+    get( {url: url, showAjaxError: true}, function (data) {
+      showText(JSON.stringify(data,null,4),'','json')
+    })
     return;
   }
 
@@ -1193,50 +1182,65 @@ function output(jsonURL) {
     }
     url = PLOTSERVER
             + "?server=" + SERVER
-            + "&id=" + selected('dataset')
+            + "&dataset=" + selected('dataset')
             + "&parameters=" + selectedParameters
-            + "&time.min=" + selected('start')
-            + "&time.max=" + selected('stop')
+            + "&start=" + selected('start')
+            + "&stop=" + selected('stop')
             + "&format=" + selected('format')
             + "&usecache=" + $("#useimagecache").prop('checked')
             + "&usedatacache=" + $("#usedatacache").prop('checked')
 
-    url = hapi2to3(url);
-
     APLOTSERVER = "https://jfaden.net/AutoplotServlet/SimpleServlet?url=";
-    aurl = "vap+hapi:http://hapi-server.org/servers/SSCWeb/hapi?id=";
+    aurl = "vap+hapi:" + SERVER + "?id=";
     aurl = aurl + `${selected('dataset')}&parameters=Time,${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
     aurl = APLOTSERVER + encodeURIComponent(aurl);
-    log(aurl)
+    let apwidth = $("#infodiv").width()-15;
+    let apheight = Math.round(apwidth*3./7.)
+    aurl = aurl + `&width=${apwidth}&height=${apheight}`
 
     $('#output').show();
 
     if (selected('format').match(/png|svg/)) {
 
-      main.imageDots = downloadlink(url,selected('format'),true);
+      let interval = downloadlink(url,selected('format'),true);
 
       let width = $("#infodiv").width()-15;
       if (selected('format').match(/svg/)) {
-          width = "100%";
+        width = "100%";
       }
           
       $("#image")
           .empty()
+          .show()
           .append("<img></img>")
           .find('img')
           .attr('src',url)
-          .parent()
-          .show()
-          .find('img')
           .width(width)
           .load( () => {
-              clearInterval(main.imageDots);
+              clearInterval(interval);
               $("#loading").empty();
           }).error( () => {
-              clearInterval(main.imageDots);
+              clearInterval(interval);
               $("#loading").empty();                              
           })
+
+      $("#image2")
+          .empty()
+          .show()
+          .append("<img></img>")
+          .find('img')
+          .attr('src',aurl)
+          .width(apwidth)
+          .load( () => {
+              clearInterval(interval);
+              $("#loading").empty();
+          }).error( () => {
+              clearInterval(interval);
+              $("#loading").empty();                              
+          })
+
     }
+
     if (selected('format').match(/pdf/)) {
 
       let interval = downloadlink(url, 'pdf', true);
@@ -1265,6 +1269,7 @@ function output(jsonURL) {
           // controls.
       })
     }
+
     if (selected('format').match(/gallery/)) {
       $("#downloadlink")
           .empty()
@@ -1358,7 +1363,6 @@ function output(jsonURL) {
       cb(sText);
     }
   }
-
 }
 
 function showText(sText,cclass,ext) {

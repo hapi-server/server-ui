@@ -3,7 +3,7 @@ function checkboxes() {
   function savedefaults() {
     var state = {};
     var values = $('input[type="checkbox"]').map(function() {
-            state[this.id] = this.checked;
+        state[this.id] = this.checked;
     })
     localStorage.setItem("server-ui-defaults", JSON.stringify(state));
   }
@@ -23,7 +23,7 @@ function checkboxes() {
               }
   }
 
-  // Show checkboxes
+  // Show the options link
   $('#options').show();
 
   // Show/Hide cache checkboxes link
@@ -120,6 +120,7 @@ function checkboxes() {
     }
   })
 
+  $('#console').attr('checked', defaults['console']);
   $('#console').change(function() {
     savedefaults();
   });

@@ -16,6 +16,7 @@ function checkboxes() {
     defaults = {
                   showdata: true,
                   showverifierlink: false,
+                  showtiming: false,
                   useimagecache: true, 
                   usedatacache: true,
                   console: false,
@@ -23,24 +24,26 @@ function checkboxes() {
               }
   }
 
-  // Show the options link
-  $('#options').show();
-
-  // Show/Hide cache checkboxes link
-  $('#optionslink').click(function () {
-      $("#optionscheckboxes").toggle();
-  })
-
-  // Set initial state based on options.
   $('#showrequests').attr('checked', defaults['showrequests']);
   $('#showrequests').change(function() {
     savedefaults();
-    if (!this.checked) {
-      $('#loading').empty();
+    if (this.checked) {
+      $('#loading').show();
+    } else {
+      $('#loading').hide();
     }
   })
 
-  // Set initial state based on options.
+  $('#showtiming').attr('checked', defaults['showtiming']);
+  $('#showtiming').change(function() {
+    savedefaults();
+    if (this.checked) {
+      $('#timing').show();
+    } else {
+      $('#timing').hide();
+    }
+  })
+
   $('#showstatuslink').attr('checked', defaults['showstatuslink']);
   $('#showstatuslink').change(function() {
     savedefaults();
@@ -51,7 +54,6 @@ function checkboxes() {
     }
   })
 
-  // Set initial state based on options.
   $('#showverifierlink').attr('checked', defaults['showverifierlink']);
   $('#showverifierlink').change(function() {
     savedefaults();
@@ -62,7 +64,6 @@ function checkboxes() {
     }
   })
 
-  // Set initial state based on options.
   $('#showtestdatalink').attr('checked', defaults['showtestdatalink']);
   $('#showtestdatalink').change(function() {
     savedefaults();

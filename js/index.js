@@ -22,12 +22,27 @@ function main() {
 
   // Configure tooltips
   // https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
-  $('.tooltip').tooltipster({theme: 'tooltipster-noir'})
+  $('.tooltip').tooltipster({
+    theme: 'tooltipster-noir',
+    side: 'top',
+    delay: 500
+  })
+  $('.tooltip-right').tooltipster({
+    theme: 'tooltipster-noir',
+    side: 'right',
+    delay: 500
+  })
   $('body')
-    .on('mouseenter','.tooltip:not(.tooltipstered)', 
+    .on('mouseenter', '.tooltip:not(.tooltipstered)', 
+      // Handle dynamically added content
       function () {
         $(this)
-          .tooltipster({theme: 'tooltipster-noir'})
+          .tooltipster({
+            theme: 'tooltipster-noir',
+            side: 'right',
+            delay: 500,
+            animationDuration: '0',
+          })
           .tooltipster('show');
       });
 
@@ -202,11 +217,29 @@ function get(options, cb) {
   if (directURLFailed == false) {
     $("#loading").empty();
   }
-  let msg = "Requesting " + link(url.replace("&param","&amp;param")) + " ";
-  $("#loading").append(msg).show();
 
-  // Append ● every 0.5 s
-  main.getDots = setInterval(() => $("#loading").append("●"), 500);
+  $("#timing").empty();
+  $("#loading").empty();
+
+  if (options.showLink || $("#showrequests").prop('checked')) {
+    $("#timing").text("Time:     [ms]");
+    let msg = "| Requesting: " + link(url.replace("&param","&amp;param"));
+    $("#loading").html(msg).show();
+  }
+
+  if (main.interval !== undefined) {
+    clearInterval(get.interval)
+  }
+
+  get.interval = setInterval(
+                   function () {
+                      if ($("#showrequests").prop('checked')) {
+                        let elapsed =  ((new Date()).getTime() - get.start);
+                        $("#timing").text("Time: " + (elapsed) + " [ms]");
+                      }
+                   }
+                 , 500);
+
   get.start = (new Date()).getTime();
 
   $.ajax({
@@ -215,10 +248,12 @@ function get(options, cb) {
       async: true,
       dataType: "text",
       success: function (data, textStatus, jqXHR) {
-        clearInterval(main.getDots);
-        if ($("#showrequests").prop('checked')) {
-          let elapsed =  ((new Date()).getTime() - get.start);
-          $("#loading").append("| Time: " + (elapsed) + " [ms] |");
+        clearInterval(get.interval);
+        if (options.showLink || $("#showrequests").prop('checked')) {
+          let elapsed = ((new Date()).getTime() - get.start);
+          $("#timing").text("Time: " + (elapsed) + " ms");
+          let msg = "| Received:&nbsp;&nbsp " + link(url.replace("&param","&amp;param"));
+          $("#loading").html(msg).show();
         } else {
           $("#loading").empty();
         }
@@ -226,6 +261,7 @@ function get(options, cb) {
         cb(false, data);
       },
       error: function (xhr, textStatus, errorThrown) {
+        clearInterval(get.interval);
         if (tryProxy && directURLFailed == false && PROXY_URL) {
           var opts = {
                         url: url,
@@ -234,7 +270,6 @@ function get(options, cb) {
                         showAjaxError: true
                       };
           log("get(): Attempting to proxy retrieve " + url);
-          clearInterval(main.getDots);
           if ($("#showrequests").prop('checked')) {
             $("#loading").append("Failed.<br/>");
           } else {
@@ -252,7 +287,6 @@ function get(options, cb) {
             }
             ajaxerror(url, message, xhr);
           }
-          clearInterval(main.getDots);
           $("#loading").empty();
           cb("Error", null);
         }
@@ -263,7 +297,7 @@ function get(options, cb) {
 // Determine selected value for a drop-down.    
 function selected(name) {
 
-  clearInterval(main.getDots);
+  clearInterval(get.interval);
 
   // When drop-down value is selected, URL should be up-to-date.
   // Use value in URL.
@@ -281,6 +315,7 @@ function link(url, text) {
   if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("//") && !url.startsWith("mailto")) {
       //url = "//" + url;
   }
+  urls = url.replace(selected("server") + "/hapi/", "");
   if (arguments.length > 1) {
     return "<a target='_blank' title='" 
             + url + "' href='" 
@@ -290,7 +325,7 @@ function link(url, text) {
     return "<a target='_blank' title='" 
             + url + "' href='" 
             + url + "'>" 
-            + url + "</a>";
+            + urls + "</a>";
   }
 }
 
@@ -306,15 +341,17 @@ function downloadlink(url, what, showElapsed) {
     $("#downloadlink > span > a")
       .css('font-weight', 'bold');
     
-    downloadlink.start = (new Date()).getTime();
+    $('#loading').empty();
+    $('#timing').empty();
     if (showElapsed) {
-      $("#loading")
-          .text("Requesting " + what + " ")
+      downloadlink.start = (new Date()).getTime();
+      $("#timing").text("Time:      ms");
+      //let msg = "| Requesting " + link(url.replace("&param","&amp;param"));
       let interval = setInterval( 
-                      () => {
-                          let elapsed =  ((new Date()).getTime() - downloadlink.start);
-                          $("#loading").html("Requesting " + what + ". Elapsed time: " + elapsed + " ms");    
-                      }, 500);
+                        () => {
+                            let elapsed = ((new Date()).getTime() - downloadlink.start);
+                            $("#timing").text("Time: " + (elapsed) + "  ms");
+                        }, 500);
       return interval;
     }
 }
@@ -438,7 +475,6 @@ function servers(cb) {
     }
 
     if (selectedServer && found == false && !server_list_in_hash()) {
-      alert('here')
       $('#xstatus')
         .append("<span style='background-color:yellow'>Server with id=" + selectedServer + " is not available from this interface.</span>");
       $(window).hashchange.byurledit = false;
@@ -742,8 +778,19 @@ function parameters(cb) {
               + name 
               + " found in hash. Will select it.")
         }
+        let label = res[k]['label'] || "";
+        if (Array.isArray(res[k]['label'])) {
+          label = res[k]['label'].join(", ");
+        }
+        let sdescription = res[k]['description'] || label;
+        if (sdescription.length > 40) {
+          sdescription = sdescription.slice(0, 40) + "...";
+        }
+        if (sdescription) {
+          sdescription = ": " + sdescription;
+        }
         list.push({
-            "label": res[k]['label'],
+            "label": '<code>' + res[k]['name'] + '</code>' + sdescription,
             "value": res[k]['name'], 
             "selected": qs['parameters'] === res[k]['name'],
             "title": res[k]['description'] || ""
@@ -1087,7 +1134,7 @@ function output(jsonURL) {
   }
 
   if (jsonURL) {
-    get( {url: url, showAjaxError: true}, function (data) {
+    get({url: url, showAjaxError: true}, function (data) {
       showText(JSON.stringify(data,null,4),'','json')
     })
     return;
@@ -1156,11 +1203,11 @@ function output(jsonURL) {
 
     downloadlink(url, "data", false);
 
-    if (!$("#showdata").prop('checked')) {
+    if ($("#showdata").prop('checked') == false) {
       return;
     }
 
-    get({url: url}, function (err, data) {
+    get({url: url, showLink: true}, function (err, data) {
         $("#downloadlink")
             .append("<pre id='data' class='data'>" + data + "</pre>");
         $("#downloadlink > pre")
@@ -1202,13 +1249,12 @@ function output(jsonURL) {
 
     if (selected('format').match(/png|svg/)) {
 
-      let interval = downloadlink(url,selected('format'),true);
-
+      let interval = downloadlink(url, selected('format'), true);
       let width = $("#infodiv").width()-15;
       if (selected('format').match(/svg/)) {
         width = "100%";
       }
-          
+
       $("#image")
           .empty()
           .show()
@@ -1218,9 +1264,13 @@ function output(jsonURL) {
           .width(width)
           .load( () => {
               clearInterval(interval);
+              let elapsed = ((new Date()).getTime() - downloadlink.start);
+              $("#timing").text("Time: " + (elapsed) + " [ms]");
               $("#loading").empty();
           }).error( () => {
               clearInterval(interval);
+              let elapsed = ((new Date()).getTime() - downloadlink.start);
+              $("#timing").text("Time: " + (elapsed) + " [ms]");
               $("#loading").empty();                              
           })
 
@@ -1232,11 +1282,9 @@ function output(jsonURL) {
           .attr('src',aurl)
           .width(apwidth)
           .load( () => {
-              clearInterval(interval);
-              $("#loading").empty();
+
           }).error( () => {
-              clearInterval(interval);
-              $("#loading").empty();                              
+
           })
 
     }
@@ -1260,7 +1308,7 @@ function output(jsonURL) {
       $('#image > iframe')
         .load(function () {
           clearInterval(interval);
-          $("#loading").empty();
+          //$("#loading").empty();
           let w = $("#infodiv").width()-15
           $('#image > iframe')
               .width(w)

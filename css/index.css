@@ -1,6 +1,7 @@
 body {
 	font-family: Veranda, Arial, sans-serif;
 	font-size: 1em;
+  height: 100vh;
 }
 
 ul {
@@ -27,18 +28,29 @@ a {
 	cursor: pointer;
 }
 
+#options-details {
+  margin-bottom: 5px;
+}
+
+.link {
+  text-decoration: underline;
+  text-decoration-color: black;
+  cursor: pointer;  
+}
+
 #optionscheckboxes {
-  display: none;
   padding-bottom: 5px;
   font-size: 80%;
 }
 
-#loading, #xstatus {
-	font-size: 80%;
+#loading, #timing, #xstatus {
+	font-size: 90%;
+  display: inline;
 }
-#loading {
+
+#loadinfo {
 	min-height: 1em;
-	max-height: 2.5em;
+	max-height: 2em;
 	overflow-y: auto;
 }
 
@@ -193,6 +205,23 @@ pre.data {
 
 #output {
 	margin-bottom: 1em;
+  display:none;
+}
+
+#serverinfo {
+  display:none;
+}
+
+#datasetinfo {
+  display:none;
+}
+
+#parameterinfo {
+  display:none;
+}
+
+#footer {
+  font-size: 90%;
 }
 
 #examplelist {
@@ -201,14 +230,17 @@ pre.data {
 	width: 12em;
 }
 
+#footer {
+ margin-left: 15.5em;
+}
+
 #infodiv {
  margin-left: 14em;
  margin-top: 0em;
+ min-height: 95vh;
+ max-width: 1024px;
 }
 
-#options {
-	margin-bottom: 5px;
-}
 
 #selections {
 	float: left;
@@ -218,6 +250,3 @@ pre.data {
 	padding-right: 1em;
 	border-right: 1px solid black;
 }
-
-
-

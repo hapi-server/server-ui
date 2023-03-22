@@ -17,6 +17,6 @@
   },
   "scripts": {
     "start": "node_modules/http-server/bin/http-server --port 8000",
-    "proxyserver": "node proxy/proxy.js 8000"
+    "proxyserver": "node proxy/proxy.js 8002"
   }
 }

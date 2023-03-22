@@ -813,21 +813,46 @@ function parameters(cb) {
   }
 }
 
+function doy2ymd(dateTime) {
+  console.log(dateTime)
+  if (/^[0-9]{4}-[0-9]{3}/.test(dateTime)) {
+    dateTime = dateTime.split("-");
+    let startUnixMs = new Date(dateTime[0],0,1).getTime();
+    let doy = dateTime[1].split("T")[0];
+    let Z = "";
+    if (doy.endsWith("Z")) {
+      doy = doy.replace("Z","");
+      Z = "Z";
+    }
+    let time = dateTime[1].split("T")[1];
+    if (time) {
+      time = "T" + time;
+    } else {
+      time = "";
+    }
+    let msOfYear = 86400*1000*parseInt(doy-1);
+    let dateTimeMod = new Date(startUnixMs+msOfYear).toISOString().slice(0,10) + time + Z;
+    console.log(dateTimeMod)
+    return dateTimeMod;
+  }
+  return dateTime;
+}
+
 function checktimes(which) {
   if (selected('start') && selected('stop')) {
     log("stoptime select event.")
     log("starttime = " + selected('start'))                 
     log("stoptime = " + selected('stop'))
-    var t = dayjs(selected('start').replace("Z","")) 
-            < dayjs(selected('stop').replace("Z",""));
+    var t = dayjs(doy2ymd(selected('start').replace("Z","")))
+            < dayjs(doy2ymd(selected('stop').replace("Z","")));
     log("---> start < stop? " + t);
     if (t == false) {
       log(which + " changed; start >= stop. Setting color of " + which + " to red.");
-      $('#' + which + 'list').css('color','red');
+      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
       return "Error";
     } else {
       log(which + " changed; start < stop. Setting color of " + which + " to black.");
-      $('#' + which + 'list').css('color','black');
+      $('#' + which + 'list').css('color','black').removeClass('tooltip').attr('title','');
     }
   }
 }

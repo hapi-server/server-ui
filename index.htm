@@ -75,7 +75,7 @@
     // Set PROXY_URL to false to not use proxy if AJAX request fails.
     let PROXY_URL = "proxy?url=";
 
-    // Will use server list at ./all.txt if found 
+    // Use server list at ./all.txt if found 
     let SERVER_LIST = "all.txt";
 
     // Show all servers if SERVER_LIST if ./all.txt not found
@@ -106,11 +106,13 @@
       devNote  = "Development server.<br>";
     } else if (location.href.match("hapi-server.org/servers")) {
       SERVER_LIST = "all-combined.txt";
-    } else if (location.href.match("//localhost") || location.host.match(/^[0-9]/)) {
+    } else if (location.href.match("//localhost")
+            || location.host.match(/^[0-9]/)) {
+      SERVER_LIST = "all-combined.txt";        
       if (location.href.match("//localhost")) {
-        SERVER_LIST = "all.txt";
+        //SERVER_LIST = "all.txt";
       } else {
-        SERVER_LIST = "all-combined.txt";        
+        //SERVER_LIST = "all-combined.txt";        
       }
       if (PLOTSERVER_EXTERNALLY_SET == false) {
       	PLOTSERVER = "http://localhost:5000";
@@ -131,7 +133,7 @@
   <div id="selections">
 
     <details id="options-details">
-      <summary><span class="link">Options</span></summary>
+      <summary><span>Options</span></summary>
       <div id="optionscheckboxes">
         <div class="tooltip-right"
              title="When requesting data, show data in broswer instead of only providing a download link.">

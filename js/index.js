@@ -1299,7 +1299,7 @@ function output(jsonURL) {
               $("#loading").empty();                              
           })
 
-	if (0) {
+    	if (0) {
       $("#image2")
           .empty()
           .show()
@@ -1312,7 +1312,7 @@ function output(jsonURL) {
           }).error( () => {
 
           })
-	}
+    	}
     }
 
     if (selected('format').match(/pdf/)) {

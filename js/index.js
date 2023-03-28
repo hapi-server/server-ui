@@ -5,65 +5,53 @@ if (false) {
   }
 }
 
-var qs = parseQueryString();
+function ajaxerror(url, message, xhr) {
+  let errmsg = xhr.statusText || xhr.responseText;
+  $('#xstatus').show().html(
+      "<div class='error'>Error encountered when attempting to retrieve "
+      + "<a target='_blank' href='" + url + "'>"
+      + url.replace("&para","&#38;para") + "</a>"
+      + ".<br><br>Message: <pre>" + message + "</pre>"
+      + "<pre>" + errmsg + "</pre>"
+      + "<p>The Javascript debugger console may have a more descriptive error message.</p></div>");
+  // Determining if CORS is cause of error is difficult:
+  // https://stackoverflow.com/q/19325314
+  console.error(errmsg)
+  console.error(xhr);
+}
 
-function main() {
+var qsInitial = parseQueryString();
 
-  $('#plotserver').val(PLOTSERVER);
-  $('#selections').append("<p><span style='font-size:80%;background-color:yellow'>" + devNote + "</span></p>");
+function main(OPTIONS) {
 
-  $('#plotserver').change(function (){
-    if (qs["return"] && qs["return"] === "image" && qs["format"]) {
-      log("plotserver changed. Triggering select event on #format drop-down.");
-      $("#format").val("").data("autocomplete")._trigger("select",null,{item:""});
-      $("#format").val(qs["format"]).data("autocomplete")._trigger("select",null,{item:qs["format"]});
-    }
-  })
+  $('#selections')
+    .append("<p><span style='font-size:80%;background-color:yellow'>" 
+            + OPTIONS["devNote"] 
+            + "</span></p>");
 
-  // Configure tooltips
-  // https://github.com/iamceege/tooltipster/issues/558#issuecomment-221627061
-  $('.tooltip').tooltipster({
-    theme: 'tooltipster-noir',
-    side: 'top',
-    delay: 500
-  })
-  $('.tooltip-right').tooltipster({
-    theme: 'tooltipster-noir',
-    side: 'right',
-    delay: 500
-  })
-  $('body')
-    .on('mouseenter', '.tooltip:not(.tooltipstered)', 
-      // Handle dynamically added content
-      function () {
-        $(this)
-          .tooltipster({
-            theme: 'tooltipster-noir',
-            side: 'right',
-            delay: 500,
-            animationDuration: '0',
-          })
-          .tooltipster('show');
-      });
+  tooltips();
 
   // Bind events to changes in checkbox state.
-  checkboxes();
+  checkboxes(OPTIONS);
 
   // Bind events to changes in the hash part of the URL
   hashchange();
 
   // Remove hash when clear clicked
-  $('#clear').show().on('click', function () {window.location = window.location.pathname;});
+  $('#clear').show().on('click', function () {
+    window.location = window.location.pathname;
+  });
 
-  // Set up main drop-downs. When server drop-down is set, the default text is -HAPI Servers-
-  // and the function servers() is called when there is interaction. On hover over the text 
-  // entry area, "Enter text to narrow list" is shown as a tooltip. On hover over the expand
-  // key on right, "Show full list" is shown as a tooltip. 
+  // Set up main drop-downs. When server drop-down is set, the default text
+  // is -HAPI Servers- and the function servers() is called when there is 
+  // interaction. On hover over the text entry area, "Enter text to narrow
+  // list" is shown as a tooltip. On hover over the expand key on right,
+  // "Show full list" is shown as a tooltip. 
   dropdowns(
       ["server","dataset","parameters","start","stop","return","format","type","style"],
       ["HAPI Servers","Datasets","Parameters","Start","Stop","Return","Format","Type","Style"],
       [servers,datasets,parameters,starttime,stoptime,returntype,format,type,style],
-      [["Enter text to narrow list","Show full list"],[],[],[],[],[],[],[],[]],
+      [["Enter text to search","Show full list"],[],[],[],[],[],[],[],[]],
       "#dropdowns");
 
   //Set up examples drop-down.
@@ -97,203 +85,6 @@ function server_list_in_hash() {
   }
 }
 
-// Monitor hash for changes via text entry in address bar.
-function hashchange() {
-
-  // Update drop-downs when URL is changed manually.
-  log("hashchange(): Binding hashchange.");
-  $(window).hashchange.byurledit = true;
-
-  $(window).bind("hashchange", function() {
-
-    $('#xstatus').empty();
-    // Need to figure out what parameter was changed and then
-    // remove all parameters after that. Otherwise user could
-    // change the server and the parameter list will not be
-    // updated.
-    log("hashchange(): Hash change; by url edit = "
-                + $(window).hashchange.byurledit);
-    var qs = parseQueryString();
-
-    let Nchanged = 0;
-    for (var id in qs) {
-      log("hashchange(): Value in query string = " + qs[id]);
-      var val = $('#' + id).parent().parent().attr('value');
-      log("hashchange(): Drop-down value  = " + val);
-      if (qs[id] !== val) {
-        Nchanged = Nchanged + 1;
-        log('hashchange(): Query string value differs from that in ' + id + " dropdown.");
-      } else {
-        log('hashchange(): Query string value same as that in ' + id + " dropdown.");           
-      }
-    }
-
-    if (Nchanged > 1) {
-      log('hashchange(): More than one query string value changed. Resetting app.');
-      $(window).unbind("hashchange");
-      location.reload();
-      return;
-    } else {                        
-      log('hashchange(): No query string value changed.');
-    }
-
-    if ($(window).hashchange.byurledit) {
-      log("hashchange(): Hash change made by manual edit of one parameter.");
-      log("hashchange(): Last hash: " + location.hash);
-
-      for (var id in qs) {
-        log("hashchange(): Setting " + id + " drop-down to " + qs[id] + " and triggering change.");
-        // This does not work in jquery-ui 1.12.1
-        if (id == 'servers' && !servers.ids.includes(qs[id]) && !server_list_in_hash()) {
-          $('#xstatus').append("<span style='background-color:yellow'>Server with id=" + qs[id] + " is not available from this interface.</span>");
-          $(window).hashchange.byurledit = false;
-          setTimeout(() => {
-            window.location.hash = "";
-            $(window).hashchange.byurledit = true;
-          },2000);
-          break;
-        }
-        $("#" + id).val(qs[id])
-            .data("autocomplete")
-            ._trigger("select",null,{item:qs[id]});
-      }
-    }                   
-    $(window).hashchange.byurledit = true;
-  }); 
-}
-
-function ajaxerror(url, message, xhr) {
-  let errmsg = xhr.statusText || xhr.responseText;
-  $('#xstatus').show().html(
-      "<div class='error'>Error encountered when attempting to retrieve "
-      + "<a target='_blank' href='" + url + "'>"
-      + url.replace("&para","&#38;para") + "</a>"
-      + ".<br><br>Message: <pre>" + message + "</pre>"
-      + "<pre>" + errmsg + "</pre>"
-      + "<p>The Javascript debugger console may have a more descriptive error message.</p></div>");
-  // Determining if CORS is cause of error is difficult:
-  // https://stackoverflow.com/q/19325314
-  console.error(errmsg)
-  console.error(xhr);
-}   
-
-function get(options, cb) {
-
-  log("get(): Options:")
-  log(options);
-
-  var url = options.url;
-
-  var tryProxy = options.tryProxy || true;
-  if (!url.startsWith("http")) {
-    tryProxy = false;
-  }                   
-
-  var showAjaxError = options.showAjaxError || false;
-
-  var directURLFailed = options.directURLFailed || false;
-
-  var urlo = url;
-  if (tryProxy && PROXY_URL && directURLFailed) {
-    url = PROXY_URL + encodeURIComponent(url);
-  }
-
-  // Client-side cache of response.
-  if (typeof(get.cache) === "undefined") {
-    get.cache = {};
-  }
-  if (get.cache[urlo]) {
-    log("get(): Client-side cache hit.");
-    cb(false, get.cache[urlo]);
-    return;
-  }
-
-  log("get(): Requesting " + url);
-  //log("get(): tryProxy = " + tryProxy);
-  //log("get(): directURLFailed = " + directURLFailed);
-  //log("get(): PROXY_URL = " + PROXY_URL);
-  //log("get(): showAjaxError = " + showAjaxError);
-
-  if (directURLFailed == false) {
-    $("#loading").empty();
-  }
-
-  $("#timing").empty();
-  $("#loading").empty();
-
-  if (options.showLink || $("#showrequests").prop('checked')) {
-    $("#timing").text("Time:     [ms]");
-    let msg = "| Requesting: " + link(url.replace("&param","&amp;param"));
-    $("#loading").html(msg).show();
-  }
-
-  if (main.interval !== undefined) {
-    clearInterval(get.interval)
-  }
-
-  get.interval = setInterval(
-                   function () {
-                      if ($("#showrequests").prop('checked')) {
-                        let elapsed =  ((new Date()).getTime() - get.start);
-                        $("#timing").text("Time: " + (elapsed) + " [ms]");
-                      }
-                   }
-                 , 500);
-
-  get.start = (new Date()).getTime();
-
-  $.ajax({
-      type: "GET",
-      url: url,
-      async: true,
-      dataType: "text",
-      success: function (data, textStatus, jqXHR) {
-        clearInterval(get.interval);
-        if (options.showLink || $("#showrequests").prop('checked')) {
-          let elapsed = ((new Date()).getTime() - get.start);
-          $("#timing").text("Time: " + (elapsed) + " ms");
-          let msg = "| Received:&nbsp;&nbsp " + link(url.replace("&param","&amp;param"));
-          $("#loading").html(msg).show();
-        } else {
-          $("#loading").empty();
-        }
-        get.cache[urlo] = data; // Cache response.
-        cb(false, data);
-      },
-      error: function (xhr, textStatus, errorThrown) {
-        clearInterval(get.interval);
-        if (tryProxy && directURLFailed == false && PROXY_URL) {
-          var opts = {
-                        url: url,
-                        directURLFailed: true,
-                        tryProxy: false,
-                        showAjaxError: true
-                      };
-          log("get(): Attempting to proxy retrieve " + url);
-          if ($("#showrequests").prop('checked')) {
-            $("#loading").append("Failed.<br/>");
-          } else {
-            $("#loading").empty();
-          }
-          get(opts, cb);
-        } else {
-          if (showAjaxError) {
-            var message = "";
-            if (directURLFailed && PROXY_URL) {
-              message = "Failed to retrieve\n<a href='" + urlo + "'>" + urlo + "</a>\nand\n<a href='" + url + "'>" 
-                        + url + "</a>\n\nThe first URL failure may be due to the server not supporting <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>CORS headers</a>. The second URL failure is usually a result of a server issue.";
-            } else {
-              message = "Failed to retrieve " + url;
-            }
-            ajaxerror(url, message, xhr);
-          }
-          $("#loading").empty();
-          cb("Error", null);
-        }
-      }
-  });
-}
-
 // Determine selected value for a drop-down.    
 function selected(name) {
 
@@ -302,7 +93,7 @@ function selected(name) {
   // When drop-down value is selected, URL should be up-to-date.
   // Use value in URL.
   if (location.hash !== "") {
-    var qs = parseQueryString();
+    let qs = parseQueryString();
     if (qs[name]) {
       return qs[name];
     }
@@ -310,8 +101,55 @@ function selected(name) {
   return $("span[name='"+name+"']").attr('value');
 }
 
+function doy2ymd(dateTime) {
+
+  if (/^[0-9]{4}-[0-9]{3}/.test(dateTime)) {
+    dateTime = dateTime.split("-");
+    let startUnixMs = new Date(dateTime[0],0,1).getTime();
+    let doy = dateTime[1].split("T")[0];
+    let Z = "";
+    if (doy.endsWith("Z")) {
+      doy = doy.replace("Z","");
+      Z = "Z";
+    }
+    let time = dateTime[1].split("T")[1];
+    if (time) {
+      time = "T" + time;
+    } else {
+      time = "";
+    }
+    let msOfYear = 86400*1000*parseInt(doy-1);
+    let dateTimeMod = new Date(startUnixMs+msOfYear).toISOString().slice(0,10) + time + Z;
+    return dateTimeMod;
+  }
+  return dateTime;
+}
+
+function checktimes(which) {
+  if (selected('start') && selected('stop')) {
+    log("stoptime select event.")
+    log("starttime = " + selected('start'))                 
+    log("stoptime = " + selected('stop'))
+    var t = dayjs(doy2ymd(selected('start').replace("Z","")))
+            < dayjs(doy2ymd(selected('stop').replace("Z","")));
+    log("---> start < stop? " + t);
+    if (t == false) {
+      log(which + " changed; start >= stop. Setting color of " + which + " to red.");
+      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
+      return "Error";
+    } else {
+      log(which + " changed; start < stop. Setting color of " + which + " to black.");
+      $('#' + which + 'list').css('color','black').removeClass('tooltip').attr('title','');
+    }
+  }
+}
+
 // Create a HTML link.
 function link(url, text) {
+  if (!url) {
+    //console.error("Invalid link URL.");
+    //return;
+  }
   if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("//") && !url.startsWith("mailto")) {
       //url = "//" + url;
   }
@@ -338,22 +176,29 @@ function downloadlink(url, what, showElapsed) {
           + link(url, "Download " + what) 
           + "</span>")
       .show();
-    $("#downloadlink > span > a")
-      .css('font-weight', 'bold');
-    
-    $('#loading').empty();
-    $('#timing').empty();
-    if (showElapsed) {
-      downloadlink.start = (new Date()).getTime();
-      $("#timing").text("Time:      ms");
-      //let msg = "| Requesting " + link(url.replace("&param","&amp;param"));
-      let interval = setInterval( 
-                        () => {
-                            let elapsed = ((new Date()).getTime() - downloadlink.start);
-                            $("#timing").text("Time: " + (elapsed) + "  ms");
-                        }, 500);
-      return interval;
-    }
+    $("#downloadlink > span > a").css('font-weight', 'bold');
+}
+
+function timer(id) {
+
+  if (id) {
+    clearInterval(timer[id].interval);
+    let elapsed = ((new Date()).getTime() - timer[id].time);
+    $("#timing").text("Time: " + (elapsed) + " [ms]");
+    return;
+  }
+
+  $('#timing').empty();
+  $("#timing").text("Time:      ms");
+  id = Math.random();
+  timer[id] = {time: (new Date()).getTime()};
+  timer[id].interval = 
+          setInterval(
+              () => {
+                  let elapsed = ((new Date()).getTime() - timer[id].time);
+                  $("#timing").text("Time: " + (elapsed) + "  ms");
+              }, 500);
+  return id;
 }
 
 // Handle servers drop-down.
@@ -397,7 +242,9 @@ function servers(cb) {
   } else {
     get({url: SERVER_LIST, showAjaxError: false}, function (err, res) {
 
-      if (err) {
+      if (!err) {
+        process(res);
+      } else {
         log("Did not find " 
             + SERVER_LIST + ".\n"
             + "Trying fall-back of " + SERVER_LIST_FALLBACK);
@@ -410,18 +257,13 @@ function servers(cb) {
         get({url: SERVER_LIST}, function (err, res) {
           if (!err) {
             process(res);
-          }   
+          }
         });
-        return;                 
       }
-
-      process(res);           
-
     });
   }
 
   function process(res) {
-
     servers.ids = [];
 
     res = res.replace(/,$/,"").split("\n");
@@ -464,6 +306,8 @@ function servers(cb) {
       if (id == selectedServer) {
         found = true;
       }
+
+      let qs = parseQueryString();
       if (qs['server'] === id) {
         log("servers(): server value for " + id + " found in hash. Selecting it.")
       }
@@ -481,7 +325,7 @@ function servers(cb) {
       setTimeout(() => {
         window.location.hash = "";
         $(window).hashchange.byurledit = true;
-      },2000);
+      }, 2000);
     }
 
     // Move TestData servers to end of list and possibly remove based on checkbox.
@@ -545,7 +389,7 @@ function datasets(cb) {
     let plural = res.length > 1 ? "s" : "";
     $('#serverinfo ul')
       .append('<li>' + (res.length) + ' dataset' + plural + '</li>');
-    $('#serverinfo ul').append('<li id="statuslink" style="display:none"><a target="_blank" href="' + URLWATCHER + '#category='+ selected('server') +'">View server response tests.</a></li>');
+    $('#serverinfo ul').append('<li id="statuslink" style="display:none"><a target="_blank" href="' + OPTIONS["urlwatcher"] + '#category='+ selected('server') +'">View server response tests.</a></li>');
     if ($("#showstatuslink").prop('checked')) {
       $('#statuslink').show();
     }
@@ -557,7 +401,7 @@ function datasets(cb) {
       for (key of Object.keys(res[i])) {
         info[res[i]['id']][key] = res[i][key];
       }
-      if (qs['dataset'] === res[i]['id']) {
+      if (qsInitial['dataset'] === res[i]['id']) {
         log("datasets(): dataset value for " 
             + res[i]['id'] 
             + " found in hash. Will select it.")
@@ -569,7 +413,7 @@ function datasets(cb) {
       list.push({
                   "label": title,
                   "value": res[i]['id'], 
-                  "selected": qs['dataset'] === res[i]['id']
+                  "selected": qsInitial['dataset'] === res[i]['id']
       });
     }
     datasets.info = info;
@@ -773,7 +617,7 @@ function parameters(cb) {
         for (key of Object.keys(res[k])) {
           info[res[k]['name']][key] = res[k][key];
         }
-        if (qs['parameters'] === res[k]['name']) {
+        if (qsInitial['parameters'] === res[k]['name']) {
           log("parameters(): parameter value for " 
               + name 
               + " found in hash. Will select it.")
@@ -792,7 +636,7 @@ function parameters(cb) {
         list.push({
             "label": '<code>' + res[k]['name'] + '</code>' + sdescription,
             "value": res[k]['name'], 
-            "selected": qs['parameters'] === res[k]['name'],
+            "selected": qsInitial['parameters'] === res[k]['name'],
             "title": res[k]['description'] || ""
         });
     }
@@ -801,7 +645,7 @@ function parameters(cb) {
       list.unshift({
                       "label": "*All*",
                       "value": "*all*",
-                      "selected": qs['parameters'] === "*all*"
+                      "selected": qsInitial['parameters'] === "*all*"
                   });
     }
 
@@ -810,50 +654,6 @@ function parameters(cb) {
     parameters.list = list;
 
     cb(list);
-  }
-}
-
-function doy2ymd(dateTime) {
-  console.log(dateTime)
-  if (/^[0-9]{4}-[0-9]{3}/.test(dateTime)) {
-    dateTime = dateTime.split("-");
-    let startUnixMs = new Date(dateTime[0],0,1).getTime();
-    let doy = dateTime[1].split("T")[0];
-    let Z = "";
-    if (doy.endsWith("Z")) {
-      doy = doy.replace("Z","");
-      Z = "Z";
-    }
-    let time = dateTime[1].split("T")[1];
-    if (time) {
-      time = "T" + time;
-    } else {
-      time = "";
-    }
-    let msOfYear = 86400*1000*parseInt(doy-1);
-    let dateTimeMod = new Date(startUnixMs+msOfYear).toISOString().slice(0,10) + time + Z;
-    console.log(dateTimeMod)
-    return dateTimeMod;
-  }
-  return dateTime;
-}
-
-function checktimes(which) {
-  if (selected('start') && selected('stop')) {
-    log("stoptime select event.")
-    log("starttime = " + selected('start'))                 
-    log("stoptime = " + selected('stop'))
-    var t = dayjs(doy2ymd(selected('start').replace("Z","")))
-            < dayjs(doy2ymd(selected('stop').replace("Z","")));
-    log("---> start < stop? " + t);
-    if (t == false) {
-      log(which + " changed; start >= stop. Setting color of " + which + " to red.");
-      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
-      return "Error";
-    } else {
-      log(which + " changed; start < stop. Setting color of " + which + " to black.");
-      $('#' + which + 'list').css('color','black').removeClass('tooltip').attr('title','');
-    }
   }
 }
 
@@ -878,10 +678,13 @@ function starttime(cb) {
   let start = meta['sampleStartDate'];
   let stop = meta['sampleStopDate'];
 
+  let qs = parseQueryString();
   list = [{}];
-  if (qs['start'] !== undefined) {
-    list[0].label = qs['start'];
-    list[0].value = qs['start'];
+  if (qsInitial['server'] == qs['server'] 
+      && qsInitial['dataset'] == qs['dataset'] 
+      && qsInitial['start'] !== undefined) {
+    list[0].label = qsInitial['start'];
+    list[0].value = qsInitial['start'];
   } else if (start && stop) {
     list[0].label = start;
     list[0].value = start;
@@ -914,10 +717,13 @@ function stoptime(cb) {
   let start = meta['sampleStartDate'];
   let stop = meta['sampleStopDate'];
 
+  let qs = parseQueryString();
   list = [{}];
-  if (qs['stop'] !== undefined) {
-    list[0].label = qs['stop'];
-    list[0].value = qs['stop'];
+  if (qsInitial['server'] == qs['server'] 
+      && qsInitial['dataset'] == qs['dataset'] 
+      && qsInitial['stop'] !== undefined) {
+    list[0].label = qsInitial['stop'];
+    list[0].value = qsInitial['stop'];
     cb(list);
     return;
   }
@@ -980,7 +786,7 @@ function returntype(cb) {
                   {label:"Script", value:"script"}
               ];
   for (var i = 0; i < values.length; i++) {
-    if (qs['return'] === values[i]['value']) {
+    if (qsInitial['return'] === values[i]['value']) {
       values[i]['selected'] = true;
     }
   }
@@ -1041,7 +847,7 @@ function format(cb) {
   }
 
   for (var i = 0; i < values.length; i++) {
-    if (qs['format'] === values[i]['value']) {
+    if (qsInitial['format'] === values[i]['value']) {
         values[i]['selected'] = true;
     }
   }
@@ -1113,13 +919,12 @@ function style(cb) {
   }
 
   for (var i = 0; i < values.length; i++) {
-    if (qs['style'] === values[i]['value']) {
+    if (qsInitial['style'] === values[i]['value']) {
       values[i]['selected'] = true;
     }
   }
 
   cb(values);
-
 }
 
 // Examples drop-down.
@@ -1149,27 +954,232 @@ function examples(cb) {
 // Form URL and place it in DOM based on drop-down change.
 function output(jsonURL) {
 
-  log('output(): Called.')
+  log('output(): Called.');
 
   let selectedParameters = selected('parameters');
-  if (0) {
-      if (selectedParameters === '*all*') {
-          selectedParameters = "";
-      }
-  }
 
   if (jsonURL) {
     get({url: url, showAjaxError: true}, function (data) {
-      showText(JSON.stringify(data,null,4),'','json')
+      showText(JSON.stringify(data,null,4),'','json');
     })
     return;
   }
 
-  if (!selected('return')) {
-      return;
-  }
+  if (!selected('return')) {return;}
 
   if (selected('return').match(/script/)) {
+    script();
+  }
+
+  if (selected('return').match(/data/)) {
+
+    let parameterString = "&parameters=" + selectedParameters
+    let url = servers.info[selected('server')]['url'] 
+                + "/data?id=" + selected('dataset')
+                + parameterString
+                + "&time.min=" + selected('start')
+                + "&time.max=" + selected('stop')
+
+    url = hapi2to3(url);
+
+    if (selected('format') === 'csv') {
+      if (selected('style') === 'header') {
+        url = url + "&include=header";
+      }
+    }
+    if (selected('format') === 'json') {
+      url = url + "&format=json";
+    }
+
+    $('#output').show();
+
+    downloadlink(url, "data");
+
+    if ($("#showdata").prop('checked') == false) {
+      return;
+    }
+
+    get({url: url, showLink: true}, function (err, data) {
+        $("#downloadlink")
+            .append("<pre id='data' class='data'>" + data + "</pre>");
+        $("#downloadlink > pre")
+            .width($("#infodiv").width()-15)
+            .height($(window).height()/2)
+        $("#downloadlink").show();
+    });
+  }
+
+  if (selected('return').match(/image/)) {
+
+    let qs = parseQueryString();
+    qs['plotserver'] = $('#plotserver').val();
+    $(window).hashchange.byurledit = false;
+    location.hash = decodeURIComponent($.param(qs));
+
+    let url = plotURL();
+
+    $('#output').show();
+
+    if (selected('format').match(/png|svg/)) {
+
+      let timerId = timer();
+      downloadlink(url, selected('format'));
+      let width = $("#infodiv").width()-15;
+      if (selected('format').match(/svg/)) {
+        width = "100%";
+      }
+
+      $("#image")
+          .empty()
+          .show()
+          .append("<img></img>")
+          .find('img')
+          .attr('src',url)
+          .width(width)
+          .load(() => {
+              timer(timerId);
+          }).error(() => {
+              timer(timerId);
+          });
+
+      $("#image")
+          .append(`<img src="${plotURL('autoplot')}" width="${width}"></img>`)
+
+    }
+
+    if (selected('format').match(/pdf/)) {
+
+      downloadlink(url, 'pdf');
+      let timerId = timer();
+      $("#image")
+          .empty()
+          .append("<iframe></iframe>")
+          .find('iframe')
+          .attr('frameborder',0)
+          .attr('scrolling','no')
+          .attr('src',url)
+          .width('0')
+          .height('0')
+          .parent()
+          .show()
+
+      $('#image > iframe')
+        .load(function () {
+          timer(timerId)
+          let w = $("#infodiv").width()-15
+          $('#image > iframe')
+              .width(w)
+              .height(w*3/7+30) 
+          // Defaut hapiplot is 7x3 image. Add 30 for PDF
+          // controls.
+      })
+    }
+
+    if (selected('format').match(/gallery/)) {
+      $("#downloadlink")
+          .empty()
+          .append(
+              "<span>" 
+              + link(url, "View gallery", true) 
+              + "</span>")
+          .show();
+      $("#downloadlink > span > a")
+        .css('font-weight', 'bold');
+    }
+ 
+  }
+
+  function plotURL(method) {
+
+    // TODO: Check method is known.
+
+    let selectedParameters = selected('parameters');
+
+    let plotserver;
+    if (qsInitial['plotserver']) {
+      plotserver = qsInitial['plotserver'];
+    } else {
+      plotserver = $('#plotserver').val();
+    }
+
+    if (!method && !/^http/.test(plotserver)) {
+      method = plotserver;
+    }
+    if (method) {
+      // Override what is in URL or text box.
+      if (method.trim() === 'hapiplot') {
+        plotserver = OPTIONS['hapiplot'];
+      }
+      if (method.trim() === 'autoplot') {
+        plotserver = OPTIONS['autoplot'];
+      }
+    }
+    if (/^[a-z].*?:http/.test(plotserver)) {
+      method = plotserver.split(":")[0];
+      plotserver = plotserver.split(":")[1];
+    }
+
+    let SERVER = servers.info[selected('server')]['url'];
+    if (!SERVER.startsWith("http")) {
+        SERVER = location.origin + location.pathname + SERVER;
+    }
+
+    let url = "";
+    if (method === 'hapiplot') {
+      url = plotserver + "?"
+          + "server=" + SERVER
+          + "&dataset=" + selected('dataset')
+          + "&parameters=" + selectedParameters
+          + "&start=" + selected('start')
+          + "&stop=" + selected('stop')
+          + "&format=" + selected('format')
+          + "&usecache=" + $("#useimagecache").prop('checked')
+          + "&usedatacache=" + $("#usedatacache").prop('checked');
+    }
+
+    if (method === 'autoplot') {
+      url = "vap+hapi:" + SERVER + "?id=";
+      url = url + `${selected('dataset')}&parameters=Time,${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
+      url = plotserver + "?url=" + encodeURIComponent(url);
+
+      let format = "image/png";
+      if (selected('format') === 'svg') {
+        format = "image/svg+xml";
+      }
+      if (selected('format') === 'pdf') {
+        format = "application/pdf";
+      }
+
+      let width = $("#infodiv").width()-15;
+      let height = Math.round(width*3./7.)
+      let config = {
+        "format": format,
+        "width": width,
+        "height": height,
+        "font": "sans-18",         // What are options?
+        "autolayout": false,       
+        "column": "6.5em,100%-2.5em", // Left gap, right gap
+        "row": "3em,100%-3em",     // Top gap, bottom gap
+        "process": "",    // histogram, magnitude(fft)
+        "renderType": "", // spectogram, series, scatter, stairSteps, fill_to_zero
+        "symbolSize": "",
+        "color": "#0000ff",
+        "fillColor": "#aaaaff",
+        "foregroundColor": "#000000",
+        "backgroundColor": "#ffffff"
+      }
+      let configa = [];
+      for (let [key, val] of Object.entries(config)) {
+        configa.push(key + "=" + encodeURIComponent(val));
+      }
+      url = url + "&" + configa.join("&");
+    }
+
+    return url;
+  }
+
+  function script() {
+
     let cclass = '';
     let ext = '';
     if (selected('format') === 'python') {
@@ -1201,168 +1211,9 @@ function output(jsonURL) {
       ext = 'sh';
     }
 
-    script(cclass, selected('format') + "." + ext, 
-        function (sText) {showText(sText,cclass,ext)})
-
-  } else if (selected('return').match(/data/)) {
-
-    parameterString = "&parameters=" + selectedParameters
-    let url = servers.info[selected('server')]['url'] 
-                + "/data?id=" + selected('dataset')
-                + parameterString
-                + "&time.min=" + selected('start')
-                + "&time.max=" + selected('stop')
-
-    url = hapi2to3(url);
-
-    if (selected('format') === 'csv') {
-      if (selected('style') === 'header') {
-        url = url + "&include=header";
-      }
-    }
-    if (selected('format') === 'json') {
-      url = url + "&format=json";
-    }
-
-    $('#output').show();
-
-    downloadlink(url, "data", false);
-
-    if ($("#showdata").prop('checked') == false) {
-      return;
-    }
-
-    get({url: url, showLink: true}, function (err, data) {
-        $("#downloadlink")
-            .append("<pre id='data' class='data'>" + data + "</pre>");
-        $("#downloadlink > pre")
-            .width($("#infodiv").width()-15)
-            .height($(window).height()/2)   
-        $("#downloadlink").show();                  
-    });
-
-  } else if (selected('return').match(/image/)) {
-
-    if (qs['plotserver']) {
-        PLOTSERVER = qs['plotserver'];
-    } else {
-        PLOTSERVER = $('#plotserver').val();
-    }
-    let SERVER = servers.info[selected('server')]['url'];
-    if (!SERVER.startsWith("http")) {
-        SERVER = location.origin + location.pathname + SERVER;
-    }
-    url = PLOTSERVER
-            + "?server=" + SERVER
-            + "&dataset=" + selected('dataset')
-            + "&parameters=" + selectedParameters
-            + "&start=" + selected('start')
-            + "&stop=" + selected('stop')
-            + "&format=" + selected('format')
-            + "&usecache=" + $("#useimagecache").prop('checked')
-            + "&usedatacache=" + $("#usedatacache").prop('checked')
-
-    APLOTSERVER = "https://jfaden.net/AutoplotServlet/SimpleServlet?url=";
-    aurl = "vap+hapi:" + SERVER + "?id=";
-    aurl = aurl + `${selected('dataset')}&parameters=Time,${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
-    aurl = APLOTSERVER + encodeURIComponent(aurl);
-    let apwidth = $("#infodiv").width()-15;
-    let apheight = Math.round(apwidth*3./7.)
-    aurl = aurl + `&width=${apwidth}&height=${apheight}`
-
-    $('#output').show();
-
-    if (selected('format').match(/png|svg/)) {
-
-      let interval = downloadlink(url, selected('format'), true);
-      let width = $("#infodiv").width()-15;
-      if (selected('format').match(/svg/)) {
-        width = "100%";
-      }
-
-      $("#image")
-          .empty()
-          .show()
-          .append("<img></img>")
-          .find('img')
-          .attr('src',url)
-          .width(width)
-          .load( () => {
-              clearInterval(interval);
-              let elapsed = ((new Date()).getTime() - downloadlink.start);
-              $("#timing").text("Time: " + (elapsed) + " [ms]");
-              $("#loading").empty();
-          }).error( () => {
-              clearInterval(interval);
-              let elapsed = ((new Date()).getTime() - downloadlink.start);
-              $("#timing").text("Time: " + (elapsed) + " [ms]");
-              $("#loading").empty();                              
-          })
-
-    	if (0) {
-      $("#image2")
-          .empty()
-          .show()
-          .append("<img></img>")
-          .find('img')
-          .attr('src',aurl)
-          .width(apwidth)
-          .load( () => {
-
-          }).error( () => {
-
-          })
-    	}
-    }
-
-    if (selected('format').match(/pdf/)) {
-
-      let interval = downloadlink(url, 'pdf', true);
-
-      $("#image")
-          .empty()
-          .append("<iframe></iframe>")
-          .find('iframe')
-          .attr('frameborder',0)
-          .attr('scrolling','no')
-          .attr('src',url)
-          .width('0')
-          .height('0')
-          .parent()
-          .show()
-
-      $('#image > iframe')
-        .load(function () {
-          clearInterval(interval);
-          //$("#loading").empty();
-          let w = $("#infodiv").width()-15
-          $('#image > iframe')
-              .width(w)
-              .height(w*3/7+30) 
-          // Defaut hapiplot is 7x3 image. Add 30 for PDF
-          // controls.
-      })
-    }
-
-    if (selected('format').match(/gallery/)) {
-      $("#downloadlink")
-          .empty()
-          .append(
-              "<span>" 
-              + link(url, "View gallery", true) 
-              + "</span>")
-          .show();
-      $("#downloadlink > span > a")
-        .css('font-weight', 'bold');
-    }
- 
-  }
-
-  function script(lang,templateFile,cb) {
-
     $.ajax({
         type: "GET",
-        url: "scripts/" + templateFile,
+        url: "scripts/" + selected('format') + "." + ext,
         async: true,
         dataType: "text",
         success: function (data, textStatus, jqXHR) {
@@ -1371,15 +1222,11 @@ function output(jsonURL) {
     });
 
     function process_(sText) {
+
       let email = servers.info[selected('server')]['contactEmail']
       sText = sText.replace(/CONTACT/gm,email);
 
       let selectedParameters = selected('parameters');
-      if (0) {
-        if (selectedParameters === '*all*') {
-          selectedParameters = "";
-        }
-      }
 
       function isDoubleByte(str) {
         // https://stackoverflow.com/a/148613
@@ -1434,74 +1281,7 @@ function output(jsonURL) {
                                   ", e.g., parameters='" 
                                   + p.slice(1,3).join(',') + "'");
       }
-      cb(sText);
+      showText(sText,cclass,ext);
     }
   }
-}
-
-function showText(sText,cclass,ext) {
-  $('#scriptcopy > button')
-      .attr("data-clipboard-text",sText)
-  $('#scriptcopy').show()
-
-  var clipboard = new ClipboardJS('.btn');
-  clipboard.on('success', function () {
-      log('Copied script to clipboard.');
-      $('#copied').tooltipster('open');
-      setTimeout(() => $('#copied').tooltipster('close'), 800);
-  });
-
-  let type = "script";
-  let fname = 'demo';
-  if (ext === 'json') {
-      type = 'json';
-      fname = 'hapi';
-  }
-
-  let h = '100%';
-  if (type === 'json') {
-      h = $(window).height()/2;
-  }                   
-  let w = $("#infodiv").width()-15
-  $("#scripttext")
-      .empty()
-      .append("<pre class='text'></pre>")
-      .show()
-  
-  // Common browser bug: &param is interpreted as &para;m: ¶m
-  if (!["wget","curl"].includes(selected('format'))) {
-      sText = sText.replace('&param','&amp;param');
-  }
-  $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>");
-  $("#script").text(sText);
-
-  $("#scripttext > pre")
-      .height(h)
-      .show();
-
-  let blob = new Blob([sText], {type: 'octet/stream'});
-  let scriptFile = window.URL.createObjectURL(blob);
-  //let scriptFile = 'data:text/plain;base64;charset=utf-8,' + btoa(sText);
-
-  //https://stackoverflow.com/a/30139435
-  var el = document.createElement('a');
-  el.setAttribute('href', scriptFile);
-  el.setAttribute('download', fname + "." + ext);
-
-  if (showText.scriptFile) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-      // Remove previous reference (frees memory)
-      window.URL.revokeObjectURL(scriptFile);
-  }
-  showText.scriptFile = scriptFile;
-
-  $("#downloadlink").empty().append(el).show();
-  $("#downloadlink > a")
-      .html('Download ' + type)
-      .css('font-weight', 'bold');
-
-  document
-      .querySelectorAll('pre code')
-      .forEach((block) => {hljs.highlightBlock(block);});
-  $("#output").show();
 }

@@ -47,15 +47,18 @@ details {
   font-size: 80%;
 }
 
-#loading, #timing, #xstatus {
+#timing, #xstatus {
 	font-size: 90%;
   display: inline;
 }
 
+#requests {
+  font-size: 80%;
+  overflow-x: scroll;
+}
+
 #loadinfo {
-	min-height: 1em;
-	max-height: 2em;
-	overflow-y: auto;
+	overflow: scroll;
 }
 
 a:link {

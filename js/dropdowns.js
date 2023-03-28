@@ -28,7 +28,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 						.focus();
 			});
 	}
-		
+
 	function ac(i, list) {	
 
 		$("#" + ids[i])
@@ -251,7 +251,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 						}
 
 						log("dropdowns.ac.select(): New value is not same as old."
-								    	+ " Clearing values in all drop-downs after " + id + ".");
+							+ " Clearing values in all drop-downs after " + id + ".");
 						
 						$("input[id='"+id+"']")
 							.parent().parent()
@@ -261,7 +261,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 							.attr('value','');
 
 						log("dropdowns.ac.select(): Getting drop-down "
-									    + "values on all remaing drop-downs.");
+							+ "values on all remaing drop-downs.");
 
 						qs = {};
 						for (j = 0;j < i+1;j++) {
@@ -270,14 +270,14 @@ function dropdowns(ids, names, funs, tips, after, i) {
 							}
 						}
 						log("dropdowns.ac.select(): Setting hash based on"
-										  + " values on all remaing drop-downs.");
+							+ " values on all remaing drop-downs.");
 						location.hash = decodeURIComponent($.param(qs));
 
 						// Trigger onselect callback for dropdowns.
 						var err;
 						if (funs[i].onselect) {
 							log("dropdowns.ac.select(): Triggering "
-											  + "onselect callback for current drop-down.");
+								+ "onselect callback for current drop-down.");
 							var err = funs[i].onselect();
 						}
 

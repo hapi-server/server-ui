@@ -347,13 +347,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 			return;
 		}
 
-		if (!list) {
-			log("dropdowns(): Drop-down has no values. Setting next drop-down.");
-			dropdowns(ids, names, funs, tips, after, i+1);
-			return;
-		}
-
-		if (list.length == 0) {
+		if (!list || list.length == 0) {
 			log("dropdowns(): Drop-down has no values. Setting next drop-down.");
 			dropdowns(ids, names, funs, tips, after, i+1);
 			return;

@@ -79,4 +79,20 @@ function get(options, cb) {
         }
       }
   });
+
+  function ajaxerror(url, message, xhr) {
+    let errmsg = xhr.statusText || xhr.responseText;
+    $('#xstatus').show().html(
+        "<div class='error'>Error encountered when attempting to retrieve "
+        + "<a target='_blank' href='" + url + "'>"
+        + url.replace("&para","&#38;para") + "</a>"
+        + ".<br><br>Message: <pre>" + message + "</pre>"
+        + "<pre>" + errmsg + "</pre>"
+        + "<p>The Javascript debugger console may have a more descriptive error message.</p></div>");
+    // Determining if CORS is cause of error is difficult:
+    // https://stackoverflow.com/q/19325314
+    console.error(errmsg)
+    console.error(xhr);
+  }
+
 }

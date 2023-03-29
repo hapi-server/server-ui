@@ -5,21 +5,6 @@ if (false) {
   }
 }
 
-function ajaxerror(url, message, xhr) {
-  let errmsg = xhr.statusText || xhr.responseText;
-  $('#xstatus').show().html(
-      "<div class='error'>Error encountered when attempting to retrieve "
-      + "<a target='_blank' href='" + url + "'>"
-      + url.replace("&para","&#38;para") + "</a>"
-      + ".<br><br>Message: <pre>" + message + "</pre>"
-      + "<pre>" + errmsg + "</pre>"
-      + "<p>The Javascript debugger console may have a more descriptive error message.</p></div>");
-  // Determining if CORS is cause of error is difficult:
-  // https://stackoverflow.com/q/19325314
-  console.error(errmsg)
-  console.error(xhr);
-}
-
 var qsInitial = parseQueryString();
 
 function main(OPTIONS) {
@@ -123,25 +108,6 @@ function doy2ymd(dateTime) {
     return dateTimeMod;
   }
   return dateTime;
-}
-
-function checktimes(which) {
-  if (selected('start') && selected('stop')) {
-    log("stoptime select event.")
-    log("starttime = " + selected('start'))                 
-    log("stoptime = " + selected('stop'))
-    var t = dayjs(doy2ymd(selected('start').replace("Z","")))
-            < dayjs(doy2ymd(selected('stop').replace("Z","")));
-    log("---> start < stop? " + t);
-    if (t == false) {
-      log(which + " changed; start >= stop. Setting color of " + which + " to red.");
-      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
-      return "Error";
-    } else {
-      log(which + " changed; start < stop. Setting color of " + which + " to black.");
-      $('#' + which + 'list').css('color','black').removeClass('tooltip').attr('title','');
-    }
-  }
 }
 
 // Create a HTML link.
@@ -375,13 +341,11 @@ function datasets(cb) {
 
   let url = servers.info[selected('server')]['url'] + "/catalog";
   get({url: url, showAjaxError: true}, function (err, res) {
-    if (err) {
-      return;
-    }
-    process(res);
+    if (!err) process(res);
   });
 
   function process(res) {
+
     res = $.parseJSON(res);
     datasets.json = res;
     res = res.catalog;
@@ -500,11 +464,8 @@ function parameters(cb) {
   url = hapi2to3(url);
 
   get({url: url, showAjaxError: true}, function (err, res) {
-        if (err) {
-          return;
-        }
-        process(res, url);
-    }); 
+    if (!err) process(res, url);
+  }); 
 
   function process(res, url) {
     res = JSON.parse(res);//$.parseJSON(res);
@@ -654,6 +615,25 @@ function parameters(cb) {
     parameters.list = list;
 
     cb(list);
+  }
+}
+
+function checktimes(which) {
+  if (selected('start') && selected('stop')) {
+    log("stoptime select event.")
+    log("starttime = " + selected('start'))                 
+    log("stoptime = " + selected('stop'))
+    var t = dayjs(doy2ymd(selected('start').replace("Z","")))
+            < dayjs(doy2ymd(selected('stop').replace("Z","")));
+    log("---> start < stop? " + t);
+    if (t == false) {
+      log(which + " changed; start >= stop. Setting color of " + which + " to red.");
+      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
+      return "Error";
+    } else {
+      log(which + " changed; start < stop. Setting color of " + which + " to black.");
+      $('#' + which + 'list').css('color','black').removeClass('tooltip').attr('title','');
+    }
   }
 }
 
@@ -869,9 +849,8 @@ function type(cb) {
   }
 
   type.onselect = function () {};
-
   var values = [];
-  if (false && selected("return").match("image")) {
+  if (selected("return").match("image")) {
       values = 
               [
                   {
@@ -927,7 +906,7 @@ function style(cb) {
   cb(values);
 }
 
-// Examples drop-down.
+// Handle examples drop-down.
 function examples(cb) {
 
   log('examples(): Called.');
@@ -1016,66 +995,13 @@ function output(jsonURL) {
     $(window).hashchange.byurledit = false;
     location.hash = decodeURIComponent($.param(qs));
 
-    let url = plotURL();
-
-    $('#output').show();
-
-    if (selected('format').match(/png|svg/)) {
-
-      let timerId = timer();
-      downloadlink(url, selected('format'));
-      let width = $("#infodiv").width()-15;
-      if (selected('format').match(/svg/)) {
-        width = "100%";
-      }
-
-      $("#image")
-          .empty()
-          .show()
-          .append("<img></img>")
-          .find('img')
-          .attr('src',url)
-          .width(width)
-          .load(() => {
-              timer(timerId);
-          }).error(() => {
-              timer(timerId);
-          });
-
-      $("#image")
-          .append(`<img src="${plotURL('autoplot')}" width="${width}"></img>`)
-
-    }
-
-    if (selected('format').match(/pdf/)) {
-
-      downloadlink(url, 'pdf');
-      let timerId = timer();
-      $("#image")
-          .empty()
-          .append("<iframe></iframe>")
-          .find('iframe')
-          .attr('frameborder',0)
-          .attr('scrolling','no')
-          .attr('src',url)
-          .width('0')
-          .height('0')
-          .parent()
-          .show()
-
-      $('#image > iframe')
-        .load(function () {
-          timer(timerId)
-          let w = $("#infodiv").width()-15
-          $('#image > iframe')
-              .width(w)
-              .height(w*3/7+30) 
-          // Defaut hapiplot is 7x3 image. Add 30 for PDF
-          // controls.
-      })
+    if (selected('format').match(/png|svg|pdf/)) {
+      $('#output').show();
+      plot();
     }
 
     if (selected('format').match(/gallery/)) {
+      url = plot(null, false);
       $("#downloadlink")
           .empty()
           .append(
@@ -1087,201 +1013,5 @@ function output(jsonURL) {
         .css('font-weight', 'bold');
     }
  
-  }
-
-  function plotURL(method) {
-
-    // TODO: Check method is known.
-
-    let selectedParameters = selected('parameters');
-
-    let plotserver;
-    if (qsInitial['plotserver']) {
-      plotserver = qsInitial['plotserver'];
-    } else {
-      plotserver = $('#plotserver').val();
-    }
-
-    if (!method && !/^http/.test(plotserver)) {
-      method = plotserver;
-    }
-    if (method) {
-      // Override what is in URL or text box.
-      if (method.trim() === 'hapiplot') {
-        plotserver = OPTIONS['hapiplot'];
-      }
-      if (method.trim() === 'autoplot') {
-        plotserver = OPTIONS['autoplot'];
-      }
-    }
-    if (/^[a-z].*?:http/.test(plotserver)) {
-      method = plotserver.split(":")[0];
-      plotserver = plotserver.split(":")[1];
-    }
-
-    let SERVER = servers.info[selected('server')]['url'];
-    if (!SERVER.startsWith("http")) {
-        SERVER = location.origin + location.pathname + SERVER;
-    }
-
-    let url = "";
-    if (method === 'hapiplot') {
-      url = plotserver + "?"
-          + "server=" + SERVER
-          + "&dataset=" + selected('dataset')
-          + "&parameters=" + selectedParameters
-          + "&start=" + selected('start')
-          + "&stop=" + selected('stop')
-          + "&format=" + selected('format')
-          + "&usecache=" + $("#useimagecache").prop('checked')
-          + "&usedatacache=" + $("#usedatacache").prop('checked');
-    }
-
-    if (method === 'autoplot') {
-      url = "vap+hapi:" + SERVER + "?id=";
-      url = url + `${selected('dataset')}&parameters=Time,${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
-      url = plotserver + "?url=" + encodeURIComponent(url);
-
-      let format = "image/png";
-      if (selected('format') === 'svg') {
-        format = "image/svg+xml";
-      }
-      if (selected('format') === 'pdf') {
-        format = "application/pdf";
-      }
-
-      let width = $("#infodiv").width()-15;
-      let height = Math.round(width*3./7.)
-      let config = {
-        "format": format,
-        "width": width,
-        "height": height,
-        "font": "sans-18",         // What are options?
-        "autolayout": false,       
-        "column": "6.5em,100%-2.5em", // Left gap, right gap
-        "row": "3em,100%-3em",     // Top gap, bottom gap
-        "process": "",    // histogram, magnitude(fft)
-        "renderType": "", // spectogram, series, scatter, stairSteps, fill_to_zero
-        "symbolSize": "",
-        "color": "#0000ff",
-        "fillColor": "#aaaaff",
-        "foregroundColor": "#000000",
-        "backgroundColor": "#ffffff"
-      }
-      let configa = [];
-      for (let [key, val] of Object.entries(config)) {
-        configa.push(key + "=" + encodeURIComponent(val));
-      }
-      url = url + "&" + configa.join("&");
-    }
-
-    return url;
-  }
-
-  function script() {
-
-    let cclass = '';
-    let ext = '';
-    if (selected('format') === 'python') {
-      cclass = 'python';
-      ext = 'py';
-    }
-    if (selected('format') === 'javascript') {
-      cclass = 'javascript';
-      ext = 'html';
-    }
-    if (selected('format') === 'matlab') {
-      cclass = 'matlab';
-      ext = 'm';
-    }
-    if (selected('format') === 'autoplot') {
-      cclass = 'python';
-      ext = 'jy';
-    }
-    if (selected('format') === 'idl') {
-      cclass = 'matlab';
-      ext = 'pro';
-    }
-    if (selected('format') === 'curl') {
-      cclass = 'curl';
-      ext = 'sh';
-    }
-    if (selected('format') === 'wget') {
-      cclass = 'wget';
-      ext = 'sh';
-    }
-
-    $.ajax({
-        type: "GET",
-        url: "scripts/" + selected('format') + "." + ext,
-        async: true,
-        dataType: "text",
-        success: function (data, textStatus, jqXHR) {
-          process_(data);
-        }
-    });
-
-    function process_(sText) {
-
-      let email = servers.info[selected('server')]['contactEmail']
-      sText = sText.replace(/CONTACT/gm,email);
-
-      let selectedParameters = selected('parameters');
-
-      function isDoubleByte(str) {
-        // https://stackoverflow.com/a/148613
-        for (var i = 0, n = str.length; i < n; i++) {
-            if (str.charCodeAt( i ) > 255) { return true; }
-        }
-        return false;
-      }
-
-      let unicodeNote = " contains Unicode UTF-8. See https://github.com/hapi-server/client-matlab/blob/master/README.md#notes.";
-      let unicodeNoteDataset = "";
-      let unicodeNoteParameters = "";
-      if (isDoubleByte(selected('dataset'))) {
-          unicodeNoteDataset = "Dataset name" + unicodeNote;
-      }
-      if (isDoubleByte(selectedParameters)) {
-          unicodeNoteParameters = "One or more parameters" + unicodeNote;
-      }
-      sText = sText.replace(/UNICODE_NOTE_DATASET/gm,unicodeNoteDataset);
-      sText = sText.replace(/UNICODE_NOTE_PARAMETERS/gm,unicodeNoteParameters);
-
-      let server = servers.info[selected('server')]['url']
-      if (!server.startsWith("http")) {
-        server = location.protocol + '//' + location.host + location.pathname + server;
-      }
-      sText = sText.replace(/SERVER/gm,server);
-      sText = sText.replace(/DATASET/gm,selected('dataset'));
-      sText = sText.replace(/PARAMETERS/gm,selectedParameters);
-
-      let startDate = datasets.info[selected('dataset')]['info']['startDate'];
-      let stopDate = datasets.info[selected('dataset')]['info']['stopDate'];
-      sText = sText.replace(/STARTMIN/gm,startDate);
-      sText = sText.replace(/STOPMAX/gm,stopDate);
-
-      sText = sText.replace(/START/gm,selected('start'));
-      sText = sText.replace(/STOP/gm,selected('stop'));
-
-      let timename = parameters.list[0]['value'];
-      sText = sText.replace(/TIMENAME/gm,timename);
-
-      let p = parameters.list.slice(0); // copy 
-      
-      p.forEach((el,i) => {p[i] = el.value});
-      if (p.length == 1) {
-          sText = sText.replace(/CSV_EXAMPLE/gm,'.');
-      } else if (p.length == 2) {
-          sText = sText.replace(/CSV_EXAMPLE/gm,
-                                  ", e.g., parameters='" 
-                                  + p.join(','));
-      } else {
-          sText = sText.replace(/CSV_EXAMPLE/gm,
-                                  ", e.g., parameters='" 
-                                  + p.slice(1,3).join(',') + "'");
-      }
-      showText(sText,cclass,ext);
-    }
   }
 }

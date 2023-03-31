@@ -14,7 +14,7 @@ Created on Thu Mar 30 19:22:55 2023
 # Only needs to be executed once.
 import os; print(os.popen('pip install hapiclient --upgrade').read())
 
-from hapiclient import hapi
+from hapiclient import hapi, hapitime2datetime
 
 server     = 'SERVER'
 dataset    = 'DATASET'
@@ -29,23 +29,30 @@ stop       = 'STOP'  # max STOPMAX
 data, meta = hapi(server, dataset, parameters, start, stop)
 
 # See note below to install kamodo-ccmc. kamodo-ccmc requires Python 3.
+# The commands below assume the user is in a notebook. Interpolation with
+# Kamodo works fine in an interactive Python environment, but the kamodo_object
+# and the plots generated below may not display properly unless in a notebook.
 from kamodo_ccmc.tools.functionalize_hapi import functionalize_hapi
 kamodo_object = functionalize_hapi(data, meta)
 kamodo_object  # prints the LaTeX representation of all variables in data
 
 # To plot a variable, retrieve the list of variables names, then plot the first
-# variable in the list. You can replace the var_list[0] with any variable name.
-# The colors and scales of the plot can easily be changed. See link below.
+# variable in the list. You can replace the var_list[0] with any variable name
+# from parameters. The colors and scales of the plot can easily be changed.
+# See link below.
 from kamodo_ccmc.tools.functionalize_hapi import varlist
 var_list = varlist(meta)  # retrieve the variable list
 kamodo_object.plot(var_list[0])  # plot the first variable
 
 # To interpolate between time values, create one or more utc timestamps
-# and imitate the syntax below. sample_datetime can one timestamp or an array
-# of timestamps. The times must be between start and stop from above.
-from datetime import datetime, timezone
-sample_datetime = datetime(2011, 3, 27, 23, tzinfo=timezone.utc).timestamp()
-kamodo_object[var_list[0]](UTC_time=sample_datetime)
+# and imitate the syntax on the last line below. The variable sample_datetime
+# can be one timestamp or an array of timestamps, but the times must be between
+# the start and stop times from above or NaNs will be returned.
+from numpy import mean
+start_ts = hapitime2datetime(start)[0].timestamp()  # convert to UTC timestamp
+stop_ts = hapitime2datetime(stop)[0].timestamp()
+sample_datetime = mean([start_ts, stop_ts])  # pick the mean as an example
+kamodo_object[var_list[0]](UTC_time=sample_datetime)  # interpolate
 # Users can also define their own custom interpolation methods.
 
 # For more details on what is possible with this function in kamodo-ccmc,

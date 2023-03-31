@@ -45,14 +45,14 @@ var_list = varlist(meta)  # retrieve the variable list
 kamodo_object.plot(var_list[0])  # plot the first variable
 
 # To interpolate between time values, create one or more utc timestamps
-# and imitate the syntax on the last line below. The variable sample_datetime
+# and imitate the syntax on the last line below. The variable sample_timestamp
 # can be one timestamp or an array of timestamps, but the times must be between
 # the start and stop times from above or NaNs will be returned.
 from numpy import mean
 start_ts = hapitime2datetime(start)[0].timestamp()  # convert to UTC timestamp
 stop_ts = hapitime2datetime(stop)[0].timestamp()
-sample_datetime = mean([start_ts, stop_ts])  # pick the mean as an example
-kamodo_object[var_list[0]](UTC_time=sample_datetime)  # interpolate
+sample_timestamp = mean([start_ts, stop_ts])  # pick the mean as an example
+kamodo_object[var_list[0]](UTC_time=sample_timestamp)  # interpolate
 # Users can also define their own custom interpolation methods.
 
 # For more details on what is possible with this function in kamodo-ccmc,

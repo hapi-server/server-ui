@@ -1,16 +1,17 @@
 function script() {
 
-  let cclass = '';
-  let ext = '';
-  if (selected('format') === 'python') {
+  let cclass = ''; // Syntax highlight class
+  let ext = '';    // Script filename extension
+
+  if (selected('format').startsWith('python')) {
     cclass = 'python';
     ext = 'py';
   }
-  if (selected('format') === 'javascript') {
+  if (selected('format').startsWith('javascript')) {
     cclass = 'javascript';
     ext = 'html';
   }
-  if (selected('format') === 'matlab') {
+  if (selected('format').startsWith('matlab')) {
     cclass = 'matlab';
     ext = 'm';
   }
@@ -18,8 +19,8 @@ function script() {
     cclass = 'python';
     ext = 'jy';
   }
-  if (selected('format') === 'idl') {
-    cclass = 'matlab';
+  if (selected('format').startsWith('idl')) {
+    cclass = '';
     ext = 'pro';
   }
   if (selected('format') === 'curl') {

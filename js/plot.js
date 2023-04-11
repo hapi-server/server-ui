@@ -48,7 +48,12 @@ function plot(method, set) {
           dataType: "xml",
           success: function (xml, textStatus, jqXHR) {
             url = $(xml).find('Name').text();
-            setImage(url);
+            if (selected('format').match(/pdf/)) {
+              console.log(PROXY_URL + url)
+              setImage(PROXY_URL + encodeURIComponent(url));
+            } else {
+              setImage(url);
+            }
           },
           error: function (xhr, textStatus, errorThrown) {
             //console.log(xhr);
@@ -120,8 +125,6 @@ function plot(method, set) {
 
     if (selected('format').match(/png|svg/)) {
 
-      //let width = $("#infodiv").width();
-
       $("#image")
           .empty()
           .show()
@@ -135,7 +138,7 @@ function plot(method, set) {
           });
 
       if (selected('format').match(/svg/)) {
-        $("#image").width("100%");
+        $("#image > img").width($("#infodiv").width());
       }
 
     }

@@ -174,6 +174,13 @@ function servers(cb) {
 
     log('servers.onselect(): Called.');
 
+    if (window.timerId) {
+      window.timerId;
+      timer(window.timerId);
+      $("#timing").empty();
+      $("#loading").empty();
+    }
+
     $('#overviewinfo').hide();
     $('#output').hide();
     $('#serverinfo').nextAll().hide();
@@ -850,7 +857,7 @@ function type(cb) {
 
   type.onselect = function () {};
   var values = [];
-  if (selected("return").match("image")) {
+  if (false && selected("return").match("image")) {
       values = 
               [
                   {
@@ -978,7 +985,19 @@ function output(jsonURL) {
       return;
     }
 
-    get({url: url, showLink: true}, function (err, data) {
+    $("#downloadlink")
+      .append("<pre id='data' class='data'></pre>")
+
+    get({url: url, chunk: true}, function(err, data) {
+      $("#downloadlink > pre")
+          .width($("#infodiv").width()-15)
+          .height($(window).height()/2)
+      $("#downloadlink").show();
+    });
+
+    return;
+
+    get({url: url}, function (err, data) {
         $("#downloadlink")
             .append("<pre id='data' class='data'>" + data + "</pre>");
         $("#downloadlink > pre")

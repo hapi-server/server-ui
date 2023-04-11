@@ -11,7 +11,6 @@ function get(options, cb) {
   }                   
 
   var showAjaxError = options.showAjaxError || false;
-
   var directURLFailed = options.directURLFailed || false;
 
   var urlo = url;
@@ -32,6 +31,7 @@ function get(options, cb) {
 
   let timerId;
   timerId = timer();
+  window.timerId = timerId;
 
   log("get(): Requesting " + url);
   //log("get(): tryProxy = " + tryProxy);
@@ -41,44 +41,89 @@ function get(options, cb) {
 
   let msg = "| Requesting " + link(url.replace("&param","&amp;param"));
   $('#requests').html(msg).show();
-  $.ajax({
-      type: "GET",
-      url: url,
-      async: true,
-      dataType: "text",
-      success: function (data, textStatus, jqXHR) {
-        timer(timerId);
-        $("#requests").html("| Received: " + link(url.replace("&param","&amp;param")));
-        get.cache[urlo] = data; // Cache response.
-        cb(false, data);
-      },
-      error: function (xhr, textStatus, errorThrown) {
-        timer(timerId);
-        if (tryProxy && directURLFailed == false && PROXY_URL) {
-          var opts = {
-                        url: url,
-                        directURLFailed: true,
-                        tryProxy: false,
-                        showAjaxError: true
-                      };
-          log("get(): Attempting to proxy retrieve " + url);
-          $("#requests").html("Failed: " + link(url.replace("&param","&amp;param")));
-          get(opts, cb);
-        } else {
-          if (showAjaxError) {
-            var message = "";
-            if (directURLFailed && PROXY_URL) {
-              message = "Failed to retrieve\n<a href='" + urlo + "'>" + urlo + "</a>\nand\n<a href='" + url + "'>" 
-                        + url + "</a>\n\nThe first URL failure may be due to the server not supporting <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>CORS headers</a>. The second URL failure is usually a result of a server issue.";
-            } else {
-              message = "Failed to retrieve " + url;
+
+  if (options.chunk) {
+    //getAll();
+    getChunks();
+  } else {
+    getAll();
+  }
+
+  function getAll() {
+    $.ajax({
+        type: "GET",
+        url: url,
+        async: true,
+        dataType: "text",
+        success: function (data, textStatus, jqXHR) {
+          timer(timerId);
+          $("#requests").html("| Received: " + link(url.replace("&param","&amp;param")));
+          get.cache[urlo] = data; // Cache response.
+          cb(false, data);
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          timer(timerId);
+          if (tryProxy && directURLFailed == false && PROXY_URL) {
+            var opts = {
+                          url: url,
+                          directURLFailed: true,
+                          tryProxy: false,
+                          showAjaxError: true
+                        };
+            log("get(): Attempting to proxy retrieve " + url);
+            $("#requests").html("Failed: " + link(url.replace("&param","&amp;param")));
+            get(opts, cb);
+          } else {
+            if (showAjaxError) {
+              var message = "";
+              if (directURLFailed && PROXY_URL) {
+                message = "Failed to retrieve\n<a href='" + urlo + "'>" + urlo + "</a>\nand\n<a href='" + url + "'>"
+                          + url + "</a>\n\nThe first URL failure may be due to the server not supporting <a href='https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing'>CORS headers</a>. The second URL failure is usually a result of a server issue.";
+              } else {
+                message = "Failed to retrieve " + url;
+              }
+              ajaxerror(url, message, xhr);
             }
-            ajaxerror(url, message, xhr);
+            cb("Error", null);
           }
-          cb("Error", null);
         }
+    });
+  }
+
+  function getChunks() {
+
+    // https://gist.github.com/jfsiii/034152ecfa908cf66178
+    run();
+    async function run() {
+      let response;
+      try {
+        response = await fetch(url);
+      } catch (e) {
+        console.log(e);
+        timer(timerId);
+        return;
       }
-  });
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let result = await reader.read();
+      let length = 0;
+      let c = false;
+      while (!result.done) {
+        length = length + result.value.length;
+        //console.log("Read " + length + " bytes");
+        if (c === false && length > 3000000) {
+          c = confirm('Large data response. Continue? (Uncheck Options > Show data to suppress display of data in browser.)');
+          if (c === false) {
+            break;
+          }
+        }
+        const text = decoder.decode(result.value);
+        $("#data").append(text);
+        result = await reader.read();
+      }
+      timer(timerId);
+    }
+  }
 
   function ajaxerror(url, message, xhr) {
     let errmsg = xhr.statusText || xhr.responseText;

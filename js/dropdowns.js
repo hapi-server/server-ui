@@ -1,6 +1,6 @@
-function dropdowns(ids, names, funs, tips, after, i) {
+function dropdowns(ids, funs, after, i) {
 	
-	if (arguments.length < 6) {
+	if (i === undefined) {
 		i = 0;
 	}
 
@@ -45,9 +45,9 @@ function dropdowns(ids, names, funs, tips, after, i) {
 						function reset(el) {
 							log("dropdowns.ac.reset(): Called.");
 							if (!$(el).attr('value')) {
-								log("dropdowns.ac.reset(): Resetting to " + '-' + names[i] + '-');
+								log("dropdowns.ac.reset(): Resetting to " + $(el).attr('label'));
 								$("#"+id)
-									.attr('value', '-' + names[i] + '-')
+									.attr('value', $(el).attr('label'))
 									.css('color','black');
 							}							
 						}
@@ -285,7 +285,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 							log("dropdowns.ac.select(): Not setting next drop-down due to error.");								
 						} else {
 							log("dropdowns.ac.select(): Setting next drop-down.");
-							dropdowns(ids, names, funs, tips, after, i+1);
+							dropdowns(ids, funs, after, i+1);
 						}
 
 					}
@@ -349,7 +349,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 
 		if (!list || list.length == 0) {
 			log("dropdowns(): Drop-down has no values. Setting next drop-down.");
-			dropdowns(ids, names, funs, tips, after, i+1);
+			dropdowns(ids, funs, after, i+1);
 			return;
 		}
 
@@ -362,19 +362,26 @@ function dropdowns(ids, names, funs, tips, after, i) {
 		let iclass = "";
 		let tip1 = "";
 		let tip2 = "";
-		if (tips.length > 0 && tips[i].length > 0) {
+		var tips = funs[i].tooltips;
+		if (tips) {
 			iclass = "tooltip";
-			tip1 = tips[i][0];
-			tip2 = tips[i][1];
+			if (tips.length > 0) {
+				tip1 = tips[0];
+				tip2 = tips[1];
+			} else {
+				tip1 = tip;
+				tip2 = tip;
+			}
 		}
-		var label = '-' + names[i] + '-';
+
+		var label = '-' + (funs[i].label || funs[i].name) + '-';
 		$(after + (i) + " .ui-widget")
 			.append('<input'
 						+ ' class="dropdown-input ' + iclass + '"'
 						+ ' id="' + ids[i] + '"'
 						+ ' label="' + label + '"'
 						+ ' title="' + tip1 + '"'
-						+ ' value="-'+ names[i] + '-"/>')
+						+ ' value="'+ label + '"/>')
 			.append('<span'
 						+ ' class="spacer"'
 						+ ' style="width:0.5em;display:table-cell"></span>')

@@ -33,7 +33,7 @@ app.get('/proxy', function (req, res) {
   if (serverlistURLs.length > 0) {
     for (i in serverlistURLs) {
       if (url.startsWith(serverlistURLs[i])) {
-        proxyOK = true;
+        allowProxy = true;
         break;
       }
     }

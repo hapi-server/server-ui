@@ -11,9 +11,10 @@
     "url": "https://github.com/hapi-server/server-ui.git"
   },
   "dependencies": {
-    "http-server": "^0.12.3",
     "express": "^4",
-    "superagent": "*"
+    "http-server": "^0.12.3",
+    "superagent": "^3.0",
+    "superagent-proxy": "^3.0.0"
   },
   "scripts": {
     "start": "node_modules/http-server/bin/http-server --port 8000",

@@ -69,18 +69,33 @@
   <script type="text/javascript" src="js/checkboxes.js"></script>
   <script type="text/javascript" src="js/dropdowns.js"></script>
   <script type="text/javascript" src="js/examplelist.js"></script>
+  <script type="text/javascript" src="js/hashchange.js"></script>
+  <script type="text/javascript" src="js/get.js"></script>
+  <script type="text/javascript" src="js/tooltips.js"></script>
+  <script type="text/javascript" src="js/showText.js"></script>
+  <script type="text/javascript" src="js/plot.js"></script>
+  <script type="text/javascript" src="js/script.js"></script>
   <script type="text/javascript" src="js/index.js"></script>
 
   <script>
     // Set PROXY_URL to false to not use proxy if AJAX request fails.
     let PROXY_URL = "proxy?url=";
 
-    // Will use server list at ./all.txt if found 
+    // Use server list at ./all.txt if found 
     let SERVER_LIST = "all.txt";
 
     // Show all servers if SERVER_LIST if ./all.txt not found
     let SERVER_LIST_FALLBACK = 
       "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
+      
+    let devNote = "";
+    if (location.href.match("hapi-server.org/servers-dev")) {
+      SERVER_LIST = "all-combined.txt";
+      devNote  = "Development server.<br>";
+    }
+    if (location.href.match("hapi-server.org/servers")) {
+      SERVER_LIST = "all-combined.txt";
+    }
 
     let VERIFIER = '__VERIFIER__';
     let VERIFIER_EXTERNALLY_SET = true;
@@ -89,6 +104,9 @@
     if (VERIFIER.startsWith('__')) {
       VERIFIER_EXTERNALLY_SET = false;
       VERIFIER = "https://hapi-server.org/verify";
+      if (location.href.match("//localhost")) {
+        VERIFIER = "http://localhost:9999";
+      }
     }
 
     let PLOTSERVER = '__PLOTSERVER__';
@@ -96,32 +114,27 @@
     if (PLOTSERVER.startsWith('__')) {
       PLOTSERVER_EXTERNALLY_SET = false;
       PLOTSERVER = "https://hapi-server.org/plot";
+      if (location.href.match("//localhost")) {
+        PLOTSERVER = "http://localhost:5000";
+      }
     }
 
-    let URLWATCHER = 'https://hapi-server.org/urlwatcher/';
+    //PLOTSERVER = "https://jfaden.net/AutoplotServlet/SimpleServlet";
 
-    let devNote = "";
-    if (location.href.match("hapi-server.org/servers-dev")) {
-      SERVER_LIST = "all-combined.txt";
-      devNote  = "Development server.<br>";
-    } else if (location.href.match("hapi-server.org/servers")) {
-      SERVER_LIST = "all-combined.txt";
-    } else if (location.href.match("//localhost") || location.host.match(/^[0-9]/)) {
-      if (location.href.match("//localhost")) {
-        SERVER_LIST = "all.txt";
-      } else {
-        SERVER_LIST = "all-combined.txt";        
-      }
-      if (PLOTSERVER_EXTERNALLY_SET == false) {
-      	PLOTSERVER = "http://localhost:5000";
-      }
-      if (VERIFIER_EXTERNALLY_SET == false) {
-        VERIFIER = "http://localhost:9999";
-      }
+    OPTIONS = {
+      "urlwatcher": "https://hapi-server.org/urlwatcher/",
+      "serverList": SERVER_LIST,
+      "serverListFallback": SERVER_LIST_FALLBACK,
+      "plotserver": PLOTSERVER,
+      "verifier": VERIFIER,
+      "proxyURL": PROXY_URL,
+      "devNote": devNote,
+      "hapiplot": "https://hapi-server.org/plot/",
+      "autoplot": "https://jfaden.net/AutoplotServlet/SimpleServlet"
     }
 
     $(function() {
-      main(); // DOM is loaded. Call main() in js/index.js.
+      main(OPTIONS); // DOM is loaded. Call main() in js/index.js.
     })
   </script>
 </head>
@@ -131,7 +144,7 @@
   <div id="selections">
 
     <details id="options-details">
-      <summary><span class="link">Options</span></summary>
+      <summary><span>Options</span></summary>
       <div id="optionscheckboxes">
         <div class="tooltip-right"
              title="When requesting data, show data in broswer instead of only providing a download link.">
@@ -188,7 +201,7 @@
 
         <br>
 
-        <div class="tooltip-right" title="URL of server to use for plots">
+        <div class="tooltip-right" title="Server to use for plots (<code>hapiplot</code>, <code>autoplot</code>, <code>hapiplot:https://..../</code>, <code>autoplot:https://..../</code>)">
           <b>Plotserver</b>
           <input id="plotserver" type="text" value="" style="width:100%">
         </div>
@@ -235,7 +248,7 @@
     <div id="xstatus"></div>
     <div id="loadinfo">
       <code id="timing"></code>
-      <code id="loading"></code>
+      <span id="requests"></span>
     </div>
 
     <div id="overviewinfo">
@@ -324,6 +337,9 @@
 
               <a title="https://github.com/spedas/pyspedas"
                  href="https://github.com/spedas/pyspedas">Python SPEDAS</a> / 
+
+              <a title="https://nasa.github.io/Kamodo"
+                 href="https://nasa.github.io/Kamodo/">Python Kamodo</a> / 
 
               Wget
 

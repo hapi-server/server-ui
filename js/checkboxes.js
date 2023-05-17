@@ -1,10 +1,11 @@
-function checkboxes() {
+function checkboxes(OPTIONS) {
 
   function savedefaults() {
     var state = {};
     var values = $('input[type="checkbox"]').map(function() {
         state[this.id] = this.checked;
-    })
+    });
+    state["plotserver"] = $('#plotserver').val();
     localStorage.setItem("server-ui-defaults", JSON.stringify(state));
   }
 
@@ -17,24 +18,38 @@ function checkboxes() {
                   showdata: true,
                   showverifierlink: false,
                   showtiming: false,
+                  showrequests: false,
                   useimagecache: true, 
                   usedatacache: true,
                   console: false,
-                  plotserver: "http://hapi-server.org/plot"
+                  plotserver: OPTIONS['plotserver']
               }
   }
 
+  $('#showdata').attr('checked', defaults['showdata']);
+  if (defaults['showdata']) {$('#data').show()}
+  $('#showdata').change(function() {
+    savedefaults();
+    if (this.checked) {
+      output();
+    } else {
+      $('#data').remove();
+    }
+  });
+
   $('#showrequests').attr('checked', defaults['showrequests']);
+  if (defaults['showrequests']) {$('#requests').show()}
   $('#showrequests').change(function() {
     savedefaults();
     if (this.checked) {
-      $('#loading').show();
+      $('#requests').show();
     } else {
-      $('#loading').hide();
+      $('#requests').hide();
     }
-  })
+  });
 
   $('#showtiming').attr('checked', defaults['showtiming']);
+  if (defaults['showtiming']) {$('#timing').show();}
   $('#showtiming').change(function() {
     savedefaults();
     if (this.checked) {
@@ -42,7 +57,7 @@ function checkboxes() {
     } else {
       $('#timing').hide();
     }
-  })
+  });
 
   $('#showstatuslink').attr('checked', defaults['showstatuslink']);
   $('#showstatuslink').change(function() {
@@ -52,7 +67,7 @@ function checkboxes() {
     } else {
       $('#statuslink').hide();
     }
-  })
+  });
 
   $('#showverifierlink').attr('checked', defaults['showverifierlink']);
   $('#showverifierlink').change(function() {
@@ -62,7 +77,7 @@ function checkboxes() {
     } else {
       $('#verifierlink').hide();
     }
-  })
+  });
 
   $('#showtestdatalink').attr('checked', defaults['showtestdatalink']);
   $('#showtestdatalink').change(function() {
@@ -73,17 +88,7 @@ function checkboxes() {
     } else {
       $('#testdatalink').hide();
     }
-  })
-
-  $('#showdata').attr('checked', defaults['showdata']);
-  $('#showdata').change(function() {
-    savedefaults();
-    if (this.checked) {
-      output();
-    } else {
-      $('#data').remove();
-    }
-  })
+  });
 
   $('#useimagecache').attr('checked', defaults['useimagecache']);
   $('#useimagecache').change(function() {
@@ -101,7 +106,7 @@ function checkboxes() {
         $("#image > img").attr('src',url)
       }
     }
-  })
+  });
 
   $('#usedatacache').attr('checked', defaults['usedatacache']);
   $('#usedatacache').change(function() { 
@@ -119,10 +124,24 @@ function checkboxes() {
         $("#image > img").attr('src',url)
       }
     }
-  })
+  });
 
   $('#console').attr('checked', defaults['console']);
   $('#console').change(function() {
+    savedefaults();
+  });
+
+  $('#plotserver').val(defaults['plotserver']);
+  $('#plotserver').change(function () {
+    let qs = parseQueryString();
+    if (qs["return"] && qs["return"] === "image" && qs["format"]) {
+      log("plotserver changed. Triggering select event on #format drop-down.");
+      $("#format").val("").data("autocomplete")._trigger("select",null,{item:""});
+      $("#format").val(qs["format"]).data("autocomplete")._trigger("select",null,{item:qs["format"]});
+    }
+    qs['plotserver'] = $('#plotserver').val();
+    $(window).hashchange.byurledit = false;
+    location.hash = decodeURIComponent($.param(qs));
     savedefaults();
   });
 

@@ -1,6 +1,6 @@
-function dropdowns(ids, names, funs, tips, after, i) {
+function dropdowns(ids, funs, after, i) {
 	
-	if (arguments.length < 6) {
+	if (i === undefined) {
 		i = 0;
 	}
 
@@ -29,6 +29,20 @@ function dropdowns(ids, names, funs, tips, after, i) {
 			});
 	}
 
+	function showvalues(id, ui) {
+		let value     = $('input[id=' + id + ']').parent().parent().attr('value');
+		let valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
+
+		console.log("value         = " + value);
+		console.log("valuelast     = " + valuelast);
+		if (ui && ui.item) {
+			console.log("ui.value      = " + ui.item.value);
+			console.log("ui.valuelast  = " + ui.item.valuelast);
+		} else {
+			console.log("ui.item.value      = undefined");
+			console.log("ui.item.valuelast  = undefined");
+		}
+	}
 	function ac(i, list) {	
 
 		$("#" + ids[i])
@@ -37,26 +51,32 @@ function dropdowns(ids, names, funs, tips, after, i) {
 				scroll: true,
 				minLength: 0,
 				open: function (event, ui) {
+					// Triggered when list is shown or modified due to typing.
 
 					var id = $(this).attr('id');
 					log("dropdowns.ac.open(): Open event on " + id + ".");
+					showvalues(id, ui);
 					log("dropdowns.ac.open(): Binding blur event on id = " + id);
+
 					$('input[id=' + id + ']').blur(function () {
+						id = $(this).attr('id');
+						log("dropdowns.ac.blur(): Blur event triggered on id = " + id + ".");
+						showvalues(id, ui)
+
 						function reset(el) {
 							log("dropdowns.ac.reset(): Called.");
+							showvalues(id, ui)
 							if (!$(el).attr('value')) {
-								log("dropdowns.ac.reset(): Resetting to " + '-' + names[i] + '-');
+								log("dropdowns.ac.reset(): Resetting to " + $(el).attr('label'));
 								$("#"+id)
-									.attr('value', '-' + names[i] + '-')
+									.attr('value', $(el).attr('label'))
 									.css('color','black');
 							}							
 						}
- 						id = $(this).attr('id')
-						log("dropdowns.ac.blur(): Blur event triggered on id = " + id + ".");
-						var value = $('input[id=' + id + ']')
-										.parent().parent().attr('value');
-						var valuelast = $('input[id=' + id + ']')
-										.parent().parent().attr('valuelast');
+
+						var value = $('input[id=' + id + ']').parent().parent().attr('value');
+						var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
+
 						log("dropdowns.ac.blur(): value = " + value)
 						log("dropdowns.ac.blur(): valuelast = " + valuelast);
 
@@ -87,9 +107,10 @@ function dropdowns(ids, names, funs, tips, after, i) {
 					});
 				},
 				close: function(event, ui) {
-					// If no value is set, use the default definition.
+					// Triggered when drop-down list disappears.
 					var id = $(this).attr('id');
 					log("dropdowns.ac.close(): Close event on drop-down with id = " + id + ".");
+					showvalues(id, ui);
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
 					var value = $('input[id=' + id + ']').attr('value');
 					if (value == "") {
@@ -99,17 +120,20 @@ function dropdowns(ids, names, funs, tips, after, i) {
 					}
 				},
 				change: function(event, ui) {
-					var id = $(this).attr('id');
+					// Triggered when editing value with keyboard, not hitting enter,
+					// and then clicking another element.
+					//alert("Change")
+					console.log("Change")
+					id = $(this).attr('id');
+					showvalues(id, ui);
+					return;
+
 					log("dropdowns.ac.change(): Change event triggered on drop-down with id = " + id + ".");
 
-					var i = parseInt($(this)
-								.parent().parent()
-								.attr("id").replace(/[a-z]/gi,""));
-					
+					var i = parseInt($(this).parent().parent().attr("id").replace(/[a-z]/gi,""));
 					$('input[id=' + id + ']').unbind('blur');
 
-					var valuelast = $('input[id=' + id + ']')
-										.parent().parent().attr('valuelast');
+					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
 					
 					log("dropdowns.ac.change(): valuelast = " + valuelast);
 					if (valuelast === "") {
@@ -120,15 +144,12 @@ function dropdowns(ids, names, funs, tips, after, i) {
 						ui.item = {};
 						log("dropdowns.ac.change(): ui.item == null."
 							+ " Setting it to "
-							+ $('input[id=' + id + ']')
-									.parent().parent()
-									.attr('value')
+							+ $('input[id=' + id + ']').parent().parent().attr('value')
 							+ " and triggering select.")
-						ui.item.value = $('input[id=' + id + ']')
-											.parent().parent().attr('value');
+						ui.item.value = $('input[id=' + id + ']').parent().parent().attr('value');
 						$('input[id=' + id + ']').val(ui.item.value)
 							.data("autocomplete")
-							._trigger("select",event,{item:ui.item.value});
+							._trigger("select",event,{item: ui.item.value});
 						
 						return;
 					}
@@ -153,18 +174,16 @@ function dropdowns(ids, names, funs, tips, after, i) {
 					}
 				},			
 				select: function(event, ui) {
-
+					// Triggered when clicking on a drop-down list item or
+					// hitting enter after typing.
 					id = $(this).attr('id');
 
 					log("dropdowns.ac.select(): Select event triggered on drop-down with id = " + id);
+					showvalues(id, ui);
 
 					var label = $('input[id=' + id + ']').attr('label');
 					var value = ui.item.value || event.target.value;
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
-					if (value == label) {
-						log("dropdowns.ac.select(): Select was for label. Taking no action.");
-						return;
-					}
 
 					var i = parseInt($(this)
 										.parent()
@@ -189,7 +208,6 @@ function dropdowns(ids, names, funs, tips, after, i) {
 					}
 
 					var value = ui.item.value || event.target.value;
-					
 					var valuelast = $(p).attr('valuelast');
 
 					log("dropdowns.ac.select(): ui.item.value = " + value)
@@ -213,7 +231,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 					var qs = parseQueryString();
 					if ($(p).val()) {
 						log("dropdowns.ac.select(): Setting query object value for "
-										+ $(p).attr('name') + " to " + $(p).val());
+							+ $(p).attr('name') + " to " + $(p).val());
 						qs[$(p).attr('name')] = $(p).val();
 					}
 					
@@ -225,7 +243,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 
 					if (value) {
 						log("dropdowns.ac.select(): Setting"
-									+ " ui.item.valuelast to ui.item.value.");
+						  + " ui.item.valuelast to ui.item.value.");
 						ui.item.valuelast = ui.item.value;
 					}
 
@@ -242,7 +260,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 
 								if (funs[i].onselect) {
 									log("dropdowns.ac.select(): Triggering "
-													  + "onselect callback for current drop-down.");
+									  + "onselect callback for current drop-down.");
 									var err = funs[i].onselect();
 								}
 
@@ -285,7 +303,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 							log("dropdowns.ac.select(): Not setting next drop-down due to error.");								
 						} else {
 							log("dropdowns.ac.select(): Setting next drop-down.");
-							dropdowns(ids, names, funs, tips, after, i+1);
+							dropdowns(ids, funs, after, i+1);
 						}
 
 					}
@@ -303,10 +321,10 @@ function dropdowns(ids, names, funs, tips, after, i) {
 							// Two commented parts are for checkboxes.
 							// TODO: Use https://ehynds.github.io/jquery-ui-multiselect-widget/#filter
 							txt = txt 
-//									+ <li style='float:left;background:white'><div style='padding-top:4px'><input type='checkbox'/></div></li>
+									// + <li style='float:left;background:white'><div style='padding-top:4px'><input type='checkbox'/></div></li>
 										+ "<li id='" 
 										+ items[i].value 
-//									+ `' style='padding-left:1.5em' class='ui-menu-item tooltip' ${title} role='presentation'>`
+									// + `' style='padding-left:1.5em' class='ui-menu-item tooltip' ${title} role='presentation'>`
 										+ `' class='ui-menu-item tooltip' ${title} role='presentation'>`										+ ""
 										+ "<a id='ui-id-" + (i) + "' class='ui-corner-all tooltip' tabindex='-1'>" 
 										+ items[i].label
@@ -330,9 +348,7 @@ function dropdowns(ids, names, funs, tips, after, i) {
 
 	}
 
-	log("dropdowns(): Calling " 
-    	+ funs[i].toString().split("{")[0].trim() 
-    	+ " to get drop-down list entries.");
+	log("dropdowns(): Calling " + funs[i].name + "() to get drop-down list entries.");
 
 	// Call dropdown function, which generates list then calls cb().
 	let list = funs[i](cb);
@@ -349,32 +365,39 @@ function dropdowns(ids, names, funs, tips, after, i) {
 
 		if (!list || list.length == 0) {
 			log("dropdowns(): Drop-down has no values. Setting next drop-down.");
-			dropdowns(ids, names, funs, tips, after, i+1);
+			dropdowns(ids, funs, after, i+1);
 			return;
 		}
 
 		log("dropdowns(): Creating drop-down with id = " + ids[i]);
-
 		$(after+(i)).empty();
 		$(after+(i)).parent().parent().attr("valuelast","");
-		$(after+(i)).append('<span class="ui-widget list"></span>');
 
 		let iclass = "";
 		let tip1 = "";
 		let tip2 = "";
-		if (tips.length > 0 && tips[i].length > 0) {
+		var tips = funs[i].tooltips;
+		if (tips) {
 			iclass = "tooltip";
-			tip1 = tips[i][0];
-			tip2 = tips[i][1];
+			if (tips.length > 0) {
+				tip1 = tips[0];
+				tip2 = tips[1];
+			} else {
+				tip1 = tip;
+				tip2 = tip;
+			}
 		}
-		var label = '-' + names[i] + '-';
+
+		var label = '-' + (funs[i].label || funs[i].name) + '-';
+		$(after+(i))
+			.append('<span class="ui-widget list"></span>');
 		$(after + (i) + " .ui-widget")
 			.append('<input'
 						+ ' class="dropdown-input ' + iclass + '"'
 						+ ' id="' + ids[i] + '"'
 						+ ' label="' + label + '"'
 						+ ' title="' + tip1 + '"'
-						+ ' value="-'+ names[i] + '-"/>')
+						+ ' value="'+ label + '"/>')
 			.append('<span'
 						+ ' class="spacer"'
 						+ ' style="width:0.5em;display:table-cell"></span>')

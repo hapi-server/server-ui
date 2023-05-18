@@ -34,13 +34,11 @@ function main(OPTIONS) {
   // "Show full list" is shown as a tooltip. 
   dropdowns(
       ["server","dataset","parameters","start","stop","return","format","type","style"],
-      ["HAPI Servers","Datasets","Parameters","Start","Stop","Return","Format","Type","Style"],
       [servers,datasets,parameters,starttime,stoptime,returntype,format,type,style],
-      [["Enter text to search","Show full list"],[],[],[],[],[],[],[],[]],
       "#dropdowns");
 
   //Set up examples drop-down.
-  //dropdowns(["examples"],["Other Examples"],[examples],[],"#examples");
+  //dropdowns(["examples"],[examples],"#examples");
 }
 
 function log(msg) {
@@ -169,6 +167,9 @@ function timer(id) {
 
 // Handle servers drop-down.
 function servers(cb) {
+
+  servers.label = "Servers";
+  servers.tooltips = ["Enter text to search","Show full list"];
 
   servers.onselect = function () {
 
@@ -334,6 +335,8 @@ function servers(cb) {
 // Handle datasets drop-down.
 function datasets(cb) {
 
+  datasets.label = "Datasets";
+
   datasets.onselect = function () {
     log('datasets.onselect(): Called.');
 
@@ -396,6 +399,8 @@ function datasets(cb) {
 function parameters(cb) {
 
   log('parameters(): Called.');
+
+  parameters.label = "Parameters";
 
   parameters.clearfollowing = function () {
     if (selected('format')) {
@@ -649,6 +654,8 @@ function starttime(cb) {
 
   log('starttime(): Called.');
 
+  starttime.label = "Start";
+
   starttime.clearfollowing = function () {
     if (selected('return')) {
       output();
@@ -686,6 +693,8 @@ function starttime(cb) {
 function stoptime(cb) {
 
   log('stoptime(): Called.');
+
+  stoptime.label = "Stop";
 
   stoptime.clearfollowing = function () {
     if (selected('return')) {
@@ -764,6 +773,9 @@ function returntype(cb) {
       return true;
     }
   }
+
+  returntype.label = "Return";
+
   returntype.onselect = function () {};
 
   var values = 
@@ -784,6 +796,8 @@ function returntype(cb) {
 function format(cb) {
 
   log('format(): Called.');
+
+  format.label = "Format";
 
   format.clearfollowing = function () {
     if (selected('type')) {
@@ -850,6 +864,8 @@ function type(cb) {
 
   log('type(): Called.');
 
+  type.label = "Type";
+
   type.clearfollowing = function () {
     if (selected('style')) {
       output();
@@ -879,6 +895,7 @@ function style(cb) {
 
   log('style(): Called.');
 
+  style.label = "Style";
   style.onselect = function () {
     output();
   }

@@ -40,7 +40,7 @@ function get(options, cb) {
   //log("get(): showAjaxError = " + showAjaxError);
 
   let msg = "| Requesting " + link(url.replace("&param","&amp;param"));
-  $('#requests').html(msg).show();
+  $('#requests').html(msg);
 
   if (options.chunk) {
     //getAll();
@@ -98,9 +98,10 @@ function get(options, cb) {
       let response;
       try {
         response = await fetch(url);
-      } catch (e) {
+      } catch (e) {        
         console.log(e);
         timer(timerId);
+        cb(err);
         return;
       }
       const reader = response.body.getReader();
@@ -110,7 +111,6 @@ function get(options, cb) {
       let c = false;
       while (!result.done) {
         length = length + result.value.length;
-        //console.log("Read " + length + " bytes");
         if (c === false && length > 3000000) {
           c = confirm('Large data response. Continue? (Uncheck Options > Show data to suppress display of data in browser.)');
           if (c === false) {
@@ -118,9 +118,11 @@ function get(options, cb) {
           }
         }
         const text = decoder.decode(result.value);
+        log("get(): Appending " + length + " bytes to #data");
         $("#data").append(text);
         result = await reader.read();
       }
+      cb(null);
       timer(timerId);
     }
   }

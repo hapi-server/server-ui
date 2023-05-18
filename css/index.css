@@ -81,9 +81,8 @@ textarea.script {
 
 textarea.data {
 	background-color: #f9f9f9;
-	max-height: 200px;
 	width: 100%;
-	overflow-y: auto;
+  height: 1px;
 	/* prevent horizontal scrollbar */
 	overflow-x: auto;
 	/* add padding to account for vertical scrollbar */

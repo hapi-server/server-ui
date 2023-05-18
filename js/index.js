@@ -990,12 +990,13 @@ function output(jsonURL) {
     }
 
     $("#downloadlink")
-      .append("<pre id='data' class='data'></pre>")
+      .append("<details open><summary></summary><textarea readonly id='data' class='data'></textarea></details>")
 
     get({url: url, chunk: true}, function(err, data) {
-      $("#downloadlink > pre")
+      $("#downloadlink textarea")
           .width($("#infodiv").width()-15)
           .height($(window).height()/2)
+      $("#downloadlink details").attr('open',true);
       $("#downloadlink").show();
     });
 

@@ -59,7 +59,7 @@ function hashchange() {
         }
         $("#" + id).val(qs[id])
             .data("autocomplete")
-            ._trigger("select",null,{item:qs[id]});
+            ._trigger("select",null,{item: qs[id]});
         }
     }                   
     $(window).hashchange.byurledit = true;

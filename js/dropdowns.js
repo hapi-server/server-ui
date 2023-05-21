@@ -29,20 +29,21 @@ function dropdowns(ids, funs, after, i) {
 			});
 	}
 
-	function showvalues(id, ui) {
+	function logvalues(id, ui) {
 		let value     = $('input[id=' + id + ']').parent().parent().attr('value');
 		let valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
 
-		console.log("value         = " + value);
-		console.log("valuelast     = " + valuelast);
+		log("value         = " + value);
+		log("valuelast     = " + valuelast);
 		if (ui && ui.item) {
-			console.log("ui.value      = " + ui.item.value);
-			console.log("ui.valuelast  = " + ui.item.valuelast);
+			log("ui.value      = " + ui.item.value);
+			log("ui.valuelast  = " + ui.item.valuelast);
 		} else {
-			console.log("ui.item.value      = undefined");
-			console.log("ui.item.valuelast  = undefined");
+			log("ui.item.value      = undefined");
+			log("ui.item.valuelast  = undefined");
 		}
 	}
+
 	function ac(i, list) {	
 
 		$("#" + ids[i])
@@ -55,17 +56,17 @@ function dropdowns(ids, funs, after, i) {
 
 					var id = $(this).attr('id');
 					log("dropdowns.ac.open(): Open event on " + id + ".");
-					showvalues(id, ui);
+					logvalues(id, ui);
 					log("dropdowns.ac.open(): Binding blur event on id = " + id);
 
 					$('input[id=' + id + ']').blur(function () {
 						id = $(this).attr('id');
 						log("dropdowns.ac.blur(): Blur event triggered on id = " + id + ".");
-						showvalues(id, ui)
+						logvalues(id, ui)
 
 						function reset(el) {
 							log("dropdowns.ac.reset(): Called.");
-							showvalues(id, ui)
+							logvalues(id, ui)
 							if (!$(el).attr('value')) {
 								log("dropdowns.ac.reset(): Resetting to " + $(el).attr('label'));
 								$("#"+id)
@@ -110,7 +111,7 @@ function dropdowns(ids, funs, after, i) {
 					// Triggered when drop-down list disappears.
 					var id = $(this).attr('id');
 					log("dropdowns.ac.close(): Close event on drop-down with id = " + id + ".");
-					showvalues(id, ui);
+					logvalues(id, ui);
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
 					var value = $('input[id=' + id + ']').attr('value');
 					if (value == "") {
@@ -122,13 +123,10 @@ function dropdowns(ids, funs, after, i) {
 				change: function(event, ui) {
 					// Triggered when editing value with keyboard, not hitting enter,
 					// and then clicking another element.
-					//alert("Change")
-					console.log("Change")
 					id = $(this).attr('id');
-					showvalues(id, ui);
-					return;
 
 					log("dropdowns.ac.change(): Change event triggered on drop-down with id = " + id + ".");
+					logvalues(id, ui);
 
 					var i = parseInt($(this).parent().parent().attr("id").replace(/[a-z]/gi,""));
 					$('input[id=' + id + ']').unbind('blur');
@@ -179,11 +177,15 @@ function dropdowns(ids, funs, after, i) {
 					id = $(this).attr('id');
 
 					log("dropdowns.ac.select(): Select event triggered on drop-down with id = " + id);
-					showvalues(id, ui);
+					logvalues(id, ui);
 
 					var label = $('input[id=' + id + ']').attr('label');
 					var value = ui.item.value || event.target.value;
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
+
+					if (value === label) {
+						return;
+					}
 
 					var i = parseInt($(this)
 										.parent()
@@ -248,27 +250,24 @@ function dropdowns(ids, funs, after, i) {
 					}
 
 					if (value === valuelast) {
-						log("dropdowns.ac.select(): New value was "
+						log("dropdowns.ac.select(): New value is "
 										+ "same as old. Closing drop-down"
 										+ " and taking no action.");
 						$('input[id=' + id + ']').autocomplete("close");
 					} else {
-						if (funs[i].clearfollowing) {
-							if (funs[i].clearfollowing() == false) {
-								log("dropdowns.ac.select(): Not clearing values "
-											    + "in all drop-downs after " + id + ".");
+						if (funs[i].clearfollowing && funs[i].clearfollowing() == false) {
+							log("dropdowns.ac.select(): clearfollowing() returned false. Not clearing values "
+							  + "in all drop-downs after " + id + ".");
 
-								if (funs[i].onselect) {
-									log("dropdowns.ac.select(): Triggering "
-									  + "onselect callback for current drop-down.");
-									var err = funs[i].onselect();
-								}
-
-								return;
+							if (funs[i].onselect) {
+								log("dropdowns.ac.select(): Triggering "
+								  + "onselect callback for current drop-down.");
+								var err = funs[i].onselect();
 							}
+							return;
 						}
 
-						log("dropdowns.ac.select(): New value is not same as old."
+						log("dropdowns.ac.select(): New value is not same as old and clearfollowing() returned true."
 							+ " Clearing values in all drop-downs after " + id + ".");
 						
 						$("input[id='"+id+"']")
@@ -279,7 +278,7 @@ function dropdowns(ids, funs, after, i) {
 							.attr('value','');
 
 						log("dropdowns.ac.select(): Getting drop-down "
-							+ "values on all remaing drop-downs.");
+							+ "values on current and previous drop-downs.");
 
 						qs = {};
 						for (j = 0;j < i+1;j++) {
@@ -288,7 +287,7 @@ function dropdowns(ids, funs, after, i) {
 							}
 						}
 						log("dropdowns.ac.select(): Setting hash based on"
-							+ " values on all remaing drop-downs.");
+							+ " values on current and previous drop-downs.");
 						location.hash = decodeURIComponent($.param(qs));
 
 						// Trigger onselect callback for dropdowns.
@@ -345,7 +344,6 @@ function dropdowns(ids, funs, after, i) {
 					}
 					$(ul).append(txt);
 				}
-
 	}
 
 	log("dropdowns(): Calling " + funs[i].name + "() to get drop-down list entries.");
@@ -456,7 +454,7 @@ function dropdowns(ids, funs, after, i) {
 
 		if (list.length > 0) {
 			log("dropdowns.ac.select(): Drop-down with id = "
-					+ ids[i] + " has values. Triggering show on it.");
+					+ ids[i] + " has values. Unhiding it.");
 			$(after+(i)).show();
 		} 
 

@@ -14,6 +14,12 @@ function main(OPTIONS) {
             + OPTIONS["devNote"] 
             + "</span></p>");
 
+
+  examples(null, function (list) {
+    $("#all-example-details ul").remove();
+    $("#all-example-details").append(list).show()
+  });
+
   tooltips();
 
   // Bind events to changes in checkbox state.
@@ -36,9 +42,6 @@ function main(OPTIONS) {
       ["server","dataset","parameters","start","stop","return","format","type","style"],
       [servers,datasets,parameters,starttime,stoptime,returntype,format,type,style],
       "#dropdowns");
-
-  //Set up examples drop-down.
-  //dropdowns(["examples"],[examples],"#examples");
 }
 
 function log(msg) {
@@ -68,6 +71,8 @@ function server_list_in_hash() {
   }
 }
 
+
+
 // Determine selected value for a drop-down.    
 function selected(name) {
 
@@ -81,7 +86,10 @@ function selected(name) {
       return qs[name];
     }
   }
-  return $("span[name='"+name+"']").attr('value');
+  if (name === 'plotserver') {
+    return $('#plotserver').val();    
+  }
+  return "";
 }
 
 function doy2ymd(dateTime) {
@@ -120,14 +128,14 @@ function link(url, text) {
   urls = url.replace(selected("server") + "/hapi/", "");
   if (arguments.length > 1) {
     return "<a target='_blank' title='" 
-            + url + "' href='" 
+            + url.replace("&param","&amp;param") + "' href='" 
             + url + "'>" 
             + text + "</a>";
   } else {
     return "<a target='_blank' title='" 
-            + url + "' href='" 
+            + url.replace("&param","&amp;param") + "' href='" 
             + url + "'>" 
-            + urls + "</a>";
+            + urls.replace("&param","&amp;param") + "</a>";
   }
 }
 
@@ -143,28 +151,6 @@ function downloadlink(url, what, showElapsed) {
     $("#downloadlink > span > a").css('font-weight', 'bold');
 }
 
-function timer(id) {
-
-  if (id) {
-    clearInterval(timer[id].interval);
-    let elapsed = ((new Date()).getTime() - timer[id].time);
-    $("#timing").text("Time: " + (elapsed) + " [ms]");
-    return;
-  }
-
-  $('#timing').empty();
-  $("#timing").text("Time:      ms");
-  id = Math.random();
-  timer[id] = {time: (new Date()).getTime()};
-  timer[id].interval = 
-          setInterval(
-              () => {
-                  let elapsed = ((new Date()).getTime() - timer[id].time);
-                  $("#timing").text("Time: " + (elapsed) + "  ms");
-              }, 500);
-  return id;
-}
-
 // Handle servers drop-down.
 function servers(cb) {
 
@@ -175,12 +161,14 @@ function servers(cb) {
 
     log('servers.onselect(): Called.');
 
-    if (window.timerId) {
-      window.timerId;
-      timer(window.timerId);
-      $("#timing").empty();
-      $("#loading").empty();
-    }
+    examples(selected('server'),
+      function (list) {
+        let id = "#server-example-details";
+        if (!list) {$(id).hide()}
+        $(id + " ul").remove();
+        $(id).prop('open',true);
+        $(id).append(list).show();
+    });
 
     $('#overviewinfo').hide();
     $('#output').hide();
@@ -208,7 +196,7 @@ function servers(cb) {
   };
 
   log('servers(): Called.');
-
+  
   let SERVER_LIST_HASH = server_list_in_hash();
   if (SERVER_LIST_HASH !== "") {
     log('servers(): Server list given in hash as URL.')
@@ -328,7 +316,6 @@ function servers(cb) {
     log(list);
     servers.info = info;
     cb(list);
-
   }
 }
 
@@ -361,7 +348,7 @@ function datasets(cb) {
     res = res.catalog;
     // Show number of datasets
     let plural = res.length > 1 ? "s" : "";
-    $('#serverinfo ul')
+    $('#serverinfo > ul')
       .append('<li>' + (res.length) + ' dataset' + plural + '</li>');
     $('#serverinfo ul').append('<li id="statuslink" style="display:none"><a target="_blank" href="' + OPTIONS["urlwatcher"] + '#category='+ selected('server') +'">View server response tests.</a></li>');
     if ($("#showstatuslink").prop('checked')) {
@@ -592,7 +579,7 @@ function parameters(cb) {
         }
         if (qsInitial['parameters'] === res[k]['name']) {
           log("parameters(): parameter value for " 
-              + name 
+              + res[k]['name'] 
               + " found in hash. Will select it.")
         }
         let label = res[k]['label'] || "";
@@ -631,22 +618,26 @@ function parameters(cb) {
 }
 
 function checktimes(which) {
+
   if (selected('start') && selected('stop')) {
     log("stoptime select event.")
     log("starttime = " + selected('start'))                 
     log("stoptime = " + selected('stop'))
     var t = dayjs(doy2ymd(selected('start').replace("Z","")))
-            < dayjs(doy2ymd(selected('stop').replace("Z","")));
+          < dayjs(doy2ymd(selected('stop').replace("Z","")));
     log("---> start < stop? " + t);
     if (t == false) {
       log(which + " changed; start >= stop. Setting color of " + which + " to red.");
       $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
-      return "Error";
+      return false;
     } else {
-      log(which + " changed; start < stop. Setting color of " + which + " to black.");
-      $('#' + which + 'list').css('color','black').removeClass('tooltip').attr('title','');
+      log(which + " changed; start < stop. Setting colors to black.");
+      $('#startlist').css('color','black').removeClass('tooltip').attr('title','');
+      $('#stoplist').css('color','black').removeClass('tooltip').attr('title','');
+      return true;
     }
   }
+  return true;
 }
 
 // Handle start time drop-down.
@@ -656,15 +647,22 @@ function starttime(cb) {
 
   starttime.label = "Start";
 
+  starttime.isvalid = function () {return checktimes('start')}
+
   starttime.clearfollowing = function () {
-    if (selected('return')) {
-      output();
+    log('starttime.clearfollowing(): Called.');
+    if (selected('format')) {
+      if (starttime.isvalid()) {
+        output(); // Update output
+      }
       return false;
     } else {
       return true;
     }
   }
+
   starttime.onselect = function () {
+    log('starttime.onselect(): Called.');
     return checktimes('start');
   };
 
@@ -696,9 +694,14 @@ function stoptime(cb) {
 
   stoptime.label = "Stop";
 
+  stoptime.isvalid = function () {return checktimes('stop')}
+
   stoptime.clearfollowing = function () {
-    if (selected('return')) {
-      output();
+    log('starttime.clearfollowing(): Called.');
+    if (selected('format')) {
+      if (stoptime.isvalid()) {
+        output(); // Update output
+      }
       return false;
     } else {
       return true;
@@ -706,6 +709,7 @@ function stoptime(cb) {
   }
 
   stoptime.onselect = function () {
+    log('stoptime.onselect(): Called.');
     return checktimes('stop');
   };
 
@@ -731,7 +735,6 @@ function stoptime(cb) {
     return;
   }
 
-  //alert('here')
   start = meta['startDate'];
   let cadenceString = meta['cadence'] || "PT1M";
   let cadenceMillis = dayjs.duration(cadenceString)['$ms'];
@@ -810,45 +813,54 @@ function format(cb) {
 
   format.onselect = function () {
     $('#output').children().hide();
-
-    if (selected("return") === "image" 
-        || selected("return") === "script"
-        || selected("format") === "json") {
+    if (selected("return") === "image"  || 
+        selected("return") === "script" || 
+        selected("format") === "json")
+    {
         output();
     }
   };
 
+  let values = [];
   if (selected("return").match("data")) {
-    var values = 
-                [
-                    {label:"CSV", value:"csv"},
-                    {label:"JSON", value:"json"}
-                ];
+    values = 
+              [
+                {label: "CSV", value: "csv"},
+                {label: "JSON", value: "json"}
+              ];
   }
   if (selected("return").match("image")) {
-    var values =
+    values =
+              [
+                {label: "SVG", value: "svg"},
+                {label: "PNG", value: "png"},
+                {label: "PDF", value: "pdf"}
+              ];
+    if (selected('server') === 'CDAWeb' && selected('plotserver') === 'native') {
+      values =
                 [
-                    {label:"SVG",value:"svg"},
-                    {label:"PNG",value:"png"},
-                    {label:"PDF",value:"pdf"},
-                    {label:"Gallery",value:"gallery"}
+                  {label: "GIF", value: "gif"},
+                  {label: "PNG", value: "png"},
+                  {label: "PDF", value: "pdf"}
                 ];
+    }
+
   }
   if (selected("return").match("script")) {
-    var values =
-                [
-                    {label:"IDL",value:"idl"},
-                    {label:"IDL/SPEDAS",value:"idl-spedas"},
-                    {label:"Javascript",value:"javascript"},
-                    {label:"MATLAB",value:"matlab"},
-                    {label:"Python",value:"python"},
-                    {label:"Python/SPEDAS",value:"python-spedas"},
-                    {label:"Python/Kamodo",value:"python-kamodo"},
-                    {label:"Python/Kamodo-alt",value:"python-kamodo-alt"},
-                    {label:"Autoplot",value:"autoplot"},
-                    {label:"curl",value:"curl"},
-                    {label:"wget",value:"wget"}
-                ];
+    values =
+              [
+                  {label: "IDL", value: "idl"},
+                  {label: "IDL/SPEDAS", value:"idl-spedas"},
+                  {label: "Javascript", value:"javascript"},
+                  {label: "MATLAB", value:"matlab"},
+                  {label: "Python", value:"python"},
+                  {label: "Python/SPEDAS", value:"python-spedas"},
+                  {label: "Python/Kamodo", value:"python-kamodo"},
+                  {label: "Python/Kamodo-alt", value:"python-kamodo-alt"},
+                  {label: "Autoplot", value: "autoplot"},
+                  {label: "curl", value: "curl"},
+                  {label: "wget", value: "wget"}
+              ];
   }
 
   for (var i = 0; i < values.length; i++) {
@@ -856,6 +868,43 @@ function format(cb) {
         values[i]['selected'] = true;
     }
   }
+  cb(values);
+}
+
+// Handle style drop-down.
+function style(cb) {
+
+  log('style(): Called.');
+
+  style.label = "Style";
+  style.onselect = function () {output()}
+
+  var values = [];
+
+  if (selected("return") === "data") {
+    var values = [];                        
+    if (selected('format') == 'csv') {
+      var values = 
+          [
+              {
+                  label: "No Header",
+                  value: "noheader",
+                  selected: true
+              },
+              {
+                label: "Header",
+                value: "header"
+              }
+          ];
+    }
+  }
+
+  for (var i = 0; i < values.length; i++) {
+    if (qsInitial['style'] === values[i]['value']) {
+      values[i]['selected'] = true;
+    }
+  }
+
   cb(values);
 }
 
@@ -888,74 +937,6 @@ function type(cb) {
               ];
   }
   cb(values);
-}
-
-// Handle style drop-down.
-function style(cb) {
-
-  log('style(): Called.');
-
-  style.label = "Style";
-  style.onselect = function () {
-    output();
-  }
-
-  var values = [];
-  if (false && selected("return") === "image") {
-    values = 
-        [
-            {label: "None/Black/Blue", value: "0", selected: true},
-            {label: "Black/Yellow/Yellow", value: "1"},
-            {label: "Sparkline", value: "2"}
-        ];
-  }
-
-  if (selected("return") === "data") {
-    var values = [];                        
-    if (selected('format') == 'csv') {
-      var values = 
-          [
-              {
-                  label: "No Header",
-                  value: "noheader",
-                  selected: true
-              },
-              {label: "Header", value: "header"}
-          ];
-    }
-  }
-
-  for (var i = 0; i < values.length; i++) {
-    if (qsInitial['style'] === values[i]['value']) {
-      values[i]['selected'] = true;
-    }
-  }
-
-  cb(values);
-}
-
-// Handle examples drop-down.
-function examples(cb) {
-
-  log('examples(): Called.');
-
-  examples.onselect = function () {
-    vid = $("#examples0").attr('value');
-    log("Example " + vid + " selected");
-
-    // Find example corresponding to vid.
-    for (var k = 0; k < examples.list.length; k++) {
-        if (examples.list[k].value === vid) {
-            break;
-        }
-    }
-    $(window).unbind("hashchange");
-    location.hash = examples.list[k].value;
-    location.reload();
-  };
-  var list = examplelist(); // Function defined in examplelist.js.
-  examples.list = list;
-  cb(list);
 }
 
 // Form URL and place it in DOM based on drop-down change.
@@ -1001,30 +982,17 @@ function output(jsonURL) {
     $('#output').show();
 
     downloadlink(url, "data");
+    $("#downloadlink").show();
 
     if ($("#showdata").prop('checked') == false) {
       return;
     }
 
-    $("#downloadlink")
-      .append("<pre id='data' class='data'></pre>")
+    $("#data-details").show();
+    $("#data").empty().width($("#infodiv").width()-15).height($(window).height()/2);
 
-    get({url: url, chunk: true}, function(err, data) {
-      $("#downloadlink > pre")
-          .width($("#infodiv").width()-15)
-          .height($(window).height()/2)
-      $("#downloadlink").show();
-    });
-
-    return;
-
-    get({url: url}, function (err, data) {
-        $("#downloadlink")
-            .append("<pre id='data' class='data'>" + data + "</pre>");
-        $("#downloadlink > pre")
-            .width($("#infodiv").width()-15)
-            .height($(window).height()/2)
-        $("#downloadlink").show();
+    get({url: url, chunk: true}, function(err, length, nrecords) {
+      $("#downloadlink").append(`<code id="records-and-size"> (${nrecords} records, ${sizeOf(length)})</code>`);
     });
   }
 
@@ -1035,23 +1003,26 @@ function output(jsonURL) {
     $(window).hashchange.byurledit = false;
     location.hash = decodeURIComponent($.param(qs));
 
-    if (selected('format').match(/png|svg|pdf/)) {
-      $('#output').show();
-      plot();
-    }
+    $('#output').show();
+    url = plot();
+    downloadlink(url, selected("format"));
+    if (/png|svg/.test(selected("format"))) {
+      url = url.replace(`format=${selected("format")}`, 'format=gallery');
+      let galleryHTML = "&nbsp;|&nbsp;"
+                      + "<span>View more in gallery:&nbsp;" 
+                      + link(url + "&mode=thumb", "&#9638;&nbsp;Thumbnails", true)
+                      + "&nbsp;|&nbsp;"
+                      + link(url, "&#9707;&nbsp;Filmstrip", true)
+                      + "</span>";
 
-    if (selected('format').match(/gallery/)) {
-      url = plot(null, false);
-      $("#downloadlink")
-          .empty()
-          .append(
-              "<span>" 
-              + link(url, "View gallery", true) 
-              + "</span>")
-          .show();
-      $("#downloadlink > span > a")
-        .css('font-weight', 'bold');
-    }
- 
+      $("#downloadlink").append(galleryHTML).show();
+    } 
   }
+}
+
+function sizeOf(bytes) {
+  // https://stackoverflow.com/a/28120564
+  if (bytes == 0) { return "0.00 B"; }
+  var e = Math.floor(Math.log(bytes) / Math.log(1000));
+  return (bytes/Math.pow(1000, e)).toFixed(2)+' '+' KMGTP'.charAt(e)+'B';
 }

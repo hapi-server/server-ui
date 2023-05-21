@@ -133,11 +133,21 @@ function checkboxes(OPTIONS) {
 
   $('#plotserver').val(defaults['plotserver']);
   $('#plotserver').change(function () {
+    // TODO: Validate
     let qs = parseQueryString();
     if (qs["return"] && qs["return"] === "image" && qs["format"]) {
-      log("plotserver changed. Triggering select event on #format drop-down.");
-      $("#format").val("").data("autocomplete")._trigger("select",null,{item:""});
-      $("#format").val(qs["format"]).data("autocomplete")._trigger("select",null,{item:qs["format"]});
+      // Need to clear all following drop-downs.
+      $("input[id='return']")
+        .parent().parent()
+        .nextAll("span")
+        .hide()
+        .html('')
+        .attr('value','');
+
+        log("plotserver changed. Triggering select event on #return drop-down.");
+        // Clear first so next trigger causes update.
+        $("#return").val("").data("autocomplete")._trigger("select",null,{item: ""});
+        $("#return").val("image").data("autocomplete")._trigger("select",null,{item: "image"});
     }
     qs['plotserver'] = $('#plotserver').val();
     $(window).hashchange.byurledit = false;

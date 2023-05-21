@@ -21,6 +21,7 @@ app.get('/', function (req,res) {
 app.use("/css", express.static(__dirname + '/../css'));
 app.use("/js", express.static(__dirname + '/../js'));
 app.use("/scripts", express.static(__dirname + '/../scripts'));
+app.use("/examples", express.static(__dirname + '/../examples'));
 
 let streamChunks = true;
 
@@ -56,16 +57,18 @@ app.get('/proxy', function (req, res) {
       .get(url)
       .buffer()
       .parse((proxy_res, callback) => {
+        if (proxy_res.statusCode !== 200) {
+          res.status(proxy_res.statusCode).end();
+          return;
+        }
         proxy_res.on('data', chunk => {
-         res.write(chunk)
+         res.write(chunk);
         })
         proxy_res.on('end', () => {
           res.end();
         })
         proxy_res.on('error', (err) => {
-          console.log(err);
           res.status(501).send("");
-          return;
         })
       })
       .end(function() {}); // end is required otherwise hangs.

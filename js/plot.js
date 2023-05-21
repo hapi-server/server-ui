@@ -1,35 +1,38 @@
-function plot(method, set) {
+function plot(set) {
 
   // TODO: Check method is known.
 
-  let selectedParameters = selected('parameters');
-
-  let plotserver = parseQueryString()['plotserver'];
-  if (!plotserver) {
-    plotserver = $('#plotserver').val();
-  }
-
-  if (!method && !/^http/.test(plotserver)) {
+  let plotserver = selected('plotserver');
+  if (/^[a-z].*?:http/.test(plotserver)) {
+    method = plotserver.split(":")[0];
+    plotserver = plotserver.split(method + ":")[1];
+  } else if (/^http/.test(plotserver)) {
+    // If bare URL, assume hapiplot
+    method = "hapiplot";
+  } else {
     method = plotserver;
-  }
-  if (method) {
-    // Override what is in URL or text box.
+    if (method.trim() === "") {
+      method = "hapiplot";
+    }
     if (method.trim() === 'hapiplot') {
       plotserver = OPTIONS['hapiplot'];
     }
     if (method.trim() === 'autoplot') {
       plotserver = OPTIONS['autoplot'];
     }
-  }
-  if (/^[a-z].*?:http/.test(plotserver)) {
-    method = plotserver.split(":")[0];
-    plotserver = plotserver.split(":")[1];
+    if (method.trim() === 'native' && selected('server') !== 'CDAWeb') {      
+      method = 'hapiplot';
+      plotserver = OPTIONS['hapiplot'];
+    }
   }
 
   let SERVER = servers.info[selected('server')]['url'];
   if (!SERVER.startsWith("http")) {
       SERVER = location.origin + location.pathname + SERVER;
   }
+
+
+  let selectedParameters = selected('parameters');
 
   let url = "";
   if (method === 'native') {
@@ -123,7 +126,7 @@ function plot(method, set) {
     let timerId = timer();
     downloadlink(url, selected('format'));
 
-    if (selected('format').match(/png|svg/)) {
+    if (!selected('format').match(/pdf/)) {
 
       $("#image")
           .empty()
@@ -141,32 +144,14 @@ function plot(method, set) {
         $("#image > img").width($("#infodiv").width());
       }
 
-    }
-
-    if (selected('format').match(/pdf/)) {
+    } else {
 
       let w = $("#infodiv").width();
       // TODO: Determine aspect ratio based on request params.
       let h = w/2.1; 
-
-      if (0) {
-        let object = `<object
-                        id="pdf-object"
-                        data="${url}"
-                        type="application/pdf"
-                        width="${w}"
-                        height="${h}"
-                      </object>`
-
-        $("#image")
-            .empty()
-            .append(object)
-            .show();
-      }
-
       // TODO: Image inside iframe will be zoomed when browser content
       // is zoomed. Undo this zoom? Use this to determine zoom:
-      // https://codepen.io/reinis/pen/RooGOE.
+      // https://codepen.io/reinis/pen/RooGOE ?
       $("#image")
           .empty()
           .append(`<iframe width='${w}' height='${h}'></iframe>`)

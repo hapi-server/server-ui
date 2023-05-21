@@ -70,11 +70,13 @@
   <script type="text/javascript" src="js/dropdowns.js"></script>
   <script type="text/javascript" src="js/examplelist.js"></script>
   <script type="text/javascript" src="js/hashchange.js"></script>
+  <script type="text/javascript" src="js/timer.js"></script>
   <script type="text/javascript" src="js/get.js"></script>
   <script type="text/javascript" src="js/tooltips.js"></script>
   <script type="text/javascript" src="js/showText.js"></script>
   <script type="text/javascript" src="js/plot.js"></script>
   <script type="text/javascript" src="js/script.js"></script>
+  <script type="text/javascript" src="examples/examples.js"></script>
   <script type="text/javascript" src="js/index.js"></script>
 
   <script>
@@ -142,9 +144,11 @@
 <body>
 
   <div id="selections">
-
     <details id="options-details">
-      <summary><span>Options</span></summary>
+      <summary>
+        <span>Options</span>
+        <code id="timing" style="float:right;"></code>
+      </summary>
       <div id="optionscheckboxes">
         <div class="tooltip-right"
              title="When requesting data, show data in broswer instead of only providing a download link.">
@@ -247,14 +251,15 @@
 
     <div id="xstatus"></div>
     <div id="loadinfo">
-      <code id="timing"></code>
       <span id="requests"></span>
     </div>
 
     <div id="overviewinfo">
       <b>Overview</b>
       <p>
-        The Heliophysics Data Application Programmer's Interface (HAPI) specification is a time series download and streaming format specification.
+        The Heliophysics Data Application Programmer's Interface 
+        (<a href="https://hapi-server.org/">HAPI</a>) 
+        specification is a time series download and streaming format specification.
       </p>
       <p>
         When data are available from a HAPI server, there is no need to download data files and write custom file reader programs. Using a HAPI client library, data can be loaded into an array using a single command in IDL, Javascript, MATLAB, and Python.
@@ -295,7 +300,7 @@
         <a  class="tooltip" 
             href="https://sscweb.gsfc.nasa.gov/"
             title="NASA's Satellite Situation Center Web Services">
-          SSCWeb</a>, 
+          SSCWeb</a>, and 
         <a  class="tooltip" 
             href="https://vires.services/"
             title="Virtual Research Service for ESA's Swarm mission">
@@ -348,41 +353,12 @@
           </ul>
         </li>
         <li>
-          Begin by selecting a HAPI-enabled data server on the left or selecting an example below.
+          Begin by selecting a HAPI-enabled data server on the left or selecting an example query below.
         </li>
       </ul>
 
-      <details>
+      <details id="all-example-details">
         <summary><b>Example Queries</b></summary>
-        <ul>
-          <li>
-            <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=svg">Plot <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=LISIRD&dataset=empire_tsi&parameters=irradiance&start=1947-02-14T00:00:00.000Z&stop=1997-02-16T00:00:00.000Z&return=image&format=svg">Plot <code>empire_tsi</code> timeseries</a> from the <a href="#server=LISIRD">LASP/LiSIRD HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=AMDA&dataset=c2-t96-model&parameters=b_t96gse_c2_xyz_gse&start=2003-10-20T00:00:00Z&stop=2003-10-30T00:00:00.000Z&return=image&format=svg">Plot <b>B</b> from T96 model at Cluster 2 location</a> from the <a href="#server=AMDA">AMDA HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=data&format=csv&style=noheader">List <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=python">Create Python script to read <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=matlab">Create MATLAB script to read <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=SYM_H&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=script&format=idl">Create IDL script to read <code>SYM-H</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=CDAWeb&dataset=OMNI_HRO2_1MIN&parameters=AL_INDEX&start=2003-10-20T00:00:00Z&stop=2003-11-30T00:00:00.000Z&return=image&format=gallery">Plot <code>AL Index</code> timeseries</a> from the <a href="#server=CDAWeb">CDAWeb HAPI server</a>
-          </li>
-          <li>
-            <a href="#server=https://pds-ppi.igpp.ucla.edu/hapi">Use this interface to test a server not in server list drop-down menu.</a>
-          </li>
-        </ul>
       </details>
 
       <!--div id="examplelist"><span id="examples0"></span></div>-->
@@ -391,25 +367,31 @@
     <div id="output">
       <div id="downloadlink" style="display:none;"></div>
 
-      <div id="scriptcopy" class='tooltip' title='Copy to clipboard'>
-          <button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
+        <div id="scriptcopy" class='tooltip' title='Copy to clipboard'>
+            <button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
               <img class='clippy' width='20' src='css/clippy.png' alt='Copy to clipboard'>
-          </button>
-          <span id="copied" class="tooltip" title="Copied!"></span>
-      </div>
+            </button>
+            <span id="copied" class="tooltip" title="Copied!"></span>
+        </div>
 
-      <div id="scripttext">
-      </div>
+        <details id="data-details" open>
+          <summary>Data</summary>
+          <textarea id='data' class='data' readonly></textarea>
+        </details>
 
-      <div id="image" style="display:none;">
-      </div>
-      <div id="image2" style="display:none;">
-      </div>
+        <div id="scripttext">
+        </div>
+
+        <div id="image" style="display:none;"></div>
+      </details>
     </div>
 
     <div id="serverinfo">
       <b>Server information</b>
       <ul></ul>
+      <details id="server-example-details" open>
+        <summary><b>Example Queries</b></summary>
+      </details>
     </div>
     <div id="datasetinfo">
       <b>Dataset information</b>

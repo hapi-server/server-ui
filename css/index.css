@@ -28,8 +28,20 @@ a {
 	cursor: pointer;
 }
 
+
 details {
   cursor: pointer;  
+}
+
+#server-example-details {
+	display: none;
+}
+#data-details {
+  margin-top: 5px;
+}
+
+#records-and-size {
+  font-size: 90%;
 }
 
 #options-details {
@@ -55,6 +67,7 @@ details {
 #requests {
   font-size: 80%;
   overflow-x: scroll;
+  display: none;
 }
 
 #loadinfo {
@@ -81,7 +94,6 @@ textarea.script {
 
 textarea.data {
 	background-color: #f9f9f9;
-	max-height: 200px;
 	width: 100%;
 	overflow-y: auto;
 	/* prevent horizontal scrollbar */
@@ -212,19 +224,19 @@ pre.data {
 
 #output {
 	margin-bottom: 1em;
-  display:none;
+  display: none;
 }
 
 #serverinfo {
-  display:none;
+  display: none;
 }
 
 #datasetinfo {
-  display:none;
+  display: none;
 }
 
 #parameterinfo {
-  display:none;
+  display: none;
 }
 
 #footer {

@@ -71,47 +71,14 @@ function get(options, cb) {
           timer(timerId);
           log("get(): Got " + url);
           $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
-          if ($('#showrequests').attr('checked')) {
-            $("#requests").show();
-          }
+          if ($('#showrequests').attr('checked')) $("#requests").show();
           get.cache[urlo] = data; // Cache response.
+          console.log(data);
           cb(false, data);
         },
         error: function (xhr, textStatus, errorThrown) {
           timer(timerId);
-          if (xhr.status !== 200) {            
-            //timer(timerId);
-            //ajaxerror(url, `<a href='${urlo}'>${urlo}</a> returned status code <code>${xhr.status}</code>`, xhr);
-            //cb("Error"  , null);
-            //return;
-          }
-          if (tryProxy && directURLFailed == false && PROXY_URL) {
-            var opts = {
-                          url: url,
-                          directURLFailed: true,
-                          tryProxy: false,
-                          showAjaxError: true
-                        };
-            log("get(): Attempting to proxy retrieve " + url);
-            get(opts, cb);
-          } else {
-            if (showAjaxError) {
-              var message = "";
-              if (directURLFailed && PROXY_URL) {
-                message = `Failed to retrieve<br><br><a href='${urlo}'>${urlo}</a>`
-                        + "<br>and<br>"
-                        + `<a href='${url}'>${url}</a>`
-                        + "<br><br>"
-                        + "The first URL failure <i>may</i> be due to the server not supporting "
-                        + `<a href='${specURL}'>CORS headers</a>. `
-                        + "The second URL failure is usually a result of a server issue.";
-              } else {
-                message = `Failed to retrieve '${url}'`;
-              }
-              ajaxerror(url, message, xhr);
-            }
-            cb("Error", null);
-          }
+          error(xhr, textStatus, errorThrown);
         }
     });
   }
@@ -125,8 +92,8 @@ function get(options, cb) {
       try {
         response = await fetch(url);
       } catch (e) {
-        console.log(e);
         timer(timerId);
+        error(e);
         return;
       }
       const reader = response.body.getReader();
@@ -150,6 +117,7 @@ function get(options, cb) {
         $("#data").append(text);
         result = await reader.read();
       }
+
       timer(timerId);
       if (cb) cb(null, length, nrecords);
     }
@@ -170,4 +138,34 @@ function get(options, cb) {
     console.error(xhr);
   }
 
+  function error(xhr, textStatus, errorThrown) {
+    if (tryProxy && directURLFailed == false && PROXY_URL) {
+      var opts = {
+                    url: url,
+                    directURLFailed: true,
+                    tryProxy: false,
+                    showAjaxError: true,
+                    chunk: options.chunk || false
+                  };
+      log("get(): Attempting to proxy retrieve " + url);
+      get(opts, cb);
+    } else {
+      if (showAjaxError) {
+        var message = "";
+        if (directURLFailed && PROXY_URL) {
+          message = `Failed to retrieve<br><br><a href='${urlo}'>${urlo}</a>`
+                  + "<br>and<br>"
+                  + `<a href='${url}'>${url}</a>`
+                  + "<br><br>"
+                  + "The first URL failure <i>may</i> be due to the server not supporting "
+                  + `<a href='${specURL}'>CORS headers</a>. `
+                  + "The second URL failure is usually a result of a server issue.";
+        } else {
+          message = `Failed to retrieve '${url}'`;
+        }
+        ajaxerror(url, message, xhr);
+      }
+      cb("Error", null);
+    }
+  }
 }

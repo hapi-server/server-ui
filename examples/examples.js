@@ -45,7 +45,7 @@ function examples(server, cb) {
                     ];
       for (option of options) {
         let label = option['label'];
-        label += ` for parameter <code>${json['parameters']}</code> `;
+        label += ` parameter <code>${json['parameters']}</code> `;
         label += `of <code>${json['dataset']}</code> dataset`
         let href = hrefo + "&" + option['args'];        
         linkHTML = linkHTML + `\n<li><a href="${href}">${label}</a></li>`

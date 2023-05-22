@@ -1,0 +1,6 @@
+{
+  "dataset": "Cassini/MAG/VectorSC",
+  "parameters": "x",
+  "start": "2010-01-01T00:00:00",
+  "stop": "2010-01-02T00:00:00"
+}

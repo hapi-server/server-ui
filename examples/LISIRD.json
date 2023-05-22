@@ -1,0 +1,6 @@
+{
+  "dataset": "historical_tsi",
+  "parameters": "Irradiance",
+  "start": "1610-01-01T00:00:00.000Z",
+  "stop": "2023-01-03T00:00:00.000Z"
+}

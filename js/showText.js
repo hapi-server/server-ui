@@ -5,7 +5,7 @@ function showText(sText,cclass,ext) {
 
   var clipboard = new ClipboardJS('.btn');
   clipboard.on('success', function () {
-      log('Copied script to clipboard.');
+      util.log('Copied script to clipboard.');
       $('#copied').tooltipster('open');
       setTimeout(() => $('#copied').tooltipster('close'), 800);
   });
@@ -17,15 +17,8 @@ function showText(sText,cclass,ext) {
       fname = 'hapi';
   }
 
-  let h = '100%';
-  if (type === 'json') {
-      h = $(window).height()/2;
-  }                   
   let w = $("#infodiv").width()-15
-  $("#scripttext")
-      .empty()
-      .append("<pre class='text'></pre>")
-      .show()
+  $("#scripttext").empty().append("<pre class='text'></pre>").show()
   
   // Common browser bug: &param is interpreted as &para;m: ¶m
   if (!["wget","curl"].includes(selected('format'))) {
@@ -34,9 +27,7 @@ function showText(sText,cclass,ext) {
   $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>");
   $("#script").text(sText);
 
-  $("#scripttext > pre")
-      .height(h)
-      .show();
+  $("#scripttext > pre").show();
 
   let blob = new Blob([sText], {type: 'octet/stream'});
   let scriptFile = window.URL.createObjectURL(blob);
@@ -48,9 +39,9 @@ function showText(sText,cclass,ext) {
   el.setAttribute('download', fname + "." + ext);
 
   if (showText.scriptFile) {
-      // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-      // Remove previous reference (frees memory)
-      window.URL.revokeObjectURL(scriptFile);
+    // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
+    // Remove previous reference (frees memory)
+    window.URL.revokeObjectURL(scriptFile);
   }
   showText.scriptFile = scriptFile;
 

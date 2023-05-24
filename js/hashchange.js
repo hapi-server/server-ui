@@ -2,7 +2,7 @@
 function hashchange() {
 
   // Update drop-downs when URL is changed manually.
-  log("hashchange(): Binding hashchange.");
+  util.log("hashchange(): Binding hashchange.");
   $(window).hashchange.byurledit = true;
 
   $(window).bind("hashchange", function() {
@@ -12,41 +12,41 @@ function hashchange() {
     // remove all parameters after that. Otherwise user could
     // change the server and the parameter list will not be
     // updated.
-    log("hashchange(): Hash change; by url edit = "
+    util.log("hashchange(): Hash change; by url edit = "
         + $(window).hashchange.byurledit);
     var qs = parseQueryString();
 
     let Nchanged = 0;
     for (var id in qs) {
-      log("hashchange(): Value in query string = " + qs[id]);
+      util.log("hashchange(): Value in query string = " + qs[id]);
       var val = $('#' + id).parent().parent().attr('value');
-      log("hashchange(): Drop-down value  = " + val);
+      util.log("hashchange(): Drop-down value  = " + val);
       if (qs[id] !== val) {
         Nchanged = Nchanged + 1;
-        log('hashchange(): Query string value differs from that in ' + id + " dropdown.");
+        util.log('hashchange(): Query string value differs from that in ' + id + " dropdown.");
       } else {
-        log('hashchange(): Query string value same as that in ' + id + " dropdown.");           
+        util.log('hashchange(): Query string value same as that in ' + id + " dropdown.");           
       }
     }
 
     if (Nchanged > 1) {
-      log('hashchange(): More than one query string value changed. Resetting app.');
+      util.log('hashchange(): More than one query string value changed. Resetting app.');
       $(window).unbind("hashchange");
       location.reload();
       return;
     } else {                        
-      log('hashchange(): No query string value changed.');
+      util.log('hashchange(): No query string value changed.');
     }
 
     if ($(window).hashchange.byurledit) {
-      log("hashchange(): Hash change made by manual edit of one parameter.");
-      log("hashchange(): Last hash: " + location.hash);
+      util.log("hashchange(): Hash change made by manual edit of one parameter.");
+      util.log("hashchange(): Last hash: " + location.hash);
 
       for (var id in qs) {
         if (id === "plotserver") {
           continue; // Handled in checkboxes.js.
         }
-        log("hashchange(): Setting " + id + " drop-down to " + qs[id] + " and triggering change.");
+        util.log("hashchange(): Setting " + id + " drop-down to " + qs[id] + " and triggering change.");
         // This does not work in jquery-ui 1.12.1
         if (id == 'servers' && !servers.ids.includes(qs[id]) && !server_list_in_hash()) {
           $('#xstatus').append("<span style='background-color:yellow'>Server with id=" + qs[id] + " is not available from this interface.</span>");

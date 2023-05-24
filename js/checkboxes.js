@@ -144,7 +144,7 @@ function checkboxes(OPTIONS) {
         .html('')
         .attr('value','');
 
-        log("plotserver changed. Triggering select event on #return drop-down.");
+        util.log("plotserver changed. Triggering select event on #return drop-down.");
         // Clear first so next trigger causes update.
         $("#return").val("").data("autocomplete")._trigger("select",null,{item: ""});
         $("#return").val("image").data("autocomplete")._trigger("select",null,{item: "image"});

@@ -38,6 +38,7 @@ details {
 }
 #data-details {
   margin-top: 5px;
+	display: none;
 }
 
 #records-and-size {
@@ -220,6 +221,8 @@ pre.data {
 
 #scripttext {
 	border: 1px solid black;
+	max-height: 50vh;
+	overflow-y: auto;
 }
 
 #output {

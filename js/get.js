@@ -3,10 +3,11 @@ function get(options, cb) {
   let specURL = 'https://github.com/hapi-server/data-specification/blob/master';
   specURL += '/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing';
 
-  log("get(): Options:")
-  log(options);
   options = JSON.parse(JSON.stringify(options));
-  var url = options.url;
+
+  util.log("get(): Called with options: " + JSON.stringify(options));
+
+  let url = options.url;
 
   // Simulate error.
   //if (url.match(/cdaweb/)) url = url + "x";
@@ -16,7 +17,7 @@ function get(options, cb) {
     // Requests to main server are relative paths and should not need a proxy.
     // So if they fail, don't try proxy.
     tryProxy = false;
-  }                   
+  }
 
   var showAjaxError = options.showAjaxError || false;
   var directURLFailed = options.directURLFailed || false;
@@ -32,22 +33,19 @@ function get(options, cb) {
   }
 
   if (get.cache[urlo]) {
-    log("get(): Client-side cache hit.");
+    util.log("get(): Client-side cache hit.");
     cb(false, get.cache[urlo]);
     return;
   }
 
-  let timerId;
-  timerId = timer();
-  window.timerId = timerId;
+  let timerId = timer();
 
-  url = url;
-
-  log("get(): Requesting " + url);
-  //log("get(): tryProxy = " + tryProxy);
-  //log("get(): directURLFailed = " + directURLFailed);
-  //log("get(): PROXY_URL = " + PROXY_URL);
-  //log("get(): showAjaxError = " + showAjaxError);
+  util.log("get(): Requesting " + url);
+  util.log("get(): timerId = " + timerId);
+  //util.log("get(): tryProxy = " + tryProxy);
+  //util.log("get(): directURLFailed = " + directURLFailed);
+  //util.log("get(): PROXY_URL = " + PROXY_URL);
+  //util.log("get(): showAjaxError = " + showAjaxError);
 
   let msg = "Requesting " + link(url);
   $('#requests').html(msg);
@@ -69,15 +67,17 @@ function get(options, cb) {
         dataType: "text",
         success: function (data, textStatus, jqXHR) {
           timer(timerId);
-          log("get(): Got " + url);
+          util.log("get(): Got " + url);
+          util.log("get(): timerId = " + timerId);
           $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
           if ($('#showrequests').attr('checked')) $("#requests").show();
           get.cache[urlo] = data; // Cache response.
-          console.log(data);
           cb(false, data);
         },
         error: function (xhr, textStatus, errorThrown) {
           timer(timerId);
+          util.log("get(): Error for " + url);
+          util.log("get(): timerId = " + timerId);
           error(xhr, textStatus, errorThrown);
         }
     });
@@ -92,6 +92,8 @@ function get(options, cb) {
       try {
         response = await fetch(url);
       } catch (e) {
+        util.log("get(): Error for " + url);
+        util.log("get(): timerId = " + timerId);
         timer(timerId);
         error(e);
         return;
@@ -118,12 +120,15 @@ function get(options, cb) {
         result = await reader.read();
       }
 
+      util.log("get(): Got chunks for " + url);
+      util.log("get(): timerId = " + timerId);
       timer(timerId);
       if (cb) cb(null, length, nrecords);
     }
   }
 
   function ajaxerror(url, message, xhr) {
+
     let errmsg = xhr.statusText || xhr.responseText;
     $('#xstatus').show().html(
         "<div class='error'>Error encountered when attempting to retrieve "
@@ -144,10 +149,10 @@ function get(options, cb) {
                     url: url,
                     directURLFailed: true,
                     tryProxy: false,
-                    showAjaxError: true,
+                    showAjaxError: showAjaxError,
                     chunk: options.chunk || false
                   };
-      log("get(): Attempting to proxy retrieve " + url);
+      util.log("get(): Attempting to proxy retrieve " + url);
       get(opts, cb);
     } else {
       if (showAjaxError) {

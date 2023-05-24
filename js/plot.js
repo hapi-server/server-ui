@@ -52,14 +52,14 @@ function plot(set) {
           success: function (xml, textStatus, jqXHR) {
             url = $(xml).find('Name').text();
             if (selected('format').match(/pdf/)) {
-              console.log(PROXY_URL + url)
+              console.util.log(PROXY_URL + url)
               setImage(PROXY_URL + encodeURIComponent(url));
             } else {
               setImage(url);
             }
           },
           error: function (xhr, textStatus, errorThrown) {
-            //console.log(xhr);
+            //console.util.log(xhr);
           }
         });
     }

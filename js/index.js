@@ -44,36 +44,7 @@ function main(OPTIONS) {
       "#dropdowns");
 }
 
-function log(msg) {
-  if (!$('#console').is(":checked")) return;
-  console.log(msg);
-}
-
-function hapi2to3(url) {
-  if (datasets.json.HAPI.substr(0,1) == "2") {
-    url.replace("/info?id=","/info?dataset=");
-    url.replace("/time.min=","/start=");
-    url.replace("/time.max=","/stop=");
-  }
-  return url;
-}
-
-function server_list_in_hash() {
-  var qs = parseQueryString();
-  if (!qs['server']) {
-    return "";
-  }
-  if (qs['server'].startsWith('http://') || qs['server'].startsWith('https://')) {
-    log("Server given in hash: " + qs['server']);
-    return qs['server'].split(",").join("\n");                  
-  } else {
-    return ""
-  }
-}
-
-
-
-// Determine selected value for a drop-down.    
+// Determine selected value for a drop-down.
 function selected(name) {
 
   clearInterval(get.interval);
@@ -90,30 +61,6 @@ function selected(name) {
     return $('#plotserver').val();    
   }
   return "";
-}
-
-function doy2ymd(dateTime) {
-
-  if (/^[0-9]{4}-[0-9]{3}/.test(dateTime)) {
-    dateTime = dateTime.split("-");
-    let startUnixMs = new Date(dateTime[0],0,1).getTime();
-    let doy = dateTime[1].split("T")[0];
-    let Z = "";
-    if (doy.endsWith("Z")) {
-      doy = doy.replace("Z","");
-      Z = "Z";
-    }
-    let time = dateTime[1].split("T")[1];
-    if (time) {
-      time = "T" + time;
-    } else {
-      time = "";
-    }
-    let msOfYear = 86400*1000*parseInt(doy-1);
-    let dateTimeMod = new Date(startUnixMs+msOfYear).toISOString().slice(0,10) + time + Z;
-    return dateTimeMod;
-  }
-  return dateTime;
 }
 
 // Create a HTML link.
@@ -139,6 +86,14 @@ function link(url, text) {
   }
 }
 
+// Create a mailto link.
+function mailtoLink(name, addr, subj) {
+  if (!name) name = "";
+  if (name.trim() !== "") name = name + " ";
+  return name + "&lt;" + link("mailto:" + addr + "?subject=" + subj, addr) + "&gt;"
+}
+
+// Create a "Download X" link.
 function downloadlink(url, what, showElapsed) {
 
     $("#downloadlink")
@@ -151,7 +106,60 @@ function downloadlink(url, what, showElapsed) {
     $("#downloadlink > span > a").css('font-weight', 'bold');
 }
 
-// Handle servers drop-down.
+function showJSONOnClick(id, url, listID) {
+
+  if (!listID) listID = '#' + id + "info";
+
+  let idjson = id + "json";
+  let showLink = `<a id="${idjson}" title='${url}'>HAPI JSON for ${id}</a>`;
+  $(listID + ' > ul').append('<li>' + showLink + '</li>');
+
+  $("#" + idjson).off("click", "**");
+  function setClick() {
+    $("#" + idjson).click(() => {
+      window.scrollTo(0, 0);
+      get({"url": url}, (err, data) => {
+        showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
+      });
+    });
+  }
+
+  setClick();
+  // Used to need (function(url) {setClick(url)})(url). Why no longer needed?
+
+  return;
+}
+
+function about(url) {
+
+  url = url + "/about";
+  get({url: url, showAjaxError: false}, (err, body) => process(err, body));
+
+  function process(err, body) {
+
+    if (err) return;
+    let bodyObj = JSON.parse(body);
+    if (bodyObj["contact"]) {
+      // Default is to show what is in all.txt. This updates based on info
+      // in /about response.
+      let newContact = "Server contact: " + mailtoLink(null, bodyObj["contact"], url);
+      $('#servercontact').html(newContact);
+    }
+    if (bodyObj["citation"]) {
+      if (bodyObj["citation"].trim().startsWith("http")) {
+        let citation = link(bodyObj["citation"], "Server citation");
+        $('#serverinfo > ul').append("<li>" + citation + "</li>");
+      } else {
+        $('#serverinfo > ul').append(`<li>Server Citation: ${bodyObj["citation"]}"</li>`);
+      }
+    }
+    if (bodyObj["contact"]) {
+      showJSONOnClick("about", url, "#serverinfo");
+    }
+  }
+}
+
+// Servers drop-down callback
 function servers(cb) {
 
   servers.label = "Servers";
@@ -159,55 +167,53 @@ function servers(cb) {
 
   servers.onselect = function () {
 
-    log('servers.onselect(): Called.');
+    util.log('servers.onselect(): Called.');
 
-    examples(selected('server'),
-      function (list) {
-        let id = "#server-example-details";
-        if (!list) {$(id).hide()}
-        $(id + " ul").remove();
-        $(id).prop('open',true);
-        $(id).append(list).show();
-    });
-
-    $('#overviewinfo').hide();
-    $('#output').hide();
-    $('#serverinfo').nextAll().hide();
+    examples(selected('server'), (list) => setExamples(list))
+    function setExamples(list) {
+      let id = "#server-example-details";
+      if (!list) {$(id).hide()}
+      $(id + " ul").remove();
+      $(id).prop('open',true);
+      $(id).append(list).show();
+    }
 
     let url = servers.info[selected('server')]['url'];
     if (!url.startsWith("http")) {
       url = window.location.origin + window.location.pathname + url;
     }
-    let text = "Server URL";
+
+    $('#output').hide();
+    $('#overviewinfo').hide();
+    $('#serverinfo').nextAll().hide();
     $('#serverinfo ul').empty();
-    $('#serverinfo ul')
-      .append('<li>Server URL: <code>' + link(url) + '</code></li>');
-    let email = servers.info[selected('server')]['contactEmail'];
-    if (servers.info[selected('server')]['contactName'] !== "") {
-        $('#serverinfo ul').append(
-          '<li>Server Contact: ' 
-          + servers.info[selected('server')]['contactName'] 
-          + " &lt;"
-          + link("mailto:" + email + "?subject=" + url,email)
-          + "&gt;"
-          + '</li>');
-    }
+
+    let contactEmail = servers.info[selected('server')]['contactEmail'];
+    let contactName = servers.info[selected('server')]['contactName'] || "";
+    let li1 = '<li>Server URL: <code>' + link(url) + '</code></li>';
+    let li2 = '<li id="servercontact">Server Contact: ' 
+            + mailtoLink(contactName, contactEmail, url) + '</li>';
+
+    $('#serverinfo ul').append(li1);
+    $('#serverinfo ul').append(li2);
     $('#serverinfo').show();
+
+    about(url);
+
   };
 
-  log('servers(): Called.');
-  
+  util.log('servers(): Called.');
+
   let SERVER_LIST_HASH = server_list_in_hash();
   if (SERVER_LIST_HASH !== "") {
-    log('servers(): Server list given in hash as URL.')
+    util.log('servers(): Server list given in hash as URL.')
     process(SERVER_LIST_HASH);
   } else {
     get({url: SERVER_LIST, showAjaxError: false}, function (err, res) {
-
       if (!err) {
         process(res);
       } else {
-        log("Did not find " 
+        util.log("Did not find " 
             + SERVER_LIST + ".\n"
             + "Trying fall-back of " + SERVER_LIST_FALLBACK);
         var warning = 'Did not find ' 
@@ -271,7 +277,7 @@ function servers(cb) {
 
       let qs = parseQueryString();
       if (qs['server'] === id) {
-        log("servers(): server value for " + id + " found in hash. Selecting it.")
+        util.log("servers(): server value for " + id + " found in hash. Selecting it.")
       }
       list.push({
           "label": name,
@@ -307,25 +313,39 @@ function servers(cb) {
       return element !== undefined;
     });
     if (list.length == 0) {
-      log("All server names start with {TestData,URLWatcher} and 'show TestData servers' option unchecked. Ignoring option so at least one server in server drop-down list.");
+      util.log("All server names start with {TestData,URLWatcher} and 'show TestData servers' option unchecked. Ignoring option so at least one server in server drop-down list.");
       list = listCopy;
     }
     $('#overviewul')
       .append('<li>' + (list.length) + " servers available.</li>");
 
-    log(list);
+    util.log(list);
     servers.info = info;
     cb(list);
   }
+
+  function server_list_in_hash() {
+    var qs = parseQueryString();
+    if (!qs['server']) {
+      return "";
+    }
+    if (qs['server'].startsWith('http://') || qs['server'].startsWith('https://')) {
+      util.log("Server given in hash: " + qs['server']);
+      return qs['server'].split(",").join("\n");
+    } else {
+      return "";
+    }
+  }
+
 }
 
-// Handle datasets drop-down.
+// Datasets drop-down callback
 function datasets(cb) {
 
   datasets.label = "Datasets";
 
   datasets.onselect = function () {
-    log('datasets.onselect(): Called.');
+    util.log('datasets.onselect(): Called.');
 
     $('#output').hide();
     $('#datasetinfo').nextAll().hide();
@@ -334,7 +354,7 @@ function datasets(cb) {
     $('#datasetinfo').show();
   };
 
-  log('datasets(): Called.');
+  util.log('datasets(): Called.');
 
   let url = servers.info[selected('server')]['url'] + "/catalog";
   get({url: url, showAjaxError: true}, function (err, res) {
@@ -346,11 +366,18 @@ function datasets(cb) {
     res = $.parseJSON(res);
     datasets.json = res;
     res = res.catalog;
+
     // Show number of datasets
-    let plural = res.length > 1 ? "s" : "";
-    $('#serverinfo > ul')
-      .append('<li>' + (res.length) + ' dataset' + plural + '</li>');
-    $('#serverinfo ul').append('<li id="statuslink" style="display:none"><a target="_blank" href="' + OPTIONS["urlwatcher"] + '#category='+ selected('server') +'">View server response tests.</a></li>');
+    let nDatasets = '<li>' + (res.length) + ' dataset' + util.plural(res) + '</li>';
+    $('#serverinfo > ul').append(nDatasets);
+
+    // TODO: Get list of watched servers from OPTIONS["urlwatcher"] and don't
+    // show if server not in list.
+    let watcherLink = OPTIONS["urlwatcher"] + '#category='+ selected('server');
+    let serverTests = '<li id="statuslink" style="display:none">'
+                    + link(watcherLink, "View server response tests")
+                    + '</li>'
+    $('#serverinfo ul').append(serverTests);
     if ($("#showstatuslink").prop('checked')) {
       $('#statuslink').show();
     }
@@ -363,7 +390,7 @@ function datasets(cb) {
         info[res[i]['id']][key] = res[i][key];
       }
       if (qsInitial['dataset'] === res[i]['id']) {
-        log("datasets(): dataset value for " 
+        util.log("datasets(): dataset value for " 
             + res[i]['id'] 
             + " found in hash. Will select it.")
       }
@@ -382,10 +409,10 @@ function datasets(cb) {
   }
 }
 
-// Handle parameters drop-down.         
+// Parameters drop-down callback
 function parameters(cb) {
 
-  log('parameters(): Called.');
+  util.log('parameters(): Called.');
 
   parameters.label = "Parameters";
 
@@ -400,7 +427,7 @@ function parameters(cb) {
 
   parameters.onselect = function () {
 
-    log('parameters.onselect(): Called.');
+    util.log('parameters.onselect(): Called.');
 
     if (!selected('format')) {
         $('#output').hide();
@@ -420,7 +447,7 @@ function parameters(cb) {
               + "/info?id=" + selected('dataset') 
               + "&parameters=" + selected('parameters');
 
-    url = hapi2to3(url);
+    url = util.hapi2to3(url);
 
     $('#parameterinfo ul')
       .append("<li>id: <code>" + selected('parameters') + "</code></li>");
@@ -432,35 +459,13 @@ function parameters(cb) {
         }
     }
 
-    $('#parameterinfo ul')
-        .append('<li>' 
-              + '<a id="parameterjson" title=' + url + '>'
-              + 'HAPI JSON for parameter'
-              + '</a>'
-              + '</li>');
-
-
-    $('#parameterjson').off("click", "**");
-    (
-        function(url) {
-                        $('#parameterjson').click(() => 
-                            {
-                                window.scrollTo(0, 0);
-                                get({"url": url}, (err, data) =>
-                                  {
-                                    showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
-                                  });
-                                //output(url);
-                            }
-                        );
-                }
-    )(url)
+    showJSONOnClick("parameter", url);
 
     $('#parameterinfo').show();
   };
 
   let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
-  url = hapi2to3(url);
+  url = util.hapi2to3(url);
 
   get({url: url, showAjaxError: true}, function (err, res) {
     if (!err) process(res, url);
@@ -522,32 +527,7 @@ function parameters(cb) {
           .append('<li>Dataset contact: ' + res['contact'] + '</li>');
     }
 
-
-    $('#datasetinfo ul')
-        .append('<li>' 
-                + '<a id="datasetjson" title=' + url + '>'
-                + 'HAPI JSON for dataset'
-                + '</a>'
-                + '</li>');
-
-    $('#datasetjson').off("click", "**");
-    (
-        function(url) {
-                log(url)
-                        $('#datasetjson').click(() => 
-                            {
-                                window.scrollTo(0, 0);
-                                get({"url": url}, (err, data) =>
-                                  {
-                                    showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
-                                  });
-                                //output(url);
-                            }
-                        );
-                }
-    )(url)
-
-    //(function(url) {$('#datasetjson').click(() => {log(url);output(url)})(url)
+    showJSONOnClick("dataset", url);
 
     let surl = servers.info[selected('server')]['url'];
     if (!surl.startsWith("http")) {
@@ -556,8 +536,8 @@ function parameters(cb) {
     let vurl = VERIFIER
               + '?url=' + surl
               + '&id=' + datasets.info[selected('dataset')]['id'];
-    
-    vurl = hapi2to3(vurl);
+
+    vurl = util.hapi2to3(vurl);
 
     $('#datasetinfo ul')
       .append('<li id="verifierlink" style="display:none"><a target="_blank" href=' + vurl + '>Check this dataset using the HAPI Verifier</a></li>');
@@ -578,7 +558,7 @@ function parameters(cb) {
           info[res[k]['name']][key] = res[k][key];
         }
         if (qsInitial['parameters'] === res[k]['name']) {
-          log("parameters(): parameter value for " 
+          util.log("parameters(): parameter value for " 
               + res[k]['name'] 
               + " found in hash. Will select it.")
         }
@@ -617,40 +597,17 @@ function parameters(cb) {
   }
 }
 
-function checktimes(which) {
-
-  if (selected('start') && selected('stop')) {
-    log("stoptime select event.")
-    log("starttime = " + selected('start'))                 
-    log("stoptime = " + selected('stop'))
-    var t = dayjs(doy2ymd(selected('start').replace("Z","")))
-          < dayjs(doy2ymd(selected('stop').replace("Z","")));
-    log("---> start < stop? " + t);
-    if (t == false) {
-      log(which + " changed; start >= stop. Setting color of " + which + " to red.");
-      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
-      return false;
-    } else {
-      log(which + " changed; start < stop. Setting colors to black.");
-      $('#startlist').css('color','black').removeClass('tooltip').attr('title','');
-      $('#stoplist').css('color','black').removeClass('tooltip').attr('title','');
-      return true;
-    }
-  }
-  return true;
-}
-
-// Handle start time drop-down.
+// Start time drop-down callback
 function starttime(cb) {
 
-  log('starttime(): Called.');
+  util.log('starttime(): Called.');
 
   starttime.label = "Start";
 
   starttime.isvalid = function () {return checktimes('start')}
 
   starttime.clearfollowing = function () {
-    log('starttime.clearfollowing(): Called.');
+    util.log('starttime.clearfollowing(): Called.');
     if (selected('format')) {
       if (starttime.isvalid()) {
         output(); // Update output
@@ -662,7 +619,7 @@ function starttime(cb) {
   }
 
   starttime.onselect = function () {
-    log('starttime.onselect(): Called.');
+    util.log('starttime.onselect(): Called.');
     return checktimes('start');
   };
 
@@ -687,17 +644,17 @@ function starttime(cb) {
   cb(list);
 }
 
-// Handle stop time drop-down.          
+// Stop time drop-down callback
 function stoptime(cb) {
 
-  log('stoptime(): Called.');
+  util.log('stoptime(): Called.');
 
   stoptime.label = "Stop";
 
   stoptime.isvalid = function () {return checktimes('stop')}
 
   stoptime.clearfollowing = function () {
-    log('starttime.clearfollowing(): Called.');
+    util.log('starttime.clearfollowing(): Called.');
     if (selected('format')) {
       if (stoptime.isvalid()) {
         output(); // Update output
@@ -709,7 +666,7 @@ function stoptime(cb) {
   }
 
   stoptime.onselect = function () {
-    log('stoptime.onselect(): Called.');
+    util.log('stoptime.onselect(): Called.');
     return checktimes('stop');
   };
 
@@ -735,29 +692,7 @@ function stoptime(cb) {
     return;
   }
 
-  start = meta['startDate'];
-  let cadenceString = meta['cadence'] || "PT1M";
-  let cadenceMillis = dayjs.duration(cadenceString)['$ms'];
-
-  if (cadenceMillis <= 100) { // 0.1 s or less
-    stop = dayjs(start).add(1,'minute').toISOString();
-  } else if (cadenceMillis <= 1000*10) { // 10 s or less
-    stop = dayjs(start).add(1,'hour').toISOString();
-  } else if (cadenceMillis <= 1000*60) { // 1 min or less
-    stop = dayjs(start).add(2,'day').toISOString();
-  } else if (cadenceMillis <= 1000*60*10) { // 10 min or less
-    stop = dayjs(start).add(4,'day').toISOString();
-  } else if (cadenceMillis <= 1000*60*60) { // 1 hr or less
-    stop = dayjs(start).add(10,'day').toISOString();
-  } else if (cadenceMillis <= 1000*60*60*24) { // 1 day or less
-    stop = dayjs(start).add(31,'day').toISOString();
-  } else if (cadenceMillis <= 1000*60*60*24*10) { // 10 days or less
-    stop = dayjs(start).add(1,'year').toISOString();
-  } else if  (cadenceMillis <= 1000*60*60*24*100) { // 100 days or less
-    stop = dayjs(start).add(10,'year').toISOString();
-  } else {
-    stop = meta['stopDate'];
-  }
+  stop = util.defaultStop(meta);
 
   list[0].label = stop;
   list[0].value = stop;
@@ -765,7 +700,30 @@ function stoptime(cb) {
   cb(list);
 }
 
-// Handle return drop-down.
+function checktimes(which) {
+
+  if (selected('start') && selected('stop')) {
+    util.log("stoptime select event.")
+    util.log("starttime = " + selected('start'))
+    util.log("stoptime = " + selected('stop'))
+    var t = dayjs(util.doy2ymd(selected('start').replace("Z","")))
+          < dayjs(util.doy2ymd(selected('stop').replace("Z","")));
+    util.log("---> start < stop? " + t);
+    if (t == false) {
+      util.log(which + " changed; start >= stop. Setting color of " + which + " to red.");
+      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
+      return false;
+    } else {
+      util.log(which + " changed; start < stop. Setting colors to black.");
+      $('#startlist').css('color','black').removeClass('tooltip').attr('title','');
+      $('#stoplist').css('color','black').removeClass('tooltip').attr('title','');
+      return true;
+    }
+  }
+  return true;
+}
+
+// Return drop-down callback
 function returntype(cb) {
 
   format.clearfollowing = function () {
@@ -795,10 +753,10 @@ function returntype(cb) {
   cb(values);
 }
 
-// Handle format drop-down.
+// Format drop-down callback
 function format(cb) {
 
-  log('format(): Called.');
+  util.log('format(): Called.');
 
   format.label = "Format";
 
@@ -871,10 +829,10 @@ function format(cb) {
   cb(values);
 }
 
-// Handle style drop-down.
+// Style drop-down callback.
 function style(cb) {
 
-  log('style(): Called.');
+  util.log('style(): Called.');
 
   style.label = "Style";
   style.onselect = function () {output()}
@@ -908,10 +866,10 @@ function style(cb) {
   cb(values);
 }
 
-// Handle type drop-down.
+// Type drop-down callback
 function type(cb) {
 
-  log('type(): Called.');
+  util.log('type(): Called.');
 
   type.label = "Type";
 
@@ -942,7 +900,7 @@ function type(cb) {
 // Form URL and place it in DOM based on drop-down change.
 function output(jsonURL) {
 
-  log('output(): Called.');
+  util.log('output(): Called.');
 
   let selectedParameters = selected('parameters');
 
@@ -968,7 +926,7 @@ function output(jsonURL) {
                 + "&time.min=" + selected('start')
                 + "&time.max=" + selected('stop')
 
-    url = hapi2to3(url);
+    url = util.hapi2to3(url);
 
     if (selected('format') === 'csv') {
       if (selected('style') === 'header') {
@@ -992,7 +950,9 @@ function output(jsonURL) {
     $("#data").empty().width($("#infodiv").width()-15).height($(window).height()/2);
 
     get({url: url, chunk: true}, function(err, length, nrecords) {
-      $("#downloadlink").append(`<code id="records-and-size"> (${nrecords} records, ${sizeOf(length)})</code>`);
+      let msg = `<code id="records-and-size"> (${nrecords} records, `;
+      msg += `${util.sizeOf(length)})</code>`;
+      $("#downloadlink").append(msg);
     });
   }
 
@@ -1018,11 +978,4 @@ function output(jsonURL) {
       $("#downloadlink").append(galleryHTML).show();
     } 
   }
-}
-
-function sizeOf(bytes) {
-  // https://stackoverflow.com/a/28120564
-  if (bytes == 0) { return "0.00 B"; }
-  var e = Math.floor(Math.log(bytes) / Math.log(1000));
-  return (bytes/Math.pow(1000, e)).toFixed(2)+' '+' KMGTP'.charAt(e)+'B';
 }

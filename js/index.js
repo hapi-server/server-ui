@@ -621,7 +621,7 @@ function starttime(cb) {
     return checktimes('start');
   };
 
-  let meta = datasets.info[selected('dataset')]['info'];              
+  let meta = datasets.info[selected('dataset')]['info'];
   let start = meta['sampleStartDate'];
   let stop = meta['sampleStopDate'];
 
@@ -838,7 +838,7 @@ function style(cb) {
   var values = [];
 
   if (selected("return") === "data") {
-    var values = [];                        
+    var values = [];
     if (selected('format') == 'csv') {
       var values = 
           [

@@ -1,9 +1,9 @@
 function checkboxes(OPTIONS) {
 
   function savedefaults() {
-    var state = {};
-    var values = $('input[type="checkbox"]').map(function() {
-        state[this.id] = this.checked;
+    const state = {};
+    const values = $('input[type="checkbox"]').map(function() {
+      state[this.id] = this.checked;
     });
     state["plotserver"] = $('#plotserver').val();
     localStorage.setItem("server-ui-defaults", JSON.stringify(state));
@@ -26,6 +26,8 @@ function checkboxes(OPTIONS) {
               }
   }
 
+  // TODO: Similar code. 
+
   $('#showdata').attr('checked', defaults['showdata']);
   if (defaults['showdata']) {$('#data').show()}
   $('#showdata').change(function() {
@@ -39,14 +41,16 @@ function checkboxes(OPTIONS) {
 
   $('#showrequests').attr('checked', defaults['showrequests']);
   if (defaults['showrequests']) {$('#requests').show()}
+  console.log(defaults)
   $('#showrequests').change(function() {
     savedefaults();
+    console.log(this.checked)
     if (this.checked) {
       $('#requests').show();
     } else {
       $('#requests').hide();
     }
-  });
+  }).trigger('change');
 
   $('#showtiming').attr('checked', defaults['showtiming']);
   if (defaults['showtiming']) {$('#timing').show();}
@@ -57,7 +61,7 @@ function checkboxes(OPTIONS) {
     } else {
       $('#timing').hide();
     }
-  });
+  }).trigger('change');
 
   $('#showstatuslink').attr('checked', defaults['showstatuslink']);
   $('#showstatuslink').change(function() {

@@ -55,7 +55,7 @@ details {
 .link {
   text-decoration: underline;
   text-decoration-color: black;
-  cursor: pointer;  
+  cursor: pointer;
 }
 
 #optionscheckboxes {
@@ -99,7 +99,7 @@ textarea.script {
 textarea.data {
 	background-color: #f9f9f9;
 	width: 100%;
-	overflow-y: auto;
+  height: 1px;
 	/* prevent horizontal scrollbar */
 	overflow-x: auto;
 	/* add padding to account for vertical scrollbar */
@@ -117,13 +117,12 @@ code {
 
 li {right:10px;}
 pre.text {
-	margin: 10px;	
+	margin: 10px;
 	background-color: #f9f9f9;
 	overflow-y: auto;
 	overflow-x: auto;
 	/* add padding to account for vertical scrollbar */
 	padding-right: 5px;
-	//border: 1px solid rgb(0,0,0);	
 }
 
 pre.data {

@@ -69,10 +69,8 @@ function dropdowns(ids, funs, after, i) {
 							logvalues(id, ui)
 							if (!$(el).attr('value')) {
 								util.log("dropdowns.ac.reset(): Resetting to " + $(el).attr('label'));
-								$("#"+id)
-									.attr('value', $(el).attr('label'))
-									.css('color','black');
-							}							
+								$("#"+id).attr('value', $(el).attr('label')).css('color','black');
+							}
 						}
 
 						var value = $('input[id=' + id + ']').parent().parent().attr('value');
@@ -132,7 +130,7 @@ function dropdowns(ids, funs, after, i) {
 					$('input[id=' + id + ']').unbind('blur');
 
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
-					
+
 					util.log("dropdowns.ac.change(): valuelast = " + valuelast);
 					if (valuelast === "") {
 						//$(after+i).attr('name',id).attr('valuelast',val);
@@ -148,10 +146,10 @@ function dropdowns(ids, funs, after, i) {
 						$('input[id=' + id + ']').val(ui.item.value)
 							.data("autocomplete")
 							._trigger("select",event,{item: ui.item.value});
-						
+
 						return;
 					}
-					
+
 					// This is to deal with the fact that change()
 					// is called on a blur event.
 					if (ui.item.value !== ui.item.valuelast) {
@@ -170,7 +168,7 @@ function dropdowns(ids, funs, after, i) {
 							+ id 
 							+ " value has not changed. Not removing drop-down with id = " + id + ".");
 					}
-				},			
+				},
 				select: function(event, ui) {
 					// Triggered when clicking on a drop-down list item or
 					// hitting enter after typing.
@@ -180,7 +178,7 @@ function dropdowns(ids, funs, after, i) {
 					logvalues(id, ui);
 
 					var label = $('input[id=' + id + ']').attr('label');
-					var value = ui.item.value || event.target.value;
+					var value = ui ? ui.item && ui.item.value || event.target.value : "";
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
 
 					if (value === label) {
@@ -214,10 +212,10 @@ function dropdowns(ids, funs, after, i) {
 
 					util.log("dropdowns.ac.select(): ui.item.value = " + value)
 					util.log("dropdowns.ac.select(): valuelast = " + valuelast)
-					
+
 					util.log("dropdowns.ac.select(): Setting value to " + value);
 					$(p).attr('name',id).attr('value',value);
-					
+
 					if (typeof(valuelast) === "undefined") {
 						util.log("dropdowns.ac.select(): Setting valuelast to " + value);
 						$(after+i).attr('name',id).attr('valuelast',value);
@@ -236,7 +234,7 @@ function dropdowns(ids, funs, after, i) {
 							+ $(p).attr('name') + " to " + $(p).val());
 						qs[$(p).attr('name')] = $(p).val();
 					}
-					
+
 					util.log("dropdowns.ac.select(): Setting hashchange.byurledit to false.");
 					$(window).hashchange.byurledit = false;
 
@@ -269,7 +267,7 @@ function dropdowns(ids, funs, after, i) {
 
 						util.log("dropdowns.ac.select(): New value is not same as old and clearfollowing() returned true."
 							+ " Clearing values in all drop-downs after " + id + ".");
-						
+
 						$("input[id='"+id+"']")
 							.parent().parent()
 							.nextAll("span")
@@ -308,7 +306,7 @@ function dropdowns(ids, funs, after, i) {
 					}
 				},
 			}).data("autocomplete")
-				._renderMenu = function( ul, items ) {
+				._renderMenu = function(ul, items) {
 					let txt = "";
 					let title = "";
 					if (this.term.length == 0) {
@@ -351,7 +349,7 @@ function dropdowns(ids, funs, after, i) {
 	// Call dropdown function, which generates list then calls cb().
 	let list = funs[i](cb);
 
-	function cb(list) {
+	function cb(list, open) {
 
 		util.log('dropdowns.cb(): Called with list');
 		util.log(list);
@@ -456,15 +454,16 @@ function dropdowns(ids, funs, after, i) {
 			util.log("dropdowns.ac.select(): Drop-down with id = "
 					+ ids[i] + " has values. Unhiding it.");
 			$(after+(i)).show();
-		} 
+		}
 
 		// Look for reasons to automatically select an item.
 		if (list.length == 1) {
 			util.log("dropdowns(): Triggering select on drop-down with id = " 
 					+ ids[i] + " because it has only one item.");
 			$('input[id=' + ids[i] + ']')
-				.val(list[0].value).data("autocomplete")
-				._trigger("select", event, {item: list[0].value});
+				.val(list[0].value)
+				.data("autocomplete")
+				._trigger("select", null, {item: list[0].value});
 
 			if (i == 0) {
 				util.log("dropdowns.ac.select(): First drop-down with id = "
@@ -475,16 +474,22 @@ function dropdowns(ids, funs, after, i) {
 
 		if (list.length > 1) {
 			// Select first item with attribute selected=true.
-			for (var k = 0;k < list.length; k++) {
+			for (var k = 0; k < list.length; k++) {
 				if (list[k].selected == true) {
 					util.log("dropdowns(): Triggering select on drop-down with id = " 
 							+ ids[i] + " because it has selected=true.");
 					$('input[id=' + ids[i] + ']')
-						.val(list[k].value).data("autocomplete")
-						._trigger("select", event, {item: list[k].value});
+						.val(list[k].value)
+						.data("autocomplete")
+						._trigger("select", null, {item: list[k].value});
 					break;
 				}
 			}
 		}
+
+		if (open) {
+			$('input#format').data("autocomplete").search("");
+		}
+
 	}
 }

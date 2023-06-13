@@ -1,7 +1,12 @@
 function examples(server, cb) {
 
-  let url = "examples/default.json";
-  if (server) {
+  if (!cb) cb = () => {};
+
+  let url = "";
+  if (Array.isArray(server)) {
+    createAll(server, cb);
+    return;
+  } else {
     url = "examples/" + server + ".json";
   }
 
@@ -9,15 +14,35 @@ function examples(server, cb) {
     if (err) {
       // If no examples for given server.
       util.log("examples(): No example file " + url)
-      autoCreateLinkJSON(cb);
-      return; 
-    } 
-    createLinkHTML(JSON.parse(linkJSON), cb);    
+      autoCreateLinkJSON(server, cb);
+      return;
+    }
+    createLinkHTML(JSON.parse(linkJSON), server, cb);
   });
 
-  function autoCreateLinkJSON(cb) {
+  function createAll(servers, cb) {
+    for (let serverLine of servers) {
+      let serverName = serverLine.split(",")[2].trim();
+      let serverID = serverLine.split(",")[2].trim();
+      examples(serverID, (html) => finished(serverName, html));
+    }
+    function finished(serverName, html) {
+      if (finished.N === undefined) {
+        finished.html = "";
+        finished.N = 0;
+      }
+      finished.N++;
+      finished.html = finished.html + `<b>${serverName}</b>\n${html}`;
+      if (finished.N == server.length) {
+        cb(finished.html);
+      }
+    }
+  }
 
-    let serverURL = servers.info[selected('server')]['url'];
+
+  function autoCreateLinkJSON(cb, server) {
+
+    let serverURL = servers.info[server]['url'];
     util.log("examples(): Auto-creating examples for " + serverURL);
 
     let linkObj = {};
@@ -47,20 +72,10 @@ function examples(server, cb) {
     });
   }
 
-  function createLinkHTML(linkObj, cb) {
-
-    let linkHTML = "";
-    if (linkObj["links"]) {
-      for (let link of linkObj["links"]) {
-        linkHTML += `\n<li><a href="${link['url']}">${link['label']}</a></li>`
-      }
-      linkHTML = "<ul>\n" + linkHTML + "\n</ul>";
-      cb(linkHTML);
-      return;
-    }
+  function createLinkHTML(linkObj, server, cb) {
 
     let hrefo = [
-                  "#server=" + selected('server'),
+                  "#server=" + server,
                   "dataset=" + linkObj['dataset'],
                   "parameters=" + linkObj['parameters'],
                   "start=" + linkObj['start'],
@@ -69,28 +84,29 @@ function examples(server, cb) {
 
     let options = [
                     {
-                      "label": "Plot", 
+                      "label": "Show plot",
                       "args": "return=image&format=svg"
                     },
                     {
-                      "label": "List data", 
+                      "label": "List data",
                       "args": "return=data&format=csv"
                     },
                     {
-                      "label": "Show script options", 
+                      "label": "Show script options",
                       "args": "return=script"
                     }
                   ];
 
+    let linkHTML = "";
     for (option of options) {
-      let label = option['label'];
-      label += ` parameter <code>${linkObj['parameters']}</code> `;
-      label += `of <code>${linkObj['dataset']}</code> dataset`
-      let href = hrefo + "&" + option['args'];        
-      linkHTML = linkHTML + `\n<li><a href="${href}">${label}</a></li>`
+      let linkText = option['label'];
+      postText = ` for parameter <code>${linkObj['parameters']}</code> `;
+      postText += `of <code>${linkObj['dataset']}</code> dataset`;
+      let href = hrefo + "&" + option['args'];
+      linkHTML = linkHTML + `\n  <li><a href="${href}">${linkText}</a>${postText}</li>`;
     }
 
-    linkHTML = "<ul>\n" + linkHTML + "\n</ul>";
+    linkHTML = "<ul>" + linkHTML + "\n</ul>\n\n";
     cb(linkHTML);
   }
 }

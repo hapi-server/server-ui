@@ -5,7 +5,7 @@ if (false) {
   }
 }
 
-var qsInitial = parseQueryString();
+let qsInitial = parseQueryString();
 
 function main(OPTIONS) {
 
@@ -13,12 +13,6 @@ function main(OPTIONS) {
     .append("<p><span style='font-size:80%;background-color:yellow'>" 
             + OPTIONS["devNote"] 
             + "</span></p>");
-
-
-  examples(null, function (list) {
-    $("#all-example-details ul").remove();
-    $("#all-example-details").append(list).show()
-  });
 
   tooltips();
 
@@ -58,7 +52,7 @@ function selected(name) {
     }
   }
   if (name === 'plotserver') {
-    return $('#plotserver').val();    
+    return $('#plotserver').val();
   }
   return "";
 }
@@ -169,14 +163,13 @@ function servers(cb) {
 
     util.log('servers.onselect(): Called.');
 
-    examples(selected('server'), (list) => setExamples(list))
-    function setExamples(list) {
-      let id = "#server-example-details";
-      if (!list) {$(id).hide()}
-      $(id + " ul").remove();
-      $(id).prop('open',true);
-      $(id).append(list).show();
-    }
+    examples(selected('server'), (html) => {
+      let id = "#server-example-details-body";
+      if (!html) {$("#server-example-details").hide()}
+      $(id).empty();
+      $(id).html(html);
+      $("#server-example-details").show().prop('open',true);
+    });
 
     let url = servers.info[selected('server')]['url'];
     if (!url.startsWith("http")) {
@@ -209,9 +202,9 @@ function servers(cb) {
     util.log('servers(): Server list given in hash as URL.')
     process(SERVER_LIST_HASH);
   } else {
-    get({url: SERVER_LIST, showAjaxError: false}, function (err, res) {
+    get({url: SERVER_LIST, showAjaxError: false}, function (err, text) {
       if (!err) {
-        process(res);
+        process(text);
       } else {
         util.log("Did not find " 
             + SERVER_LIST + ".\n"
@@ -222,36 +215,41 @@ function servers(cb) {
         $('#xstatus')
           .append("<span style='background-color:yellow'>" + warning + "</span>");
         SERVER_LIST = SERVER_LIST_FALLBACK;
-        get({url: SERVER_LIST}, function (err, res) {
+        get({url: SERVER_LIST}, function (err, text) {
           if (!err) {
-            process(res);
+            process(text);
           }
         });
       }
     });
   }
 
-  function process(res) {
+  function process(alltxt) {
     servers.ids = [];
 
-    res = res.replace(/,$/,"").split("\n");
-    // Remove empty lines
-    res = res.filter(x => x !== ""); 
+    // Split and remove empty lines
+    allarr = alltxt.split("\n").filter(x => x !== ""); 
+
+    examples(allarr, function (html) {
+      $("#all-example-details-body").empty();
+      $("#all-example-details-body").html(html).show();
+    });
+
     let list = [];
     let info = {};
     let selectedServer = selected("server");
     let found = false;
-    for (let i = 0; i < res.length; i++) {
+    for (let i = 0; i < allarr.length; i++) {
 
-      if (res[i].substring(0,1) === "#") {
+      if (allarr[i].substring(0,1) === "#") {
         continue;
       }
       let id, name;
       let selectedServer = selected('server');
 
-      if (res[i].split(",").length == 1) {
+      if (allarr[i].split(",").length == 1) {
         // Only URL given. Will occur with SERVER_LIST_HASH given.
-        id = res[i].split(',')[0].trim()
+        id = allarr[i].split(',')[0].trim()
         name = id;
         info[id] = {};
         info[id]['url'] = id;
@@ -259,12 +257,12 @@ function servers(cb) {
         info[id]['contactEmail'] = "";
         info[id]['contactName'] = "";
       } else {
-        id = res[i].split(',')[2].trim();
-        name = res[i].split(',')[1].trim();
+        id = allarr[i].split(',')[2].trim();
+        name = allarr[i].split(',')[1].trim();
         info[id] = {};
-        info[id]['url'] = res[i].split(',')[0].trim();
-        info[id]['contactName'] = res[i].split(',')[3].trim();
-        info[id]['contactEmail'] = res[i].split(',')[4].trim();
+        info[id]['url'] = allarr[i].split(',')[0].trim();
+        info[id]['contactName'] = allarr[i].split(',')[3].trim();
+        info[id]['contactEmail'] = allarr[i].split(',')[4].trim();
         if (info[id]['contactName'] == info[id]['contactEmail']) {
           info[id]['contactName'] = '';
         }
@@ -317,7 +315,7 @@ function servers(cb) {
       list = listCopy;
     }
     $('#overviewul')
-      .append('<li>' + (list.length) + " servers available.</li>");
+      .prepend('<li>' + (list.length) + " servers available.</li>");
 
     util.log(list);
     servers.info = info;
@@ -826,7 +824,7 @@ function format(cb) {
         values[i]['selected'] = true;
     }
   }
-  cb(values);
+  cb(values, true);
 }
 
 // Style drop-down callback.
@@ -946,14 +944,15 @@ function output(jsonURL) {
       return;
     }
 
-    $("#data-details").show();
-    $("#data").empty().width($("#infodiv").width()-15).height($(window).height()/2);
+    $("#data").empty();
 
     get({url: url, chunk: true}, function(err, length, nrecords) {
       let msg = `<code id="records-and-size"> (${nrecords} records, `;
       msg += `${util.sizeOf(length)})</code>`;
       $("#downloadlink").append(msg);
-    });
+      $("#data-details").show();
+      $("#data").width($("#infodiv").width()-15).height($(window).height()/2)
+     });
   }
 
   if (selected('return').match(/image/)) {

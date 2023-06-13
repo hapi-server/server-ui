@@ -33,6 +33,9 @@ details {
   cursor: pointer;  
 }
 
+#all-example-details-body {
+	margin-top: 0.7em;
+}
 #server-example-details {
 	display: none;
 }

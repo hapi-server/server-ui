@@ -1,30 +1,32 @@
-function examples(server, cb) {
+function examples(serverID, serverURL, cb) {
 
   if (!cb) cb = () => {};
 
   let url = "";
-  if (Array.isArray(server)) {
-    createAll(server, cb);
+  if (Array.isArray(serverID)) {
+    createAll(serverID, cb);
     return;
   } else {
-    url = "examples/" + server + ".json";
+    url = "examples/" + serverID + ".json";
   }
 
-  get({"url": url}, (err, linkJSON) => {
+  get({"url": url, "showRequest": false}, (err, linkJSON) => {
     if (err) {
       // If no examples for given server.
       util.log("examples(): No example file " + url)
-      autoCreateLinkJSON(server, cb);
+      autoCreateLinkJSON(serverID, serverURL, cb);
       return;
     }
-    createLinkHTML(JSON.parse(linkJSON), server, cb);
+    createLinkHTML(JSON.parse(linkJSON), serverID, cb);
   });
 
-  function createAll(servers, cb) {
-    for (let serverLine of servers) {
-      let serverName = serverLine.split(",")[2].trim();
-      let serverID = serverLine.split(",")[2].trim();
-      examples(serverID, (html) => finished(serverName, html));
+  function createAll(allArray, cb) {
+    for (let serverLine of allArray) {
+      let lineColumns =  serverLine.split(",");
+      let serverURL = lineColumns[0].trim();
+      let serverName = lineColumns[1].trim();
+      let serverID = lineColumns[2].trim();
+      examples(serverID, serverURL, (html) => finished(serverName, html));
     }
     function finished(serverName, html) {
       if (finished.N === undefined) {
@@ -33,29 +35,24 @@ function examples(server, cb) {
       }
       finished.N++;
       finished.html = finished.html + `<b>${serverName}</b>\n${html}`;
-      if (finished.N == server.length) {
+      if (finished.N == allArray.length) {
         cb(finished.html);
       }
     }
   }
 
+  function autoCreateLinkJSON(serverID, serverURL, cb) {
 
-  function autoCreateLinkJSON(cb, server) {
-
-    let serverURL = servers.info[server]['url'];
     util.log("examples(): Auto-creating examples for " + serverURL);
-
     let linkObj = {};
-    let catalogURL = servers.info[selected('server')]['url'];
-
-    get({"url": catalogURL + "/catalog"}, (err, catalogJSON) => {
+    get({"url": serverURL + "/catalog", "showRequest": false}, (err, catalogJSON) => {
 
       let catalogObj = JSON.parse(catalogJSON);
       linkObj["dataset"] = catalogObj["catalog"][0]["id"];
 
-      let version = catalogObj["catalog"]['HAPI'];
-      let url = catalogURL + "/info?id=" + linkObj["dataset"];
-      get({"url": util.hapi2to3(url, version)}, (err, infoJSON) => {
+      let version = catalogObj['HAPI'];
+      let url = serverURL + "/info?id=" + linkObj["dataset"];
+      get({"url": util.hapi2to3(url, version), "showRequest": false}, (err, infoJSON) => {
 
         infoObj = JSON.parse(infoJSON);
         linkObj["parameters"] = infoObj["parameters"][0]["name"];
@@ -67,7 +64,7 @@ function examples(server, cb) {
           linkObj["start"] = infoObj["startDate"]
           linkObj["stop"] = util.defaultStop(infoObj);
         }
-        createLinkHTML(linkObj, cb);
+        createLinkHTML(linkObj, serverID, cb);
       });
     });
   }
@@ -75,7 +72,7 @@ function examples(server, cb) {
   function createLinkHTML(linkObj, server, cb) {
 
     let hrefo = [
-                  "#server=" + server,
+                  "#server=" + serverID,
                   "dataset=" + linkObj['dataset'],
                   "parameters=" + linkObj['parameters'],
                   "start=" + linkObj['start'],

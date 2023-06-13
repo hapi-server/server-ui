@@ -127,12 +127,24 @@ function showJSONOnClick(id, url, listID) {
 function about(url) {
 
   url = url + "/about";
-  get({url: url, showAjaxError: false}, (err, body) => process(err, body));
+  get({url: url, showAjaxError: false}, (err, body) => {
+    if (err) {
+      util.log("about(): No /about response or problem with response.");
+      return;
+    }
+    process(err, body);
+  });
 
-  function process(err, body) {
+  function process(body) {
 
-    if (err) return;
-    let bodyObj = JSON.parse(body);
+    let bodyObj;
+    try {
+      bodyObj = JSON.parse(body);
+    } catch {
+      util.log("about.process(): /about response not JSON parseable.");
+      return;
+    }
+
     if (bodyObj["contact"]) {
       // Default is to show what is in all.txt. This updates based on info
       // in /about response.
@@ -163,7 +175,9 @@ function servers(cb) {
 
     util.log('servers.onselect(): Called.');
 
-    examples(selected('server'), (html) => {
+    let url = servers.info[selected('server')]['url'];
+
+    examples(selected('server'), url, (html) => {
       let id = "#server-example-details-body";
       if (!html) {$("#server-example-details").hide()}
       $(id).empty();
@@ -171,7 +185,6 @@ function servers(cb) {
       $("#server-example-details").show().prop('open',true);
     });
 
-    let url = servers.info[selected('server')]['url'];
     if (!url.startsWith("http")) {
       url = window.location.origin + window.location.pathname + url;
     }
@@ -229,8 +242,7 @@ function servers(cb) {
 
     // Split and remove empty lines
     allarr = alltxt.split("\n").filter(x => x !== ""); 
-
-    examples(allarr, function (html) {
+    examples(allarr, null, function (html) {
       $("#all-example-details-body").empty();
       $("#all-example-details-body").html(html).show();
     });

@@ -7,6 +7,14 @@ function get(options, cb) {
 
   util.log("get(): Called with options: " + JSON.stringify(options));
 
+  let showRequest = false;
+  if ($('#showrequests').attr('checked')) {
+    let showRequest = true;
+    if (options["showRequest"] !== undefined) {
+      showRequest = options["showRequest"];
+    }
+  }
+
   let url = options.url;
 
   // Simulate error.
@@ -47,10 +55,10 @@ function get(options, cb) {
   //util.log("get(): PROXY_URL = " + PROXY_URL);
   //util.log("get(): showAjaxError = " + showAjaxError);
 
-  let msg = "Requesting " + link(url);
-  $('#requests').html(msg);
-  if ($('#showrequests').attr('checked')) {
-    $('#requests').show();
+  if (showRequest) {
+    let msg = "Requesting " + link(url);
+    $('#requests').html(msg);
+      $('#requests').show();
   }
 
   if (options.chunk) {
@@ -69,8 +77,10 @@ function get(options, cb) {
           timer(timerId);
           util.log("get(): Got " + url);
           util.log("get(): timerId = " + timerId);
-          $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
-          if ($('#showrequests').attr('checked')) $("#requests").show();
+          if (showRequest) {
+            $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
+            $("#requests").show();
+          }
           get.cache[urlo] = data; // Cache response.
           cb(false, data);
         },

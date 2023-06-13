@@ -26,7 +26,7 @@ function checkboxes(OPTIONS) {
               }
   }
 
-  // TODO: Similar code. 
+  // TODO: Similar code.
 
   $('#showdata').attr('checked', defaults['showdata']);
   if (defaults['showdata']) {$('#data').show()}
@@ -41,10 +41,8 @@ function checkboxes(OPTIONS) {
 
   $('#showrequests').attr('checked', defaults['showrequests']);
   if (defaults['showrequests']) {$('#requests').show()}
-  console.log(defaults)
   $('#showrequests').change(function() {
     savedefaults();
-    console.log(this.checked)
     if (this.checked) {
       $('#requests').show();
     } else {

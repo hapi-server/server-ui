@@ -37,7 +37,7 @@ function checkboxes(OPTIONS) {
     } else {
       $('#data').remove();
     }
-  });
+  }).trigger('change');
 
   $('#showrequests').attr('checked', defaults['showrequests']);
   if (defaults['showrequests']) {$('#requests').show()}
@@ -69,7 +69,7 @@ function checkboxes(OPTIONS) {
     } else {
       $('#statuslink').hide();
     }
-  });
+  }).trigger('change');
 
   $('#showverifierlink').attr('checked', defaults['showverifierlink']);
   $('#showverifierlink').change(function() {
@@ -79,7 +79,7 @@ function checkboxes(OPTIONS) {
     } else {
       $('#verifierlink').hide();
     }
-  });
+  }).trigger('change');
 
   $('#showtestdatalink').attr('checked', defaults['showtestdatalink']);
   $('#showtestdatalink').change(function() {
@@ -90,7 +90,7 @@ function checkboxes(OPTIONS) {
     } else {
       $('#testdatalink').hide();
     }
-  });
+  }); // Cannot trigger change b/c reload creates infinite loop.
 
   $('#useimagecache').attr('checked', defaults['useimagecache']);
   $('#useimagecache').change(function() {
@@ -108,7 +108,7 @@ function checkboxes(OPTIONS) {
         $("#image > img").attr('src',url)
       }
     }
-  });
+  }).trigger('change');
 
   $('#usedatacache').attr('checked', defaults['usedatacache']);
   $('#usedatacache').change(function() { 
@@ -126,12 +126,12 @@ function checkboxes(OPTIONS) {
         $("#image > img").attr('src',url)
       }
     }
-  });
+  }).trigger('change');
 
   $('#console').attr('checked', defaults['console']);
   $('#console').change(function() {
     savedefaults();
-  });
+  }).trigger('change');
 
   $('#plotserver').val(defaults['plotserver']);
   $('#plotserver').change(function () {

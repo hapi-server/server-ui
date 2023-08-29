@@ -930,6 +930,8 @@ function output(jsonURL) {
   if (selected('return').match(/data/)) {
 
     let parameterString = "&parameters=" + selectedParameters
+    //console.log(selected('server'))
+    //console.log(servers.info)
     let url = servers.info[selected('server')]['url'] 
                 + "/data?id=" + selected('dataset')
                 + parameterString

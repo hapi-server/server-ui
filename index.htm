@@ -89,7 +89,7 @@
     // Show all servers if SERVER_LIST if ./all.txt not found
     let SERVER_LIST_FALLBACK = 
       "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt";
-      
+
     let devNote = "";
     if (location.href.match("hapi-server.org/servers-dev")) {
       SERVER_LIST = "all-combined.txt";
@@ -98,6 +98,9 @@
     if (location.href.match("hapi-server.org/servers")) {
       SERVER_LIST = "all-combined.txt";
     }
+
+    // For local testing with all servers used at URLs above.
+    //SERVER_LIST = "all-combined.txt";
 
     let VERIFIER = '__VERIFIER__';
     let VERIFIER_EXTERNALLY_SET = true;

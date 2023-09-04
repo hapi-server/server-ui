@@ -25,19 +25,20 @@ function checkboxes(OPTIONS) {
                   plotserver: OPTIONS['plotserver']
               }
   }
+  savedefaults();
 
   // TODO: Similar code.
 
   $('#showdata').attr('checked', defaults['showdata']);
-  if (defaults['showdata']) {$('#data').show()}
+  if (defaults['showdata']) {$('#data-details').show()}
   $('#showdata').change(function() {
     savedefaults();
     if (this.checked) {
       output();
     } else {
-      $('#data').remove();
+      $('#data-details').hide();
     }
-  }).trigger('change');
+  });
 
   $('#showrequests').attr('checked', defaults['showrequests']);
   if (defaults['showrequests']) {$('#requests').show()}
@@ -129,9 +130,6 @@ function checkboxes(OPTIONS) {
   }).trigger('change');
 
   $('#console').attr('checked', defaults['console']);
-  $('#console').change(function() {
-    savedefaults();
-  }).trigger('change');
 
   $('#plotserver').val(defaults['plotserver']);
   $('#plotserver').change(function () {

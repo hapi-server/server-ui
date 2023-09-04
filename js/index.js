@@ -174,17 +174,7 @@ function servers(cb) {
   servers.onselect = function () {
 
     util.log('servers.onselect(): Called.');
-
     let url = servers.info[selected('server')]['url'];
-
-    examples(selected('server'), url, (html) => {
-      let id = "#server-example-details-body";
-      if (!html) {$("#server-example-details").hide()}
-      $(id).empty();
-      $(id).html(html);
-      $("#server-example-details").show().prop('open',true);
-    });
-
     if (!url.startsWith("http")) {
       url = window.location.origin + window.location.pathname + url;
     }
@@ -192,7 +182,7 @@ function servers(cb) {
     $('#output').hide();
     $('#overviewinfo').hide();
     $('#serverinfo').nextAll().hide();
-    $('#serverinfo ul').empty();
+    $('#serverinfo > ul').empty();
 
     let contactEmail = servers.info[selected('server')]['contactEmail'];
     let contactName = servers.info[selected('server')]['contactName'] || "";
@@ -200,11 +190,20 @@ function servers(cb) {
     let li2 = '<li id="servercontact">Server Contact: ' 
             + mailtoLink(contactName, contactEmail, url) + '</li>';
 
-    $('#serverinfo ul').append(li1);
-    $('#serverinfo ul').append(li2);
+    $('#serverinfo > ul').append(li1);
+    $('#serverinfo > ul').append(li2);
     $('#serverinfo').show();
 
     about(url);
+
+    examples(selected('server'), url, (html) => {
+      console.log(html)
+      let id = "#server-example-details-body";
+      if (!html) {$("#server-example-details").hide()}
+      $(id).empty();
+      $(id).html(html);
+      $("#server-example-details").show().prop('open',true);
+    });
 
   };
 
@@ -680,7 +679,7 @@ function stoptime(cb) {
     return checktimes('stop');
   };
 
-  let meta = datasets.info[selected('dataset')]['info'];              
+  let meta = datasets.info[selected('dataset')]['info'];
   let start = meta['sampleStartDate'];
   let stop = meta['sampleStopDate'];
 
@@ -930,8 +929,7 @@ function output(jsonURL) {
   if (selected('return').match(/data/)) {
 
     let parameterString = "&parameters=" + selectedParameters
-    //console.log(selected('server'))
-    //console.log(servers.info)
+
     let url = servers.info[selected('server')]['url'] 
                 + "/data?id=" + selected('dataset')
                 + parameterString
@@ -959,13 +957,20 @@ function output(jsonURL) {
     }
 
     $("#data").empty();
-
+    util.log('Getting ' + url);
     get({url: url, chunk: true}, function(err, length, nrecords) {
+      if (err) {
+        console.error(err);
+        return;
+      }
       let msg = `<code id="records-and-size"> (${nrecords} records, `;
       msg += `${util.sizeOf(length)})</code>`;
       $("#downloadlink").append(msg);
-      $("#data-details").show();
-      $("#data").width($("#infodiv").width()-15).height($(window).height()/2)
+      $("#data").width($("#infodiv").width()-15).height($(window).height()/2);
+      if ($('#showdata').attr('checked')) {
+        $("#data-details").show();
+        $("#data").show();
+      }
      });
   }
 

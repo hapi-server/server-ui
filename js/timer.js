@@ -2,7 +2,9 @@ function timer(id) {
 
   let updateInterval = 500;
 
-  let showtiming = $('#showtiming').attr('checked') === "checked";
+  if (!showtiming) {
+    showtiming = $('#showtiming').attr('checked') === "checked";
+  }
 
   if (id) {
     clearInterval(timer[id].interval);
@@ -42,7 +44,7 @@ function timer(id) {
                     if (showtiming === false) {
                       // Request took more than updateInterval. Show
                       // timing for feedback.
-                      timer[id].clearTiming = true;                      
+                      timer[id].clearTiming = true;
                     }
                     showtiming = true;
                   }

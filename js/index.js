@@ -197,7 +197,7 @@ function servers(cb) {
     about(url);
 
     examples(selected('server'), url, (html) => {
-      console.log(html)
+      //console.log(html)
       let id = "#server-example-details-body";
       if (!html) {$("#server-example-details").hide()}
       $(id).empty();
@@ -240,10 +240,10 @@ function servers(cb) {
     servers.ids = [];
 
     // Split and remove empty lines
-    allarr = alltxt.split("\n").filter(x => x !== ""); 
+    allarr = alltxt.split("\n").filter(x => x !== "");
+    $("#all-example-details-body").empty().show();
     examples(allarr, null, function (html) {
-      $("#all-example-details-body").empty();
-      $("#all-example-details-body").html(html).show();
+      $("#all-example-details-body").append(html).show();
     });
 
     let list = [];

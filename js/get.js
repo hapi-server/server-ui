@@ -9,7 +9,7 @@ function get(options, cb) {
 
   let showRequest = false;
   if ($('#showrequests').attr('checked')) {
-    let showRequest = true;
+    showRequest = true;
     if (options["showRequest"] !== undefined) {
       showRequest = options["showRequest"];
     }
@@ -58,7 +58,7 @@ function get(options, cb) {
   if (showRequest) {
     let msg = "Requesting " + link(url);
     $('#requests').html(msg);
-      $('#requests').show();
+    $('#requests').show();
   }
 
   if (options.chunk) {

@@ -268,12 +268,20 @@ function servers(cb) {
         info[id]['contactEmail'] = "";
         info[id]['contactName'] = "";
       } else {
-        id = allarr[i].split(',')[2].trim();
-        name = allarr[i].split(',')[1].trim();
+        let line = allarr[i].split(',');
+        for (let col in line) {
+          line[col] = line[col].trim();
+        }
+        id = line[2];
+        if (!id) {
+          console.error('No id found in ' + allarr[i]);
+          continue;
+        }
+        name = line[1] || id;
         info[id] = {};
-        info[id]['url'] = allarr[i].split(',')[0].trim();
-        info[id]['contactName'] = allarr[i].split(',')[3].trim();
-        info[id]['contactEmail'] = allarr[i].split(',')[4].trim();
+        info[id]['url'] = line[0];
+        info[id]['contactName'] = line[3] || '';
+        info[id]['contactEmail'] = line[4] || '';
         if (info[id]['contactName'] == info[id]['contactEmail']) {
           info[id]['contactName'] = '';
         }

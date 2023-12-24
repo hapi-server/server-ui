@@ -197,7 +197,6 @@ function servers(cb) {
     about(url);
 
     examples(selected('server'), url, (html) => {
-      console.log(html)
       let id = "#server-example-details-body";
       if (!html) {$("#server-example-details").hide()}
       $(id).empty();
@@ -221,11 +220,11 @@ function servers(cb) {
         util.log("Did not find " 
             + SERVER_LIST + ".\n"
             + "Trying fall-back of " + SERVER_LIST_FALLBACK);
-        var warning = 'Did not find ' 
+        let warning = 'Did not find ' 
                       + SERVER_LIST + ". Will use " 
-                      + SERVER_LIST_FALLBACK
-        $('#xstatus')
-          .append("<span style='background-color:yellow'>" + warning + "</span>");
+                      + SERVER_LIST_FALLBACK;
+        let html = "<span style='background-color:yellow'>" + warning + "</span>";
+        $('#xstatus').append(html);
         SERVER_LIST = SERVER_LIST_FALLBACK;
         get({url: SERVER_LIST}, function (err, text) {
           if (!err) {
@@ -238,9 +237,9 @@ function servers(cb) {
 
   function process(alltxt) {
     servers.ids = [];
-
     // Split and remove empty lines
-    allarr = alltxt.split("\n").filter(x => x !== ""); 
+    allarr = alltxt.split("\n").filter(x => x !== "");
+
     examples(allarr, null, function (html) {
       $("#all-example-details-body").empty();
       $("#all-example-details-body").html(html).show();

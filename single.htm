@@ -9,8 +9,8 @@
     VERIFIER = "__VERIFIER__";
     PLOTSERVER = "__PLOTSERVER__";
     if (window.location.hostname === "localhost") {
-      VERIFIER = "http://localhost:9999";
-      PLOTSERVER = "http://localhost:5000";
+      //VERIFIER = "http://localhost:9999";
+      //PLOTSERVER = "http://localhost:5000";
     }
   </script>
 </head>
@@ -84,11 +84,19 @@
       })
     }
 
-    let vargs = "?url=" + window.location.href;
-    $("#verifier").attr("href",VERIFIER + vargs);
+    if (VERIFIER.trim() !== "" && VERIFIER !== "__VERIFIER__") {
+      let vargs = "?url=" + window.location.href;
+      $("#verifier").attr("href",VERIFIER + vargs);
+    } else {
+      $("#verifier").hide();
+    }
 
-    let pargs = "?server=" + window.location.href + "&format=gallery";
-    $("#viviz").attr("href",PLOTSERVER + pargs);
+    if (PLOTSERVER.trim() !== "" && PLOTSERVER !== "__PLOTSERVER__") {
+      let pargs = "?server=" + window.location.href + "&format=gallery";
+      $("#viviz").attr("href",PLOTSERVER + pargs);
+    } else {
+      $("#viviz").hide();
+    }
 
     if (!window.location.hostname == 'localhost') {
       $('#verifierp').append('Remove validation link on production sites.');

@@ -26,18 +26,8 @@ function examples(serverID, serverURL, cb) {
       let serverURL = lineColumns[0].trim();
       let serverName = lineColumns[1].trim();
       let serverID = lineColumns[2].trim();
-      examples(serverID, serverURL, (html) => finished(serverName, html));
-    }
-    function finished(serverName, html) {
-      if (finished.N === undefined) {
-        finished.html = "";
-        finished.N = 0;
-      }
-      finished.N++;
-      finished.html = finished.html + `<b>${serverName}</b>\n${html}`;
-      if (finished.N == allArray.length) {
-        cb(finished.html);
-      }
+      //examples(serverID, serverURL, (html) => finished(serverName, html));
+      examples(serverID, serverURL, (html) => cb(`<b>${serverName}</b>\n${html}`));
     }
   }
 
@@ -46,7 +36,10 @@ function examples(serverID, serverURL, cb) {
     util.log("examples(): Auto-creating examples for " + serverURL);
     let linkObj = {};
     get({"url": serverURL + "/catalog", "showRequest": false}, (err, catalogJSON) => {
-
+      if (err) {
+        util.log("examples(): Failed to get catalog for " + serverURL);
+        return;
+      }
       let catalogObj = JSON.parse(catalogJSON);
       linkObj["dataset"] = catalogObj["catalog"][0]["id"];
 

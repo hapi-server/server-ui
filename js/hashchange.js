@@ -7,7 +7,6 @@ function hashchange() {
 
   $(window).bind("hashchange", function() {
 
-    $('#xstatus').empty();
     // Need to figure out what parameter was changed and then
     // remove all parameters after that. Otherwise user could
     // change the server and the parameter list will not be
@@ -25,7 +24,7 @@ function hashchange() {
         Nchanged = Nchanged + 1;
         util.log('hashchange(): Query string value differs from that in ' + id + " dropdown.");
       } else {
-        util.log('hashchange(): Query string value same as that in ' + id + " dropdown.");           
+        util.log('hashchange(): Query string value same as that in ' + id + " dropdown.");
       }
     }
 
@@ -34,7 +33,7 @@ function hashchange() {
       $(window).unbind("hashchange");
       location.reload();
       return;
-    } else {                        
+    } else {
       util.log('hashchange(): No query string value changed.');
     }
 
@@ -47,21 +46,11 @@ function hashchange() {
           continue; // Handled in checkboxes.js.
         }
         util.log("hashchange(): Setting " + id + " drop-down to " + qs[id] + " and triggering change.");
-        // This does not work in jquery-ui 1.12.1
-        if (id == 'servers' && !servers.ids.includes(qs[id]) && !server_list_in_hash()) {
-          $('#xstatus').append("<span style='background-color:yellow'>Server with id=" + qs[id] + " is not available from this interface.</span>");
-          $(window).hashchange.byurledit = false;
-          setTimeout(() => {
-            window.location.hash = "";
-            $(window).hashchange.byurledit = true;
-          },2000);
-          break;
-        }
         $("#" + id).val(qs[id])
             .data("autocomplete")
             ._trigger("select",null,{item: qs[id]});
         }
-    }                   
+    }
     $(window).hashchange.byurledit = true;
-  }); 
+  });
 }

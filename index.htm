@@ -73,6 +73,7 @@
   <script type="text/javascript" src="js/timer.js"></script>
   <script type="text/javascript" src="js/get.js"></script>
   <script type="text/javascript" src="js/tooltips.js"></script>
+  <script type="text/javascript" src="js/status.js"></script>
   <script type="text/javascript" src="js/showText.js"></script>
   <script type="text/javascript" src="js/plot.js"></script>
   <script type="text/javascript" src="js/script.js"></script>
@@ -137,6 +138,7 @@
 <body>
 
   <div id="selections">
+    <!-- Left column -->
     <details id="options-details">
       <summary>
         <span>Options</span>
@@ -240,9 +242,12 @@
     </div>
   </div>
 
+  <!-- Main column -->
   <div id="infodiv">
 
-    <div id="xstatus"></div>
+    <div id="xstatus">
+      <div id='ajaxerror'></div>
+    </div>
     <div id="loadinfo">
       <span id="requests"></span>
     </div>

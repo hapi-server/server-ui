@@ -146,9 +146,10 @@ pre.data {
 	border: 1px solid black;
 }
 
-.error {
+#ajaxerror {
 	border: 2px solid red;
 	padding: 0.5em;
+	display: none;
 }
 
 .ui-menu .ui-menu-item a {

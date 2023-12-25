@@ -1,5 +1,7 @@
 function get(options, cb) {
 
+  $("#ajaxerror").hide().empty();
+
   let specURL = 'https://github.com/hapi-server/data-specification/blob/master';
   specURL += '/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing';
 
@@ -9,7 +11,7 @@ function get(options, cb) {
 
   let showRequest = false;
   if ($('#showrequests').attr('checked')) {
-    let showRequest = true;
+    showRequest = true;
     if (options["showRequest"] !== undefined) {
       showRequest = options["showRequest"];
     }
@@ -46,7 +48,10 @@ function get(options, cb) {
     return;
   }
 
-  let timerId = timer();
+  let timerId = undefined;
+  if (showRequest) {
+    timerId = timer();
+  }
 
   util.log("get(): Requesting " + url);
   util.log("get(): timerId = " + timerId);
@@ -58,7 +63,7 @@ function get(options, cb) {
   if (showRequest) {
     let msg = "Requesting " + link(url);
     $('#requests').html(msg);
-      $('#requests').show();
+    $('#requests').show();
   }
 
   if (options.chunk) {
@@ -74,7 +79,9 @@ function get(options, cb) {
         async: true,
         dataType: "text",
         success: function (data, textStatus, jqXHR) {
-          timer(timerId);
+          if (timerId !== undefined) {
+            timer(timerId);
+          }
           util.log("get(): Got " + url);
           util.log("get(): timerId = " + timerId);
           if (showRequest) {
@@ -85,7 +92,9 @@ function get(options, cb) {
           cb(false, data);
         },
         error: function (xhr, textStatus, errorThrown) {
-          timer(timerId);
+          if (timerId !== undefined) {
+            timer(timerId);
+          }
           util.log("get(): Error for " + url);
           util.log("get(): timerId = " + timerId);
           error(xhr, textStatus, errorThrown);
@@ -140,13 +149,14 @@ function get(options, cb) {
   function ajaxerror(url, message, xhr) {
 
     let errmsg = xhr.statusText || xhr.responseText;
-    $('#xstatus').show().html(
-        "<div class='error'>Error encountered when attempting to retrieve "
-        + "<a target='_blank' href='" + url + "'>"
-        + url.replace("&para","&#38;para") + "</a>"
-        + "<br><br>Error: <pre>" + errmsg + "</pre>"
-        + "Message:<br><br>" + message
-        + "<p>The Javascript debugger console may have a more descriptive error message.</p></div>");
+    let msg = 
+      "Error encountered when attempting to retrieve "
+      + "<a target='_blank' href='" + url + "'>"
+      + url.replace("&para","&#38;para") + "</a>"
+      + "<br><br>Error: <pre>" + errmsg + "</pre>"
+      + "Message:<pre>" + message + "</pre>"
+      + "The Javascript debugger console may have a more descriptive error message."
+    $('#ajaxerror').html(msg).show();
     // Determining if CORS is cause of error is difficult:
     // https://stackoverflow.com/q/19325314
     console.error(errmsg)

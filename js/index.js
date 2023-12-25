@@ -1,18 +1,12 @@
-if (false) {
-  // TODO: Catch and report uncaught errors.
-  window.onerror = function (message, filename, linenumber) {
-    $('#xstatus.append').message();
-  }
+// Catch and report uncaught errors.
+window.onerror = function (message, fileName, lineNumber) {
+  fileName = fileName.replace(window.location,"");
+  status(`${fileName}#L${lineNumber} <code>${message}</code>`,'error');
 }
 
 let qsInitial = parseQueryString();
 
 function main(OPTIONS) {
-
-  $('#selections')
-    .append("<p><span style='font-size:80%;background-color:yellow'>" 
-            + OPTIONS["devNote"] 
-            + "</span></p>");
 
   tooltips();
 
@@ -121,7 +115,6 @@ function showJSONOnClick(id, url, listID) {
   setClick();
   // Used to need (function(url) {setClick(url)})(url). Why no longer needed?
 
-  return;
 }
 
 function about(url) {
@@ -174,7 +167,22 @@ function servers(cb) {
   servers.onselect = function () {
 
     util.log('servers.onselect(): Called.');
-    let url = servers.info[selected('server')]['url'];
+
+    let SERVER_LIST_HASH = server_list_in_hash();
+    if (SERVER_LIST_HASH !== "") {
+      util.log('servers(): Server list given in hash as URL.')
+      //process(SERVER_LIST_HASH);
+      //return;
+    }
+
+    let selectedServer = selected('server');
+    if (!servers.info[selectedServer]) {
+      // If user typed server=X and X not is server list
+      serverNotFound(selectedServer);
+      return;
+    }
+
+    let url = servers.info[selectedServer]['url'];
     if (!url.startsWith("http")) {
       url = window.location.origin + window.location.pathname + url;
     }
@@ -217,14 +225,12 @@ function servers(cb) {
       if (!err) {
         process(text);
       } else {
-        util.log("Did not find " 
-            + SERVER_LIST + ".\n"
+        util.log("Did not find " + SERVER_LIST + ".\n"
             + "Trying fall-back of " + SERVER_LIST_FALLBACK);
         let warning = 'Did not find ' 
                       + SERVER_LIST + ". Will use " 
                       + SERVER_LIST_FALLBACK;
-        let html = "<span style='background-color:yellow'>" + warning + "</span>";
-        $('#xstatus').append(html);
+        status(warning,'warning');
         SERVER_LIST = SERVER_LIST_FALLBACK;
         get({url: SERVER_LIST}, function (err, text) {
           if (!err) {
@@ -236,27 +242,30 @@ function servers(cb) {
   }
 
   function process(alltxt) {
+
     servers.ids = [];
     // Split and remove empty lines
     allarr = alltxt.split("\n").filter(x => x !== "");
 
-    examples(allarr, null, function (html) {
-      $("#all-example-details-body").empty();
-      $("#all-example-details-body").html(html).show();
-    });
+    $("#all-example-details-body").empty().show();
+
+    if (server_list_in_hash() === "") {
+      examples(allarr, null, function (html) {
+        $("#all-example-details-body").append(html).show();
+      });
+    }
 
     let list = [];
     let info = {};
-    let selectedServer = selected("server");
     let found = false;
+
     for (let i = 0; i < allarr.length; i++) {
 
       if (allarr[i].substring(0,1) === "#") {
         continue;
       }
-      let id, name;
-      let selectedServer = selected('server');
 
+      let id, name;
       if (allarr[i].split(",").length == 1) {
         // Only URL given. Will occur with SERVER_LIST_HASH given.
         id = allarr[i].split(',')[0].trim()
@@ -277,9 +286,9 @@ function servers(cb) {
           info[id]['contactName'] = '';
         }
       }
-
+      let selectedServer = selected("server");
       servers.ids.push(id);
-      if (id == selectedServer) {
+      if (id === selectedServer) {
         found = true;
       }
 
@@ -294,14 +303,10 @@ function servers(cb) {
       });
     }
 
+    let selectedServer = selected('server');
     if (selectedServer && found == false && !server_list_in_hash()) {
-      $('#xstatus')
-        .append("<span style='background-color:yellow'>Server with id=" + selectedServer + " is not available from this interface.</span>");
-      $(window).hashchange.byurledit = false;
-      setTimeout(() => {
-        window.location.hash = "";
-        $(window).hashchange.byurledit = true;
-      }, 2000);
+      serverNotFound(selectedServer);
+      return;
     }
 
     // Move TestData servers to end of list and possibly remove based on checkbox.
@@ -321,15 +326,25 @@ function servers(cb) {
       return element !== undefined;
     });
     if (list.length == 0) {
-      util.log("All server names start with {TestData,URLWatcher} and 'show TestData servers' option unchecked. Ignoring option so at least one server in server drop-down list.");
+      let msg = "All server names start with {TestData,URLWatcher} and ";
+      msg += "'show TestData servers' option unchecked. "
+      msg += "Ignoring option so at least one server in server drop-down list.";
+      util.log(msg);
       list = listCopy;
     }
-    $('#overviewul')
-      .prepend('<li>' + (list.length) + " servers available.</li>");
 
+    $('#overviewul').prepend('<li>' + (list.length) + " servers available.</li>");
+    util.log("Dataset list:");
     util.log(list);
     servers.info = info;
     cb(list);
+  }
+
+  function serverNotFound(selectedServer) {
+    let msg = `Server with id=${selectedServer} is not available from this interface.`;
+    alert(msg);
+    window.location.hash = "";
+    location.reload();
   }
 
   function server_list_in_hash() {
@@ -431,7 +446,7 @@ function parameters(cb) {
     } else {
       return true;
     }
-  }   
+  }
 
   parameters.onselect = function () {
 
@@ -477,10 +492,10 @@ function parameters(cb) {
 
   get({url: url, showAjaxError: true}, function (err, res) {
     if (!err) process(res, url);
-  }); 
+  });
 
   function process(res, url) {
-    res = JSON.parse(res);//$.parseJSON(res);
+    res = JSON.parse(res);
 
     $('#datasetinfo ul')
         .append('<li>id: <code>' + selected('dataset') + '</code></li>');

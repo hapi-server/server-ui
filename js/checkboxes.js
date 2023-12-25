@@ -2,7 +2,7 @@ function checkboxes(OPTIONS) {
 
   function savedefaults() {
     const state = {};
-    const values = $('input[type="checkbox"]').map(function() {
+    $('input[type="checkbox"]').map(function() {
       state[this.id] = this.checked;
     });
     state["plotserver"] = $('#plotserver').val();
@@ -130,6 +130,9 @@ function checkboxes(OPTIONS) {
   }).trigger('change');
 
   $('#console').attr('checked', defaults['console']);
+  $('#console').change(function() {
+    savedefaults();
+  }).trigger('change');
 
   $('#plotserver').val(defaults['plotserver']);
   $('#plotserver').change(function () {

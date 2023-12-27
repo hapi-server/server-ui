@@ -46,7 +46,9 @@ function examples(serverID, serverURL, cb) {
       let version = catalogObj['HAPI'];
       let url = serverURL + "/info?id=" + linkObj["dataset"];
       get({"url": util.hapi2to3(url, version), "showRequest": false, "dataType": "json"}, (err, infoObj) => {
-
+        if (err || !infoObj || !infoObj["parameters"]) {
+          return;
+        }
         linkObj["parameters"] = infoObj["parameters"][0]["name"];
 
         if (linkObj["parameters"]["sampleStartDate"]) {

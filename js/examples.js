@@ -10,7 +10,7 @@ function examples(serverID, serverURL, cb) {
     url = "examples/" + serverID + ".json";
   }
 
-  get({"url": url, "showRequest": false, "dataType": "json"}, (err, linkJSON) => {
+  get({"url": url, "showRequest": false, "showTiming": false, "dataType": "json"}, (err, linkJSON) => {
     if (err) {
       // If no examples for given server.
       util.log("examples(): No example file " + url)
@@ -35,7 +35,7 @@ function examples(serverID, serverURL, cb) {
 
     util.log("examples(): Auto-creating examples for " + serverURL);
     let linkObj = {};
-    get({"url": serverURL + "/catalog", "showRequest": false, "dataType": "json"}, (err, catalogObj) => {
+    get({"url": serverURL + "/catalog", "showRequest": false, "showTiming": false, "dataType": "json"}, (err, catalogObj) => {
       if (err) {
         util.log("examples(): Failed to get catalog for " + serverURL);
         return;
@@ -45,7 +45,7 @@ function examples(serverID, serverURL, cb) {
 
       let version = catalogObj['HAPI'];
       let url = serverURL + "/info?id=" + linkObj["dataset"];
-      get({"url": util.hapi2to3(url, version), "showRequest": false, "dataType": "json"}, (err, infoObj) => {
+      get({"url": util.hapi2to3(url, version), "showRequest": false, "showTiming": false, "dataType": "json"}, (err, infoObj) => {
         if (err || !infoObj || !infoObj["parameters"]) {
           return;
         }

@@ -199,6 +199,7 @@ function get(options, cb) {
                     directURLFailed: true,
                     tryProxy: false,
                     dataType: options.dataType || "text",
+                    showTiming: options.showTiming || false,
                     showAjaxError: showAjaxError,
                     chunk: options.chunk || false
                   };

@@ -3,6 +3,7 @@ function plot(set) {
   // TODO: Check method is known.
 
   let plotserver = selected('plotserver');
+
   if (/^[a-z].*?:http/.test(plotserver)) {
     method = plotserver.split(":")[0];
     plotserver = plotserver.split(method + ":")[1];
@@ -20,7 +21,7 @@ function plot(set) {
     if (method.trim() === 'autoplot') {
       plotserver = OPTIONS['autoplot'];
     }
-    if (method.trim() === 'native' && selected('server') !== 'CDAWeb') {      
+    if (method.trim() === 'native' && selected('server') !== 'CDAWeb') {
       method = 'hapiplot';
       plotserver = OPTIONS['hapiplot'];
     }

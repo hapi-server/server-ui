@@ -51,7 +51,7 @@ function get(options, cb) {
   }
 
   if (get.cache[urlo]) {
-    util.log("get(): Client-side cache hit.");
+    util.log("get(): Client-side cache hit for " + urlo);
     cb(false, get.cache[urlo]);
     return;
   }

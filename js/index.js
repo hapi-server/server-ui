@@ -161,6 +161,33 @@ function about(url) {
 // Servers drop-down callback
 function servers(cb) {
 
+  util.log('servers(): Called.');
+  let SERVER_LIST_HASH = server_list_in_hash();
+  if (SERVER_LIST_HASH !== "") {
+    util.log("servers(): Server given in hash: " + SERVER_LIST_HASH);
+    process(SERVER_LIST_HASH);
+    return;
+  } else {
+    get({url: SERVER_LIST, showAjaxError: false}, function (err, text) {
+      if (!err) {
+        process(text);
+      } else {
+        util.log("Did not find " + SERVER_LIST + ".\n"
+            + "Trying fall-back of " + SERVER_LIST_FALLBACK);
+        let warning = 'Did not find ' 
+                      + SERVER_LIST + ". Will use " 
+                      + SERVER_LIST_FALLBACK;
+        status(warning,'warning');
+        SERVER_LIST = SERVER_LIST_FALLBACK;
+        get({url: SERVER_LIST}, function (err, text) {
+          if (!err) {
+            process(text);
+          }
+        });
+      }
+    });
+  }
+
   servers.label = "Servers";
   servers.tooltips = ["Enter text to search","Show full list"];
 
@@ -170,9 +197,9 @@ function servers(cb) {
 
     let SERVER_LIST_HASH = server_list_in_hash();
     if (SERVER_LIST_HASH !== "") {
-      util.log('servers(): Server list given in hash as URL.')
-      //process(SERVER_LIST_HASH);
-      //return;
+      util.log('servers.onselect(): No further processing b/c server list in hash.');
+      process(SERVER_LIST_HASH);
+      return;
     }
 
     let selectedServer = selected('server');
@@ -211,33 +238,6 @@ function servers(cb) {
     });
 
   };
-
-  util.log('servers(): Called.');
-
-  let SERVER_LIST_HASH = server_list_in_hash();
-  if (SERVER_LIST_HASH !== "") {
-    util.log('servers(): Server list given in hash as URL.')
-    process(SERVER_LIST_HASH);
-  } else {
-    get({url: SERVER_LIST, showAjaxError: false}, function (err, text) {
-      if (!err) {
-        process(text);
-      } else {
-        util.log("Did not find " + SERVER_LIST + ".\n"
-            + "Trying fall-back of " + SERVER_LIST_FALLBACK);
-        let warning = 'Did not find ' 
-                      + SERVER_LIST + ". Will use " 
-                      + SERVER_LIST_FALLBACK;
-        status(warning,'warning');
-        SERVER_LIST = SERVER_LIST_FALLBACK;
-        get({url: SERVER_LIST}, function (err, text) {
-          if (!err) {
-            process(text);
-          }
-        });
-      }
-    });
-  }
 
   function process(alltxt) {
 
@@ -292,7 +292,7 @@ function servers(cb) {
 
       let qs = parseQueryString();
       if (qs['server'] === id) {
-        util.log("servers(): server value for " + id + " found in hash. Selecting it.")
+        util.log("servers(): Server value for " + id + " found in hash. Selecting it.")
       }
       list.push({
           "label": name,
@@ -339,10 +339,11 @@ function servers(cb) {
   }
 
   function serverNotFound(selectedServer) {
-    let msg = `Server with id=${selectedServer} is not available from this interface.`;
+    let msg = `Server '${selectedServer}' is not available from this interface.`;
+    console.error(msg);
     alert(msg);
     window.location.hash = "";
-    location.reload();
+    //location.reload();
   }
 
   function server_list_in_hash() {
@@ -351,7 +352,6 @@ function servers(cb) {
       return "";
     }
     if (qs['server'].startsWith('http://') || qs['server'].startsWith('https://')) {
-      util.log("Server given in hash: " + qs['server']);
       return qs['server'].split(",").join("\n");
     } else {
       return "";

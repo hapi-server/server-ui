@@ -35,9 +35,10 @@ function dropdowns(ids, funs, after, i) {
 
 		util.log("value         = " + value);
 		util.log("valuelast     = " + valuelast);
+		console.log(ui);
 		if (ui && ui.item) {
-			util.log("ui.value      = " + ui.item.value);
-			util.log("ui.valuelast  = " + ui.item.valuelast);
+			util.log("ui.item.value      = " + ui.item.value);
+			util.log("ui.item.valuelast  = " + ui.item.valuelast);
 		} else {
 			util.log("ui.item.value      = undefined");
 			util.log("ui.item.valuelast  = undefined");
@@ -191,11 +192,7 @@ function dropdowns(ids, funs, after, i) {
 						return;
 					}
 
-					var i = parseInt($(this)
-										.parent()
-										.parent()
-										.attr("id")
-										.replace(/[a-z]/gi,""));
+					var i = parseInt($(this).parent().parent().attr("id").replace(/[a-z]/gi,""));
 
 					var p = $(this).parent().parent();
 
@@ -216,7 +213,9 @@ function dropdowns(ids, funs, after, i) {
 					var value = ui.item.value || event.target.value;
 					var valuelast = $(p).attr('valuelast');
 
-					util.log("dropdowns.ac.select(): ui.item.value = " + value);
+					util.log("dropdowns.ac.select(): ui.item.value = " + ui.item.value);
+					util.log("dropdowns.ac.select(): event.target.value = " + event.target.value);
+					util.log("dropdowns.ac.select(): value = " + value);
 					util.log("dropdowns.ac.select(): valuelast = " + valuelast);
 
 					util.log("dropdowns.ac.select(): Setting value to " + value);

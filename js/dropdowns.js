@@ -1,5 +1,5 @@
 function dropdowns(ids, funs, after, i) {
-	
+
 	if (i === undefined) {
 		i = 0;
 	}
@@ -44,7 +44,7 @@ function dropdowns(ids, funs, after, i) {
 		}
 	}
 
-	function ac(i, list) {	
+	function ac(i, list) {
 
 		$("#" + ids[i])
 			.autocomplete({
@@ -182,6 +182,12 @@ function dropdowns(ids, funs, after, i) {
 					var valuelast = $('input[id=' + id + ']').parent().parent().attr('valuelast');
 
 					if (value === label) {
+						util.log("dropdowns.ac.select(): Value selected was label. Closing " + id + " dropdown.");
+						return;
+					}
+					if (value === "") {
+						util.log("dropdowns.ac.select(): No value selected. Setting to valuelast = " + valuelast);
+						$('input[id=' + id + ']').attr('value',valuelast);
 						return;
 					}
 
@@ -210,8 +216,8 @@ function dropdowns(ids, funs, after, i) {
 					var value = ui.item.value || event.target.value;
 					var valuelast = $(p).attr('valuelast');
 
-					util.log("dropdowns.ac.select(): ui.item.value = " + value)
-					util.log("dropdowns.ac.select(): valuelast = " + valuelast)
+					util.log("dropdowns.ac.select(): ui.item.value = " + value);
+					util.log("dropdowns.ac.select(): valuelast = " + valuelast);
 
 					util.log("dropdowns.ac.select(): Setting value to " + value);
 					$(p).attr('name',id).attr('value',value);
@@ -297,7 +303,7 @@ function dropdowns(ids, funs, after, i) {
 						}
 
 						if (typeof(err) === "string") {
-							util.log("dropdowns.ac.select(): Not setting next drop-down due to error.");								
+							util.log("dropdowns.ac.select(): Not setting next drop-down due to error.");
 						} else {
 							util.log("dropdowns.ac.select(): Setting next drop-down.");
 							dropdowns(ids, funs, after, i+1);
@@ -405,9 +411,9 @@ function dropdowns(ids, funs, after, i) {
 
 		let el = '#' + ids[i]
 		$(el).click(() => {
-			// Clear value if bounded by hypens
+			// Clear value if bounded by hyphens
 			if ($(el).attr('value').match(/^\-.*\-$/)) {
-				//$(el).attr('value','');
+				$(el).attr('value','');
 			}
 		});
 
@@ -452,7 +458,7 @@ function dropdowns(ids, funs, after, i) {
 
 		if (list.length > 0) {
 			util.log("dropdowns.ac.select(): Drop-down with id = "
-					+ ids[i] + " has values. Unhiding it.");
+					+ ids[i] + " has values. Showing it.");
 			$(after+(i)).show();
 		}
 

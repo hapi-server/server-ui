@@ -41,7 +41,7 @@ function hashchange() {
       util.log("hashchange(): Hash change made by manual edit of one parameter.");
       util.log("hashchange(): Last hash: " + location.hash);
 
-      for (var id in qs) {
+      for (let id in qs) {
         if (id === "plotserver") {
           continue; // Handled in checkboxes.js.
         }

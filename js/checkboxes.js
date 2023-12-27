@@ -17,7 +17,7 @@ function checkboxes(OPTIONS) {
     defaults = {
                   showdata: true,
                   showverifierlink: false,
-                  showtiming: false,
+                  showtiming: true,
                   showrequests: false,
                   useimagecache: true, 
                   usedatacache: true,
@@ -25,16 +25,18 @@ function checkboxes(OPTIONS) {
                   plotserver: OPTIONS['plotserver']
               }
   }
+
   savedefaults();
 
   // TODO: Similar code.
 
   $('#showdata').attr('checked', defaults['showdata']);
-  if (defaults['showdata']) {$('#data-details').show()}
+  //if (defaults['showdata']) {}
   $('#showdata').change(function() {
     savedefaults();
     if (this.checked) {
       output();
+      $('#data-details').show();
     } else {
       $('#data-details').hide();
     }

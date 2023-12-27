@@ -29,8 +29,8 @@ a {
 }
 
 
-details {
-  cursor: pointer;  
+details > summary {
+  cursor: pointer;
 }
 
 #all-example-details-body {
@@ -39,7 +39,13 @@ details {
 #server-example-details {
 	display: none;
 }
+
 #data-details {
+  margin-top: 5px;
+	display: none;
+}
+
+#script-details {
   margin-top: 5px;
 	display: none;
 }

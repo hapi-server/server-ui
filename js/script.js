@@ -89,7 +89,7 @@ function script() {
     sText = sText.replace(/TIMENAME/gm,timename);
 
     let p = parameters.list.slice(0); // copy 
-    
+
     p.forEach((el,i) => {p[i] = el.value});
     if (p.length == 1) {
         sText = sText.replace(/CSV_EXAMPLE/gm,'.');

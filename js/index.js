@@ -106,8 +106,8 @@ function showJSONOnClick(id, url, listID) {
   function setClick() {
     $("#" + idjson).click(() => {
       window.scrollTo(0, 0);
-      get({"url": url}, (err, data) => {
-        showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
+      get({"url": url, showAjaxError: true, dataType: "json"}, (err, data) => {
+        showText(JSON.stringify(data, null, 4),'','json')
       });
     });
   }
@@ -120,12 +120,12 @@ function showJSONOnClick(id, url, listID) {
 function about(url) {
 
   url = url + "/about";
-  get({url: url, showAjaxError: false}, (err, body) => {
+  get({url: url, showAjaxError: false, dataType: "json"}, (err, body) => {
     if (err) {
       util.log("about(): No /about response or problem with response.");
       return;
     }
-    process(err, body);
+    process(body);
   });
 
   function process(body) {
@@ -201,8 +201,6 @@ function servers(cb) {
     $('#serverinfo > ul').append(li1);
     $('#serverinfo > ul').append(li2);
     $('#serverinfo').show();
-
-    about(url);
 
     examples(selected('server'), url, (html) => {
       let id = "#server-example-details-body";
@@ -378,15 +376,20 @@ function datasets(cb) {
   };
 
   util.log('datasets(): Called.');
-
   let url = servers.info[selected('server')]['url'] + "/catalog";
-  get({url: url, showAjaxError: true}, function (err, res) {
-    if (!err) process(res);
+  get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
+    if (!err) {
+      if (res["HAPI"]) {
+        if (parseFloat(res["HAPI"]) >= 3.0) {
+          about(servers.info[selected('server')]['url']);
+        }
+      }
+      process(res);
+    };
   });
 
   function process(res) {
 
-    res = $.parseJSON(res);
     datasets.json = res;
     res = res.catalog;
 
@@ -469,7 +472,6 @@ function parameters(cb) {
     let url = servers.info[selected('server')]['url'] 
               + "/info?id=" + selected('dataset') 
               + "&parameters=" + selected('parameters');
-
     url = util.hapi2to3(url);
 
     $('#parameterinfo ul')
@@ -490,12 +492,11 @@ function parameters(cb) {
   let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
   url = util.hapi2to3(url);
 
-  get({url: url, showAjaxError: true}, function (err, res) {
+  get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
     if (!err) process(res, url);
   });
 
   function process(res, url) {
-    res = JSON.parse(res);
 
     $('#datasetinfo ul')
         .append('<li>id: <code>' + selected('dataset') + '</code></li>');
@@ -793,7 +794,7 @@ function format(cb) {
   }
 
   format.onselect = function () {
-    $('#output').children().hide();
+    //$('#output').children().hide();
     if (selected("return") === "image"  || 
         selected("return") === "script" || 
         selected("format") === "json")

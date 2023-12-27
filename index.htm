@@ -364,20 +364,29 @@
     <div id="output">
       <div id="downloadlink" style="display:none;"></div>
 
-        <div id="scriptcopy" class='tooltip' title='Copy to clipboard'>
-            <button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
-              <img class='clippy' width='20' src='css/clippy.png' alt='Copy to clipboard'>
-            </button>
-            <span id="copied" class="tooltip" title="Copied!"></span>
-        </div>
-
         <details id="data-details" open>
           <summary>Data</summary>
           <textarea id='data' class='data' readonly></textarea>
         </details>
 
-        <div id="scripttext">
-        </div>
+        <details id="script-details" open>
+          <summary>Script</summary>
+          <div id="scriptcopy" class='tooltip' title='Copy to clipboard'>
+            <button type="button" class="btn tooltip" style="padding:0px;" data-clipboard-text="">
+              <img class='clippy' width='20' src='css/clippy.png' alt='Copy to clipboard'>
+            </button>
+            <span id="copied" class="tooltip" title="Copied!"></span>
+          </div>
+          <div id='scripttext' class='data' readonly>
+            <pre>
+              <code id='script'>
+              </code>
+            </pre>
+          </div>
+        </details>
+
+        <!--div id="scripttext">
+        </div-->
 
         <div id="image" style="display:none;"></div>
       </details>

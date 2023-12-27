@@ -106,8 +106,8 @@ function showJSONOnClick(id, url, listID) {
   function setClick() {
     $("#" + idjson).click(() => {
       window.scrollTo(0, 0);
-      get({"url": url}, (err, data) => {
-        showText(JSON.stringify(JSON.parse(data), null, 4),'','json')
+      get({"url": url, showAjaxError: true, dataType: "json"}, (err, data) => {
+        showText(JSON.stringify(data, null, 4),'','json')
       });
     });
   }
@@ -120,12 +120,12 @@ function showJSONOnClick(id, url, listID) {
 function about(url) {
 
   url = url + "/about";
-  get({url: url, showAjaxError: false}, (err, body) => {
+  get({url: url, showAjaxError: false, dataType: "json"}, (err, body) => {
     if (err) {
       util.log("about(): No /about response or problem with response.");
       return;
     }
-    process(err, body);
+    process(body);
   });
 
   function process(body) {
@@ -161,6 +161,33 @@ function about(url) {
 // Servers drop-down callback
 function servers(cb) {
 
+  util.log('servers(): Called.');
+  let SERVER_LIST_HASH = server_list_in_hash();
+  if (SERVER_LIST_HASH !== "") {
+    util.log("servers(): Server given in hash: " + SERVER_LIST_HASH);
+    process(SERVER_LIST_HASH);
+    return;
+  } else {
+    get({url: SERVER_LIST, showAjaxError: false}, function (err, text) {
+      if (!err) {
+        process(text);
+      } else {
+        util.log("Did not find " + SERVER_LIST + ".\n"
+            + "Trying fall-back of " + SERVER_LIST_FALLBACK);
+        let warning = 'Did not find ' 
+                      + SERVER_LIST + ". Will use " 
+                      + SERVER_LIST_FALLBACK;
+        status(warning,'warning');
+        SERVER_LIST = SERVER_LIST_FALLBACK;
+        get({url: SERVER_LIST}, function (err, text) {
+          if (!err) {
+            process(text);
+          }
+        });
+      }
+    });
+  }
+
   servers.label = "Servers";
   servers.tooltips = ["Enter text to search","Show full list"];
 
@@ -170,9 +197,9 @@ function servers(cb) {
 
     let SERVER_LIST_HASH = server_list_in_hash();
     if (SERVER_LIST_HASH !== "") {
-      util.log('servers(): Server list given in hash as URL.')
-      //process(SERVER_LIST_HASH);
-      //return;
+      util.log('servers.onselect(): No further processing b/c server list in hash.');
+      process(SERVER_LIST_HASH);
+      return;
     }
 
     let selectedServer = selected('server');
@@ -202,8 +229,6 @@ function servers(cb) {
     $('#serverinfo > ul').append(li2);
     $('#serverinfo').show();
 
-    about(url);
-
     examples(selected('server'), url, (html) => {
       let id = "#server-example-details-body";
       if (!html) {$("#server-example-details").hide()}
@@ -213,33 +238,6 @@ function servers(cb) {
     });
 
   };
-
-  util.log('servers(): Called.');
-
-  let SERVER_LIST_HASH = server_list_in_hash();
-  if (SERVER_LIST_HASH !== "") {
-    util.log('servers(): Server list given in hash as URL.')
-    process(SERVER_LIST_HASH);
-  } else {
-    get({url: SERVER_LIST, showAjaxError: false}, function (err, text) {
-      if (!err) {
-        process(text);
-      } else {
-        util.log("Did not find " + SERVER_LIST + ".\n"
-            + "Trying fall-back of " + SERVER_LIST_FALLBACK);
-        let warning = 'Did not find ' 
-                      + SERVER_LIST + ". Will use " 
-                      + SERVER_LIST_FALLBACK;
-        status(warning,'warning');
-        SERVER_LIST = SERVER_LIST_FALLBACK;
-        get({url: SERVER_LIST}, function (err, text) {
-          if (!err) {
-            process(text);
-          }
-        });
-      }
-    });
-  }
 
   function process(alltxt) {
 
@@ -302,7 +300,7 @@ function servers(cb) {
 
       let qs = parseQueryString();
       if (qs['server'] === id) {
-        util.log("servers(): server value for " + id + " found in hash. Selecting it.")
+        util.log("servers(): Server value for " + id + " found in hash. Selecting it.")
       }
       list.push({
           "label": name,
@@ -349,10 +347,11 @@ function servers(cb) {
   }
 
   function serverNotFound(selectedServer) {
-    let msg = `Server with id=${selectedServer} is not available from this interface.`;
+    let msg = `Server '${selectedServer}' is not available from this interface.`;
+    console.error(msg);
     alert(msg);
     window.location.hash = "";
-    location.reload();
+    //location.reload();
   }
 
   function server_list_in_hash() {
@@ -361,7 +360,6 @@ function servers(cb) {
       return "";
     }
     if (qs['server'].startsWith('http://') || qs['server'].startsWith('https://')) {
-      util.log("Server given in hash: " + qs['server']);
       return qs['server'].split(",").join("\n");
     } else {
       return "";
@@ -386,15 +384,20 @@ function datasets(cb) {
   };
 
   util.log('datasets(): Called.');
-
   let url = servers.info[selected('server')]['url'] + "/catalog";
-  get({url: url, showAjaxError: true}, function (err, res) {
-    if (!err) process(res);
+  get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
+    if (!err) {
+      if (res["HAPI"]) {
+        if (parseFloat(res["HAPI"]) >= 3.0) {
+          about(servers.info[selected('server')]['url']);
+        }
+      }
+      process(res);
+    };
   });
 
   function process(res) {
 
-    res = $.parseJSON(res);
     datasets.json = res;
     res = res.catalog;
 
@@ -477,7 +480,6 @@ function parameters(cb) {
     let url = servers.info[selected('server')]['url'] 
               + "/info?id=" + selected('dataset') 
               + "&parameters=" + selected('parameters');
-
     url = util.hapi2to3(url);
 
     $('#parameterinfo ul')
@@ -498,12 +500,11 @@ function parameters(cb) {
   let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
   url = util.hapi2to3(url);
 
-  get({url: url, showAjaxError: true}, function (err, res) {
+  get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
     if (!err) process(res, url);
   });
 
   function process(res, url) {
-    res = JSON.parse(res);
 
     $('#datasetinfo ul')
         .append('<li>id: <code>' + selected('dataset') + '</code></li>');
@@ -801,7 +802,7 @@ function format(cb) {
   }
 
   format.onselect = function () {
-    $('#output').children().hide();
+    //$('#output').children().hide();
     if (selected("return") === "image"  || 
         selected("return") === "script" || 
         selected("format") === "json")

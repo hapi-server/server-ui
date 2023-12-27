@@ -17,6 +17,14 @@ function get(options, cb) {
     }
   }
 
+  let showTiming = false;
+  if ($('#showtiming').attr('checked')) {
+    showTiming = true;
+    if (options["showTiming"] !== undefined) {
+      showTiming = options["showTiming"];
+    }
+  }
+
   let url = options.url;
 
   // Simulate error.
@@ -43,18 +51,21 @@ function get(options, cb) {
   }
 
   if (get.cache[urlo]) {
-    util.log("get(): Client-side cache hit.");
+    util.log("get(): Client-side cache hit for " + urlo);
     cb(false, get.cache[urlo]);
     return;
   }
 
   let timerId = undefined;
-  if (showRequest) {
+  if (showTiming) {
     timerId = timer();
   }
 
   util.log("get(): Requesting " + url);
-  util.log("get(): timerId = " + timerId);
+  if (timerId !== undefined) {
+    util.log("get(): timerId = " + timerId);
+  }
+
   //util.log("get(): tryProxy = " + tryProxy);
   //util.log("get(): directURLFailed = " + directURLFailed);
   //util.log("get(): PROXY_URL = " + PROXY_URL);
@@ -77,27 +88,34 @@ function get(options, cb) {
         type: "GET",
         url: url,
         async: true,
-        dataType: "text",
+        dataType: options.dataType || "text",
         success: function (data, textStatus, jqXHR) {
-          if (timerId !== undefined) {
+          if (showTiming) {
             timer(timerId);
           }
           util.log("get(): Got " + url);
-          util.log("get(): timerId = " + timerId);
+          if (showTiming) {
+            util.log("get(): timerId = " + timerId);
+          }
           if (showRequest) {
             $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
             $("#requests").show();
+          }
+          if (options.dataType === "json" && data["status"] && parseInt(data["status"]["code"]) !== 1200) {
+            ajaxError(url, data["status"]["message"], jqXHR);
+            cb(true, data);
+            return;
           }
           get.cache[urlo] = data; // Cache response.
           cb(false, data);
         },
         error: function (xhr, textStatus, errorThrown) {
-          if (timerId !== undefined) {
+          util.log("get(): Error for " + url);
+          if (showTiming) {
+            util.log("get(): timerId = " + timerId);
             timer(timerId);
           }
-          util.log("get(): Error for " + url);
-          util.log("get(): timerId = " + timerId);
-          error(xhr, textStatus, errorThrown);
+          errorHandler(xhr, textStatus, errorThrown);
         }
     });
   }
@@ -114,7 +132,7 @@ function get(options, cb) {
         util.log("get(): Error for " + url);
         util.log("get(): timerId = " + timerId);
         timer(timerId);
-        error(e);
+        errorHandler(e);
         return;
       }
       const reader = response.body.getReader();
@@ -146,7 +164,7 @@ function get(options, cb) {
     }
   }
 
-  function ajaxerror(url, message, xhr) {
+  function ajaxError(url, message, xhr) {
 
     let errmsg = xhr.statusText || xhr.responseText;
     let msg = 
@@ -163,12 +181,24 @@ function get(options, cb) {
     console.error(xhr);
   }
 
-  function error(xhr, textStatus, errorThrown) {
+  function errorHandler(xhr, textStatus, errorThrown) {
+
+    if (options.dataType === "json") {
+      let responseJSON;
+      try {responseJSON = JSON.parse(xhr.responseText);} catch (e) {}
+      if (responseJSON && parseInt(responseJSON["status"]["code"]) !== 1200) {
+        ajaxError(url, responseJSON["status"]["message"], xhr);
+        cb(true, data);
+        return;
+      }
+    }
+
     if (tryProxy && directURLFailed == false && PROXY_URL) {
       var opts = {
                     url: url,
                     directURLFailed: true,
                     tryProxy: false,
+                    dataType: options.dataType || "text",
                     showAjaxError: showAjaxError,
                     chunk: options.chunk || false
                   };
@@ -188,7 +218,7 @@ function get(options, cb) {
         } else {
           message = `Failed to retrieve '${url}'`;
         }
-        ajaxerror(url, message, xhr);
+        ajaxError(url, message, xhr);
       }
       cb("Error", null);
     }

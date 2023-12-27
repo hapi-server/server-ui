@@ -18,13 +18,13 @@ function showText(sText,cclass,ext) {
   }
 
   let w = $("#infodiv").width()-15
-  $("#scripttext").empty().append("<pre class='text'></pre>").show()
-  
-  // Common browser bug: &param is interpreted as &para;m: ¶m
+  $("#script-details").show();
+
+  // Common browser bug: &param is interpreted as &para;m (¶m)
   if (!["wget","curl"].includes(selected('format'))) {
       sText = sText.replace('&param','&amp;param');
   }
-  $("#scripttext > pre").append("<code id='script' class='" + cclass + "'></code>");
+  $('#script').addClass(cclass);
   $("#script").text(sText);
 
   $("#scripttext > pre").show();

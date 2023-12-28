@@ -35,7 +35,7 @@ function dropdowns(ids, funs, after, i) {
 
 		util.log("value         = " + value);
 		util.log("valuelast     = " + valuelast);
-		console.log(ui);
+
 		if (ui && ui.item) {
 			util.log("ui.item.value      = " + ui.item.value);
 			util.log("ui.item.valuelast  = " + ui.item.valuelast);

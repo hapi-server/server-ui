@@ -13,7 +13,7 @@ function hashchange() {
     // updated.
     util.log("hashchange.bind(): Called.");
     var qs = parseQueryString();
-    console.log(qs)
+
     let Nchanged = 0;
     for (var id in qs) {
       util.log("hashchange.bind(): Value in query string = " + qs[id]);

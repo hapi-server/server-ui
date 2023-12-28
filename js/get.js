@@ -99,9 +99,15 @@ function get(options, cb) {
             cb(true, data);
             return;
           }
-          util.log("get(): Caching: ");
-          util.log(data);
-          get.cache[urlo] = data; // Cache response.
+
+          // Cache response.
+          //util.log("get(): Caching: ");
+          //util.log(data);
+          if (options.dataType === "json") {
+            get.cache[urlo] = JSON.parse(JSON.stringify(data));
+          } else {
+            get.cache[urlo] = data; // Cache response.
+          }
           cb(false, data);
         },
         error: function (xhr, textStatus, errorThrown) {

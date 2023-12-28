@@ -49,6 +49,7 @@ function examples(serverID, serverURL, cb) {
         if (err || !infoObj || !infoObj["parameters"]) {
           return;
         }
+        console.log(infoObj)
         linkObj["parameters"] = infoObj["parameters"][0]["name"];
 
         if (linkObj["parameters"]["sampleStartDate"]) {

@@ -807,12 +807,14 @@ function format(cb) {
         selected("return") === "script" || 
         selected("format") === "json")
     {
-        output();
+      output();
     }
   };
 
   let values = [];
+  let autoOpen = true;
   if (selected("return").match("data")) {
+    autoOpen = false;
     values = 
               [
                 {label: "CSV", value: "csv"},
@@ -855,10 +857,10 @@ function format(cb) {
 
   for (var i = 0; i < values.length; i++) {
     if (qsInitial['format'] === values[i]['value']) {
-        values[i]['selected'] = true;
+      values[i]['selected'] = true;
     }
   }
-  cb(values, true);
+  cb(values, autoOpen);
 }
 
 // Style drop-down callback.

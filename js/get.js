@@ -7,41 +7,35 @@ function get(options, cb) {
 
   options = JSON.parse(JSON.stringify(options));
 
-  util.log("get(): Called with options: " + JSON.stringify(options));
-
-  let showRequest = false;
-  if ($('#showrequests').attr('checked')) {
-    showRequest = true;
-    if (options["showRequest"] !== undefined) {
-      showRequest = options["showRequest"];
-    }
-  }
-
-  let showTiming = false;
-  if ($('#showtiming').attr('checked')) {
-    showTiming = true;
-    if (options["showTiming"] !== undefined) {
-      showTiming = options["showTiming"];
-    }
-  }
-
   let url = options.url;
 
-  // Simulate error.
-  //if (url.match(/cdaweb/)) url = url + "x";
+  options.tryProxy = options.tryProxy || true;
+  options.showAjaxError = options.showAjaxError || false;
+  options.directURLFailed = options.directURLFailed || false;
+  options.dataType = options.dataType || "text",
+  options.showRequest = options.showRequest || false,
+  options.showTiming = options.showTiming || false,
+  options.timeout = options.timeout || 20000,
+  options.chunk =  options.chunk || false
 
-  var tryProxy = options.tryProxy || true;
+  util.log("get(): Called with options: " + JSON.stringify(options));
+
+  if ($('#showrequests').attr('checked') && options["showRequest"] === undefined) {
+    options.showRequest = options["showRequest"];
+  }
+  if ($('#showtiming').attr('checked') && options["showtiming"] === undefined) {
+    options.showtiming = options["showtiming"];
+  }
+
   if (!url.startsWith("http")) {
     // Requests to main server are relative paths and should not need a proxy.
     // So if they fail, don't try proxy.
-    tryProxy = false;
+    options.tryProxy = false;
   }
 
-  var showAjaxError = options.showAjaxError || false;
-  var directURLFailed = options.directURLFailed || false;
 
-  var urlo = url;
-  if (tryProxy && PROXY_URL && directURLFailed) {
+  let urlo = url;
+  if (options.tryProxy && PROXY_URL && options.directURLFailed) {
     url = PROXY_URL + encodeURIComponent(url);
   }
 
@@ -57,12 +51,12 @@ function get(options, cb) {
   }
 
   let timerId = undefined;
-  if (showTiming) {
+  if (options.showTiming) {
     timerId = timer();
   }
 
   util.log("get(): Requesting " + url);
-  if (timerId !== undefined) {
+  if (options.showTiming) {
     util.log("get(): timerId = " + timerId);
   }
 
@@ -71,7 +65,7 @@ function get(options, cb) {
   //util.log("get(): PROXY_URL = " + PROXY_URL);
   //util.log("get(): showAjaxError = " + showAjaxError);
 
-  if (showRequest) {
+  if (options.showRequest) {
     let msg = "Requesting " + link(url);
     $('#requests').html(msg);
     $('#requests').show();
@@ -88,16 +82,15 @@ function get(options, cb) {
         type: "GET",
         url: url,
         async: true,
-        dataType: options.dataType || "text",
+        dataType: options.dataType,
+        timeout: options.timeout,
         success: function (data, textStatus, jqXHR) {
-          if (showTiming) {
-            timer(timerId);
-          }
           util.log("get(): Got " + url);
-          if (showTiming) {
+          if (options.showTiming) {
+            timer(timerId);
             util.log("get(): timerId = " + timerId);
           }
-          if (showRequest) {
+          if (options.showRequest) {
             $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
             $("#requests").show();
           }
@@ -106,12 +99,14 @@ function get(options, cb) {
             cb(true, data);
             return;
           }
+          util.log("get(): Caching: ");
+          util.log(data);
           get.cache[urlo] = data; // Cache response.
           cb(false, data);
         },
         error: function (xhr, textStatus, errorThrown) {
           util.log("get(): Error for " + url);
-          if (showTiming) {
+          if (options.showTiming) {
             util.log("get(): timerId = " + timerId);
             timer(timerId);
           }
@@ -130,8 +125,10 @@ function get(options, cb) {
         response = await fetch(url);
       } catch (e) {
         util.log("get(): Error for " + url);
-        util.log("get(): timerId = " + timerId);
-        timer(timerId);
+        if (options.showTiming) {
+          util.log("get(): timerId = " + timerId);
+          timer(timerId);
+        }
         errorHandler(e);
         return;
       }
@@ -145,7 +142,9 @@ function get(options, cb) {
 
         length = length + result.value.length;
         if (c === false && length > 3000000) {
-          c = confirm('Large data response. Continue? (Uncheck Options > Show data to suppress display of data in browser.)');
+          msg = 'Large data response. Continue? ';
+          msg += '(Uncheck Options > Show data to suppress display of data in browser.)'
+          c = confirm(msg);
           if (c === false) {
             break;
           }
@@ -158,8 +157,10 @@ function get(options, cb) {
       }
 
       util.log("get(): Got chunks for " + url);
-      util.log("get(): timerId = " + timerId);
-      timer(timerId);
+      if (options.showTiming) {
+        util.log("get(): timerId = " + timerId);
+        timer(timerId);
+      }
       if (cb) cb(null, length, nrecords);
     }
   }
@@ -193,22 +194,18 @@ function get(options, cb) {
       }
     }
 
-    if (tryProxy && directURLFailed == false && PROXY_URL) {
+    if (options.tryProxy && options.directURLFailed == false && PROXY_URL) {
       var opts = {
-                    url: url,
+                    ...options,
                     directURLFailed: true,
                     tryProxy: false,
-                    dataType: options.dataType || "text",
-                    showTiming: options.showTiming || false,
-                    showAjaxError: showAjaxError,
-                    chunk: options.chunk || false
                   };
       util.log("get(): Attempting to proxy retrieve " + url);
       get(opts, cb);
     } else {
-      if (showAjaxError) {
+      if (options.showAjaxError) {
         var message = "";
-        if (directURLFailed && PROXY_URL) {
+        if (options.directURLFailed && PROXY_URL) {
           message = `Failed to retrieve<br><br><a href='${urlo}'>${urlo}</a>`
                   + "<br>and<br>"
                   + `<a href='${url}'>${url}</a>`

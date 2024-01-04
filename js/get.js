@@ -9,30 +9,28 @@ function get(options, cb) {
 
   let url = options.url;
 
+  util.log("get(): Called with options: " + JSON.stringify(options));
+
   options.tryProxy = options.tryProxy || true;
   options.showAjaxError = options.showAjaxError || false;
   options.directURLFailed = options.directURLFailed || false;
-  options.dataType = options.dataType || "text",
-  options.showRequest = options.showRequest || false,
-  options.showTiming = options.showTiming || false,
-  options.timeout = options.timeout || 20000,
-  options.chunk =  options.chunk || false
+  options.dataType = options.dataType || "text";
+  options.timeout = options.timeout || 20000;
+  options.chunk =  options.chunk || false;
+  options.timer = timerSettings(options.timer || {});
 
-  util.log("get(): Called with options: " + JSON.stringify(options));
+  // If option not given, use what is indicated by checkbox
+  if ($('#showrequests').prop('checked') && options["showRequest"] === undefined) {
+    options.showRequest = $('#showrequests').prop('checked');
+  }
 
-  if ($('#showrequests').attr('checked') && options["showRequest"] === undefined) {
-    options.showRequest = options["showRequest"];
-  }
-  if ($('#showtiming').attr('checked') && options["showtiming"] === undefined) {
-    options.showtiming = options["showtiming"];
-  }
+  util.log("get(): Given options and defaults: " + JSON.stringify(options));
 
   if (!url.startsWith("http")) {
     // Requests to main server are relative paths and should not need a proxy.
     // So if they fail, don't try proxy.
     options.tryProxy = false;
   }
-
 
   let urlo = url;
   if (options.tryProxy && PROXY_URL && options.directURLFailed) {
@@ -50,15 +48,9 @@ function get(options, cb) {
     return;
   }
 
-  let timerId = undefined;
-  if (options.showTiming) {
-    timerId = timer();
-  }
+  let timerId = timer(null, options.timer);
 
   util.log("get(): Requesting " + url);
-  if (options.showTiming) {
-    util.log("get(): timerId = " + timerId);
-  }
 
   //util.log("get(): tryProxy = " + tryProxy);
   //util.log("get(): directURLFailed = " + directURLFailed);
@@ -66,8 +58,7 @@ function get(options, cb) {
   //util.log("get(): showAjaxError = " + showAjaxError);
 
   if (options.showRequest) {
-    let msg = "Requesting " + link(url);
-    $('#requests').html(msg);
+    $('#requests').html("Requesting " + link(url));
     $('#requests').show();
   }
 
@@ -86,10 +77,7 @@ function get(options, cb) {
         timeout: options.timeout,
         success: function (data, textStatus, jqXHR) {
           util.log("get(): Got " + url);
-          if (options.showTiming) {
-            timer(timerId);
-            util.log("get(): timerId = " + timerId);
-          }
+          timer(timerId);
           if (options.showRequest) {
             $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
             $("#requests").show();
@@ -101,8 +89,6 @@ function get(options, cb) {
           }
 
           // Cache response.
-          //util.log("get(): Caching: ");
-          //util.log(data);
           if (options.dataType === "json") {
             get.cache[urlo] = JSON.parse(JSON.stringify(data));
           } else {
@@ -112,10 +98,7 @@ function get(options, cb) {
         },
         error: function (xhr, textStatus, errorThrown) {
           util.log("get(): Error for " + url);
-          if (options.showTiming) {
-            util.log("get(): timerId = " + timerId);
-            timer(timerId);
-          }
+          timer(timerId);
           errorHandler(xhr, textStatus, errorThrown);
         }
     });
@@ -131,10 +114,7 @@ function get(options, cb) {
         response = await fetch(url);
       } catch (e) {
         util.log("get(): Error for " + url);
-        if (options.showTiming) {
-          util.log("get(): timerId = " + timerId);
-          timer(timerId);
-        }
+        timer(timerId);
         errorHandler(e);
         return;
       }
@@ -162,11 +142,8 @@ function get(options, cb) {
         result = await reader.read();
       }
 
-      util.log("get(): Got chunks for " + url);
-      if (options.showTiming) {
-        util.log("get(): timerId = " + timerId);
-        timer(timerId);
-      }
+      util.log("get(): Got all chunks for " + url);
+      timer(timerId);
       if (cb) cb(null, length, nrecords);
     }
   }

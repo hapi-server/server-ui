@@ -50,6 +50,10 @@ details > summary {
 	display: none;
 }
 
+#datatime {
+  font-size: 90%;
+}
+
 #records-and-size {
   font-size: 90%;
 }
@@ -69,19 +73,13 @@ details > summary {
   font-size: 80%;
 }
 
-#timing, #xstatus {
-	font-size: 90%;
+#timing, #imagetime, #datetime, #requests, #xstatus {
+	font-size: 80%;
   display: inline;
 }
 
 #requests {
-  font-size: 80%;
   overflow-x: scroll;
-  display: none;
-}
-
-#loadinfo {
-	overflow: scroll;
 }
 
 a:link {

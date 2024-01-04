@@ -1,4 +1,6 @@
-function plot(set) {
+function plot(timingOptions) {
+
+  timingOptions = timerSettings(timingOptions);
 
   // TODO: Check method is known.
 
@@ -31,7 +33,6 @@ function plot(set) {
   if (!SERVER.startsWith("http")) {
       SERVER = location.origin + location.pathname + SERVER;
   }
-
 
   let selectedParameters = selected('parameters');
 
@@ -99,11 +100,11 @@ function plot(set) {
       "width": width,
       "height": height,
       "font": "sans-18",         // What are options?
-      "autolayout": true,       
+      "autolayout": true,
       "column": "6.5em,100%-2.5em", // Left gap, right gap
       "row": "3em,100%-3em",     // Top gap, bottom gap
       "process": "",    // histogram, magnitude(fft)
-      "renderType": "", // spectogram, series, scatter, stairSteps, fill_to_zero
+      "renderType": "", // spectrogram, series, scatter, stairSteps, fill_to_zero
       "symbolSize": "",
       "color": "#0000ff",
       "fillColor": "#aaaaff",
@@ -122,10 +123,7 @@ function plot(set) {
 
   function setImage(url) {
 
-    if (set === false) {return;}
-
-    let timerId = timer();
-    downloadlink(url, selected('format'));
+    let timerId = timer(null,timingOptions);
 
     if (!selected('format').match(/pdf/)) {
 
@@ -158,6 +156,7 @@ function plot(set) {
           .append(`<iframe width='${w}' height='${h}'></iframe>`)
           .find('iframe')
           .load(() => timer(timerId))
+          .error(() => timer(timerId))
           .attr('frameborder',0)
           .attr('scrolling','no')
           .attr('src',url)

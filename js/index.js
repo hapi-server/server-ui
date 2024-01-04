@@ -82,7 +82,7 @@ function mailtoLink(name, addr, subj) {
 }
 
 // Create a "Download X" link.
-function downloadlink(url, what, showElapsed) {
+function downloadlink(url, what) {
 
     $("#downloadlink")
       .empty()
@@ -975,27 +975,25 @@ function output(jsonURL) {
     $('#output').show();
 
     downloadlink(url, "data");
-    $("#downloadlink").show();
 
-    if ($("#showdata").prop('checked') == false) {
+    if ($("#showdata").prop('checked') === false) {
       return;
     }
 
     $("#data").empty();
+    $("#data-details").show();
+    $('#timing').empty();
+
     util.log('Getting ' + url);
-    get({url: url, chunk: true}, function(err, length, nrecords) {
+    get({url: url, chunk: true, timer: {'element': '#datatime'}}, function(err, length, nrecords) {
       if (err) {
         console.error(err);
         return;
       }
-      let msg = `<code id="records-and-size"> (${nrecords} records, `;
-      msg += `${util.sizeOf(length)})</code>`;
-      $("#downloadlink").append(msg);
+      let msg = `(${nrecords} records, ${util.sizeOf(length)})`;
+      $("#records-and-size").empty().text(msg);
       $("#data").width($("#infodiv").width()-15).height($(window).height()/2);
-      if ($('#showdata').attr('checked')) {
-        $("#data-details").show();
-        $("#data").show();
-      }
+      $("#data").show();
      });
   }
 
@@ -1006,9 +1004,15 @@ function output(jsonURL) {
     $(window).hashchange.byurledit = false;
     location.hash = decodeURIComponent($.param(qs));
 
+    $('#timing').empty();
+
+    let url = plot({'element': '#imagetime'});
+
     $('#output').show();
-    url = plot();
     downloadlink(url, selected("format"));
+
+    $("#image-details").show();
+
     if (/png|svg/.test(selected("format"))) {
       url = url.replace(`format=${selected("format")}`, 'format=gallery');
       let galleryHTML = "&nbsp;|&nbsp;"
@@ -1019,6 +1023,6 @@ function output(jsonURL) {
                       + "</span>";
 
       $("#downloadlink").append(galleryHTML).show();
-    } 
+    }
   }
 }

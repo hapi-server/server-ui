@@ -1,58 +1,56 @@
-function timer(id) {
+function timerSettings(given) {
 
-  let updateInterval = 500;
-
-  if (!showtiming) {
-    showtiming = $('#showtiming').attr('checked') === "checked";
+  if ($('#showtiming').prop('checked') && given["visible"] === undefined) {
+    given.visible = true;
   }
 
-  if (id) {
+  return {
+    "element": given.element || "#timing",
+    "updateInterval": given.updateInterval || 500,
+    "visible": given.visible || false
+  };
+}
+
+function timer(id,timingOptions) {
+
+  if (id !== null) {
+    // Stop timer
+    let timingElement = timer[id].timingOptions.element;
+    let timingUpdateInterval = timer[id].timingOptions.updateInterval;
+    let timingVisible =  timer[id].timingOptions.visible;
     clearInterval(timer[id].interval);
-    if (showtiming === false || timer[id].clearTiming) {
-      $('#timing').empty();
-    } else {
+    if (timingVisible) {
       let elapsed = ((new Date()).getTime() - timer[id].time);
-      $("#timing").text("Time: " + (elapsed) + " [ms]");
+      $(timingElement).html("Time: " + (elapsed) + " [ms]&nbsp;");
+    } else {
+      $(timingElement).empty();
     }
     return;
   }
 
-  let clearTiming = false;
-  if (selected('return') === 'image') {
-    // Always show timing for images, for feedback
-    showtiming = true;
-    clearTiming = true;
-  }
-  if (selected('return') === 'data' && $('#showdata').attr('checked')) {
-    // Always show timing for data, for feedback
-    showtiming = true;
-    clearTiming = true;
-  } 
-
-  $('#timing').empty();
-  if (showtiming) {
-    $("#timing").text("Time:      ms");
-  }
-
   id = Math.random();
-  timer[id] = {time: (new Date()).getTime()};
+  timer[id] = {
+                time: (new Date()).getTime(),
+                timingOptions: timingOptions
+              };
+
+  let element = timingOptions.element;
+  let visible = timingOptions.visible;
+  let updateInterval = timingOptions.updateInterval;
+
+  $(element).empty();
+
   timer[id].interval = 
           setInterval(
               () => {
                   let elapsed = ((new Date()).getTime() - timer[id].time);
-                  if (elapsed > updateInterval) {
-                    if (showtiming === false) {
-                      // Request took more than updateInterval. Show
-                      // timing for feedback.
-                      timer[id].clearTiming = true;
-                    }
-                    showtiming = true;
-                  }
-                  elapsed = 100*parseInt(elapsed/100); // Round
-                  if (showtiming) {
-                    $("#timing").text("Time: " + (elapsed) + "  ms");
+                  // Round.
+                  elapsed = (updateInterval/10)*parseInt(elapsed/(updateInterval/10));
+                  if (visible || elapsed > updateInterval) {
+                    $(element).html(`Time: ${elapsed} [ms]&nbsp;`);
                   }
               },
               updateInterval);
+
   return id;
 }

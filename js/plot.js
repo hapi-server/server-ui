@@ -82,7 +82,7 @@ function plot(timingOptions) {
 
   if (method === 'autoplot') {
     url = "vap+hapi:" + SERVER + "?id=";
-    url = url + `${selected('dataset')}&parameters=Time,${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
+    url = url + `${selected('dataset')}&parameters=${selectedParameters}&timerange=${selected('start')}/${selected('stop')}`;
     url = plotserver + "?url=" + encodeURIComponent(url);
 
     let format = "image/png";

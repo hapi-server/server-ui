@@ -105,9 +105,15 @@ function showJSONOnClick(id, url, listID) {
   $("#" + idjson).off("click", "**");
   function setClick() {
     $("#" + idjson).click(() => {
-      window.scrollTo(0, 0);
+      document.getElementById("json-details").scrollIntoView();
+      $('#output details').attr('open',false)
+      $("#json-details").show().attr('open',true);
       get({"url": url, showAjaxError: true, dataType: "json"}, (err, data) => {
-        showText(JSON.stringify(data, null, 4),'','json')
+        $("#json").width($("#infodiv").width()-15).height($(window).height()/2);
+        $("#output").show();
+        $("#json").text(JSON.stringify(data, null, 2));
+        hljs.highlightBlock(document.getElementById("json"));
+        downloadlink(url, "JSON");
       });
     });
   }
@@ -215,6 +221,10 @@ function servers(cb) {
     }
 
     $('#output').hide();
+    $('#output json').empty();
+    $('#output script').empty();
+    $('#output data').empty();
+    $('#output image').empty();
     $('#overviewinfo').hide();
     $('#serverinfo').nextAll().hide();
     $('#serverinfo > ul').empty();
@@ -351,7 +361,6 @@ function servers(cb) {
     console.error(msg);
     alert(msg);
     window.location.hash = "";
-    //location.reload();
   }
 
   function server_list_in_hash() {
@@ -932,23 +941,21 @@ function type(cb) {
 }
 
 // Form URL and place it in DOM based on drop-down change.
-function output(jsonURL) {
+function output() {
 
   util.log('output(): Called.');
 
   let selectedParameters = selected('parameters');
 
-  if (jsonURL) {
-    get({url: url, showAjaxError: true}, function (data) {
-      showText(JSON.stringify(data,null,4),'','json');
-    })
-    return;
-  }
-
   if (!selected('return')) {return;}
+
+  $('#output').show();
 
   if (selected('return').match(/script/)) {
     script();
+    document.getElementById("script-details").scrollIntoView();
+    $('#output details').attr('open',false);
+    $("#script-details").show().attr('open',true);
   }
 
   if (selected('return').match(/data/)) {
@@ -972,8 +979,6 @@ function output(jsonURL) {
       url = url + "&format=json";
     }
 
-    $('#output').show();
-
     downloadlink(url, "data");
 
     if ($("#showdata").prop('checked') === false) {
@@ -981,8 +986,11 @@ function output(jsonURL) {
     }
 
     $("#data").empty();
-    $("#data-details").show();
     $('#timing').empty();
+
+    document.getElementById("data-details").scrollIntoView();
+    $('#output details').attr('open',false);
+    $("#data-details").show().attr('open',true);
 
     util.log('Getting ' + url);
     get({url: url, chunk: true, timer: {'element': '#datatime'}}, function(err, length, nrecords) {
@@ -1008,10 +1016,11 @@ function output(jsonURL) {
 
     let url = plot({'element': '#imagetime'});
 
-    $('#output').show();
     downloadlink(url, selected("format"));
 
-    $("#image-details").show();
+    document.getElementById("image-details").scrollIntoView();
+    $('#output details').attr('open',false);
+    $("#image-details").show().attr('open',true)
 
     if (/png|svg/.test(selected("format"))) {
       url = url.replace(`format=${selected("format")}`, 'format=gallery');

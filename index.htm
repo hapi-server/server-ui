@@ -74,7 +74,6 @@
   <script type="text/javascript" src="js/get.js"></script>
   <script type="text/javascript" src="js/tooltips.js"></script>
   <script type="text/javascript" src="js/status.js"></script>
-  <script type="text/javascript" src="js/showText.js"></script>
   <script type="text/javascript" src="js/plot.js"></script>
   <script type="text/javascript" src="js/script.js"></script>
   <script type="text/javascript" src="js/examples.js"></script>
@@ -386,6 +385,15 @@
         <textarea id="data" class="data" readonly></textarea>
       </details>
 
+      <details id="json-details" open>
+        <summary>
+          JSON
+        </summary>
+        <div id="jsontext" class="json" readonly>
+          <code id="json"></code>
+        </div>
+      </details>
+
       <details id="script-details" open>
         <summary>Script</summary>
         <div id="scriptcopy" class="tooltip" title="Copy to clipboard">
@@ -395,10 +403,7 @@
           <span id="copied" class="tooltip" title="Copied!"></span>
         </div>
         <div id="scripttext" class="data" readonly>
-          <pre>
-            <code id="script">
-            </code>
-          </pre>
+          <code id="script"></code>
         </div>
       </details>
 
@@ -412,10 +417,12 @@
         <div id="server-example-details-body"></div>
       </details>
     </div>
+
     <div id="datasetinfo">
       <b>Dataset information</b>
       <ul></ul>
     </div>
+
     <div id="parameterinfo">
       <b>Parameter information</b>
       <ul></ul>

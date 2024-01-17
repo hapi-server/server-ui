@@ -37,7 +37,10 @@ util = {
     start = meta['startDate'];
     let cadenceString = meta['cadence'] || "PT1M";
     let cadenceMillis = dayjs.duration(cadenceString)['$ms'];
-
+    if (start.length == 11 && start.endsWith("Z")) {
+      // Safari date parsing workaround. 1999-01-01Z -> 1999-01-01
+      start = start.slice(0,1);
+    }
     let stop;
     if (cadenceMillis <= 100) { // 0.1 s or less
       stop = dayjs(start).add(1,'minute').toISOString();

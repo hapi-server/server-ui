@@ -40,23 +40,73 @@ details > summary {
 	display: none;
 }
 
-#data-details {
-  margin-top: 5px;
-	display: none;
+#output {
+	margin-bottom: 1em;
+  display: none;
 }
 
-#script-details {
-  margin-top: 5px;
-	display: none;
-}
+	#data-details {
+		margin-top: 5px;
+		display: none;
+	}
 
-#datatime {
-  font-size: 90%;
-}
+		textarea.data {
+			background-color: #f9f9f9;
+			width: 100%;
+			height: 1px;
+			/* prevent horizontal scrollbar */
+			overflow-x: auto;
+			/* add padding to account for vertical scrollbar */
+			padding-right: 5px;
+			border: 1px solid rgb(0,0,0);
+		}
 
-#records-and-size {
-  font-size: 90%;
-}
+		#datatime {
+			font-size: 90%;
+		}
+
+		#records-and-size {
+			font-size: 90%;
+		}
+
+	#image-details {
+		margin-top: 5px;
+		display: none;
+	}
+
+	#script-details {
+		margin-top: 5px;
+		display: none;
+	}
+
+		#scriptcopy {
+			float: left;
+			position: absolute;
+			opacity: 0.9;
+			z-index: 100;
+		}
+
+		#scripttext {
+			border: 1px solid black;
+			max-height: 50vh;
+			overflow-y: auto;
+		}
+
+	#json-details {
+		margin-top: 5px;
+		display: none;
+	}
+
+		#jsontext {
+			border: 1px solid black;
+			max-height: 50vh;
+			overflow-y: auto;
+		}
+
+		#jsontext pre {
+			margin: 0em;
+		}
+
 
 #options-details {
   margin-bottom: 5px;
@@ -96,47 +146,36 @@ button.simple {
 	margin-top:5px;
 }
 
-textarea.script {
-	background-color: #f9f9f9;
+
+code {
+	white-space: pre-wrap;
 }
 
-textarea.data {
-	background-color: #f9f9f9;
-	width: 100%;
-  height: 1px;
-	/* prevent horizontal scrollbar */
-	overflow-x: auto;
-	/* add padding to account for vertical scrollbar */
-	padding-right: 5px;
-	border: 1px solid rgb(0,0,0);
+li {
+	right: 10px;
 }
 
 pre {
 	white-space: pre-wrap;
 }
 
-code {
-	white-space: pre-wrap;
-}
+	pre.text {
+		margin: 10px;
+		background-color: #f9f9f9;
+		overflow-y: auto;
+		overflow-x: auto;
+		/* add padding to account for vertical scrollbar */
+		padding-right: 5px;
+	}
 
-li {right:10px;}
-pre.text {
-	margin: 10px;
-	background-color: #f9f9f9;
-	overflow-y: auto;
-	overflow-x: auto;
-	/* add padding to account for vertical scrollbar */
-	padding-right: 5px;
-}
-
-pre.data {
-	background-color: #f9f9f9;
-	overflow-y: auto;
-	overflow-x: auto;
-	/* add padding to account for vertical scrollbar */
-	padding-right: 5px;
-	border: 1px solid rgb(0,0,0);
-}
+	pre.data {
+		background-color: #f9f9f9;
+		overflow-y: auto;
+		overflow-x: auto;
+		/* add padding to account for vertical scrollbar */
+		padding-right: 5px;
+		border: 1px solid rgb(0,0,0);
+	}
 
 .ui-widget {
 	font-family: Veranda, Arial, sans-serif;
@@ -219,24 +258,6 @@ pre.data {
 	display: none;
 }
 
-#scriptcopy {
-	float: left;
-	position: absolute;
-	opacity: 0.9;
-	z-index: 100;
-}
-
-#scripttext {
-	border: 1px solid black;
-	max-height: 50vh;
-	overflow-y: auto;
-}
-
-#output {
-	margin-bottom: 1em;
-  display: none;
-}
-
 #serverinfo {
   display: none;
 }
@@ -269,7 +290,6 @@ pre.data {
  min-height: 95vh;
  max-width: 1024px;
 }
-
 
 #selections {
 	float: left;

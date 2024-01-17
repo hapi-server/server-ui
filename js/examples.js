@@ -50,10 +50,9 @@ function examples(serverID, serverURL, cb) {
           return;
         }
         linkObj["parameters"] = infoObj["parameters"][0]["name"];
-
-        if (linkObj["parameters"]["sampleStartDate"]) {
-          linkObj["start"] = infoObj["parameters"]["sampleStartDate"];
-          linkObj["stop"] = infoObj["parameters"]["sampleStartDate"];
+        if (infoObj["sampleStartDate"]) {
+          linkObj["start"] = infoObj["sampleStartDate"];
+          linkObj["stop"] = infoObj["sampleStopDate"];
         } else {
           linkObj["start"] = infoObj["startDate"]
           linkObj["stop"] = util.defaultStop(infoObj);

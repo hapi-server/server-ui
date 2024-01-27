@@ -1,7 +1,8 @@
 // Catch and report uncaught errors.
 window.onerror = function (message, fileName, lineNumber) {
   fileName = fileName.replace(window.location,"");
-  status(`${fileName}#L${lineNumber} <code>${message}</code>`,'error');
+  status(`Error. Please post URL to the 
+  <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.<br>Error Location: ${fileName.replace(window.location.origin + window.location.pathname,"")}#L${lineNumber}<br>Error Message: <code>${message}</code>. `,'error');
 }
 
 let qsInitial = parseQueryString();
@@ -507,6 +508,7 @@ function parameters(cb) {
   };
 
   let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
+  console.log(datasets.json.HAPI);
   url = util.hapi2to3(url);
 
   get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
@@ -821,7 +823,7 @@ function format(cb) {
   };
 
   let values = [];
-  let autoOpen = true;
+  let autoOpen = false;
   if (selected("return").match("data")) {
     autoOpen = false;
     values = 

@@ -82,8 +82,9 @@ function get(options, cb) {
             $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
             $("#requests").show();
           }
-          if (options.dataType === "json" && data["status"] && parseInt(data["status"]["code"]) !== 1200) {
-            ajaxError(url, data["status"]["message"], jqXHR);
+          if (options.dataType === "json" && data["status"] && parseInt(data["status"]["code"]) !== 1200 && parseInt(data["status"]["code"]) !== 200) {
+            // Last condition is a work-around of a bug in the CDAWeb HAPI server.
+            ajaxError(url, data["status"]["message"] + ". Status: " +  data["status"]["code"], jqXHR);
             cb(true, data);
             return;
           }

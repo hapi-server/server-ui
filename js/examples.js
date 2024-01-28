@@ -3,11 +3,11 @@ function examples(serverID, serverURL, cb) {
   if (!cb) cb = () => {};
 
   let url = "";
-  if (Array.isArray(serverID)) {
+  if (typeof serverID === 'string') {
+    url = "examples/" + serverID + ".json";
+  } else {
     createAll(serverID, cb);
     return;
-  } else {
-    url = "examples/" + serverID + ".json";
   }
 
   get({"url": url, "showRequest": false, "showTiming": false, "dataType": "json"}, (err, linkJSON) => {
@@ -20,12 +20,10 @@ function examples(serverID, serverURL, cb) {
     createLinkHTML(linkJSON, serverID, cb);
   });
 
-  function createAll(allArray, cb) {
-    for (let serverLine of allArray) {
-      let lineColumns =  serverLine.split(",");
-      let serverURL = lineColumns[0].trim();
-      let serverName = lineColumns[1].trim();
-      let serverID = lineColumns[2].trim();
+  function createAll(allServers, cb) {
+    for (let [serverID, server] of Object.entries(allServers)) {
+      let serverURL = server['url'];
+      let serverName = server['name'];
       //examples(serverID, serverURL, (html) => finished(serverName, html));
       examples(serverID, serverURL, (html) => cb(`<b>${serverName}</b>\n${html}`));
     }
@@ -45,20 +43,21 @@ function examples(serverID, serverURL, cb) {
 
       let version = catalogObj['HAPI'];
       let url = serverURL + "/info?id=" + linkObj["dataset"];
-      get({"url": util.hapi2to3(url, version), "showRequest": false, "showTiming": false, "dataType": "json"}, (err, infoObj) => {
-        if (err || !infoObj || !infoObj["parameters"]) {
-          return;
-        }
-        linkObj["parameters"] = infoObj["parameters"][0]["name"];
-        if (infoObj["sampleStartDate"]) {
-          linkObj["start"] = infoObj["sampleStartDate"];
-          linkObj["stop"] = infoObj["sampleStopDate"];
-        } else {
-          linkObj["start"] = infoObj["startDate"]
-          linkObj["stop"] = util.defaultStop(infoObj);
-        }
-        createLinkHTML(linkObj, serverID, cb);
-      });
+      get({"url": util.hapi2to3(url, version), "showRequest": false, "showTiming": false, "dataType": "json"},
+        (err, infoObj) => {
+          if (err || !infoObj || !infoObj["parameters"]) {
+            return;
+          }
+          linkObj["parameters"] = infoObj["parameters"][0]["name"];
+          if (infoObj["sampleStartDate"]) {
+            linkObj["start"] = infoObj["sampleStartDate"];
+            linkObj["stop"] = infoObj["sampleStopDate"];
+          } else {
+            linkObj["start"] = infoObj["startDate"]
+            linkObj["stop"] = util.defaultStop(infoObj);
+          }
+          createLinkHTML(linkObj, serverID, cb);
+        });
     });
   }
 

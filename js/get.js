@@ -195,7 +195,7 @@ function get(options, cb) {
                   + "<br><br>"
                   + "The first URL failure <i>may</i> be due to the server not supporting "
                   + `<a href='${specURL}'>CORS headers</a>. `
-                  + "The second URL failure is usually a result of a server issue.";
+                  + "The second URL failure is usually a result of a server issue or an URL with a typo.";
         } else {
           message = `Failed to retrieve '${url}'`;
         }

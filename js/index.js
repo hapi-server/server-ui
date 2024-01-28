@@ -1,8 +1,11 @@
 // Catch and report uncaught errors.
 window.onerror = function (message, fileName, lineNumber) {
   fileName = fileName.replace(window.location,"");
-  status(`Error. Please post URL to the 
-  <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.<br>Error Location: ${fileName.replace(window.location.origin + window.location.pathname,"")}#L${lineNumber}<br>Error Message: <code>${message}</code>. `,'error');
+  let msg = "Error. Please post URL to the ";
+  msg += '<a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.'
+  msg += `<br>Error Location: ${fileName.replace(window.location.origin + window.location.pathname,"")}#L${lineNumber}`
+  msg += `<br>Error Message: <code>${message}</code>.`
+  status(msg,'error');
 }
 
 let qsInitial = parseQueryString();
@@ -169,7 +172,7 @@ function about(url) {
 function servers(cb) {
 
   util.log('servers(): Called.');
-  let SERVER_LIST_HASH = server_list_in_hash();
+  let SERVER_LIST_HASH = listInHash();
   if (SERVER_LIST_HASH !== "") {
     util.log("servers(): Server given in hash: " + SERVER_LIST_HASH);
     process(SERVER_LIST_HASH);
@@ -179,16 +182,15 @@ function servers(cb) {
       if (!err) {
         process(text);
       } else {
-        util.log("Did not find " + SERVER_LIST + ".\n"
-            + "Trying fall-back of " + SERVER_LIST_FALLBACK);
-        let warning = 'Did not find ' 
-                      + SERVER_LIST + ". Will use " 
-                      + SERVER_LIST_FALLBACK;
+        util.log(SERVER_LIST + " not found.\n" + "Trying fall-back of " + SERVER_LIST_FALLBACK);
+        let warning = SERVER_LIST + " not found. Will try " + SERVER_LIST_FALLBACK;
         status(warning,'warning');
-        SERVER_LIST = SERVER_LIST_FALLBACK;
-        get({url: SERVER_LIST}, function (err, text) {
+        get({url: SERVER_LIST_FALLBACK}, function (err, text) {
           if (!err) {
             process(text);
+          } else {
+            let msg = `Unable to load a server list. Tried ${SERVER_LIST} and ${SERVER_LIST_FALLBACK}`;
+            status(msg,'error');
           }
         });
       }
@@ -202,7 +204,7 @@ function servers(cb) {
 
     util.log('servers.onselect(): Called.');
 
-    let SERVER_LIST_HASH = server_list_in_hash();
+    let SERVER_LIST_HASH = listInHash();
     if (SERVER_LIST_HASH !== "") {
       util.log('servers.onselect(): No further processing b/c server list in hash.');
       process(SERVER_LIST_HASH);
@@ -211,7 +213,7 @@ function servers(cb) {
 
     let selectedServer = selected('server');
     if (!servers.info[selectedServer]) {
-      // If user typed server=X and X not is server list
+      // Will occur if user typed server=X and X not is server list
       serverNotFound(selectedServer);
       return;
     }
@@ -253,20 +255,58 @@ function servers(cb) {
   function process(alltxt) {
 
     servers.ids = [];
-    // Split and remove empty lines
-    allarr = alltxt.split("\n").filter(x => x !== "");
+    let selectedServer = selected("server");
+    let qs = parseQueryString();
 
-    $("#all-example-details-body").empty().show();
+    let info = parseServerList(alltxt);
 
-    if (server_list_in_hash() === "") {
-      examples(allarr, null, function (html) {
-        $("#all-example-details-body").append(html).show();
+    let found = false;
+    let list = [];
+    for (let id of Object.keys(info)) {
+
+      servers.ids.push(id);
+      if (id === selectedServer) {
+        found = true;
+      }
+
+      if (qs['server'] === id) {
+        util.log("servers(): Server value for " + id + " found in hash. Selecting it.")
+      }
+      list.push({
+          "label": info[id]['name'],
+          "value": id, 
+          "selected": qs['server'] === id
       });
     }
 
-    let list = [];
+    if (selectedServer && found == false && !listInHash()) {
+      // Will occur if user typed a server name in drop-down and it is not in list
+      serverNotFound(selectedServer);
+      return;
+    }
+
+    // Move TestData servers to end of list and possibly remove based on checkbox.
+    list = modifyServerList(list, found);
+
+    $("#all-example-details-body").empty();
+    examples(info, null, function (html) {
+      if (!html) return;
+      $("#all-example-details").show();
+      $("#all-example-details-body").append(html).show();
+    });
+
+    $('#overviewul').prepend('<li>' + (list.length) + " servers available.</li>");
+    util.log("Dataset list:");
+    util.log(list);
+    servers.info = info;
+    cb(list);
+  }
+
+  function parseServerList(alltxt) {
+
     let info = {};
-    let found = false;
+    // Split and remove empty lines
+    let allarr = alltxt.split("\n").filter(x => x !== "");
 
     for (let i = 0; i < allarr.length; i++) {
 
@@ -274,13 +314,12 @@ function servers(cb) {
         continue;
       }
 
-      let id, name;
       if (allarr[i].split(",").length == 1) {
         // Only URL given. Will occur with SERVER_LIST_HASH given.
-        id = allarr[i].split(',')[0].trim()
-        name = id;
+        let id = allarr[i].split(',')[0].trim();
         info[id] = {};
         info[id]['url'] = id;
+        info[id]['name'] = id;
         info[id]['contactName'] = "";
         info[id]['contactEmail'] = "";
         info[id]['contactName'] = "";
@@ -289,47 +328,28 @@ function servers(cb) {
         for (let col in line) {
           line[col] = line[col].trim();
         }
-        id = line[2];
+        let id = line[2];
         if (!id) {
           console.error('No id found in ' + allarr[i]);
           continue;
         }
-        name = line[1] || id;
         info[id] = {};
         info[id]['url'] = line[0];
+        info[id]['name'] = line[1] || id;
         info[id]['contactName'] = line[3] || '';
         info[id]['contactEmail'] = line[4] || '';
         if (info[id]['contactName'] == info[id]['contactEmail']) {
           info[id]['contactName'] = '';
         }
       }
-      let selectedServer = selected("server");
-      servers.ids.push(id);
-      if (id === selectedServer) {
-        found = true;
-      }
-
-      let qs = parseQueryString();
-      if (qs['server'] === id) {
-        util.log("servers(): Server value for " + id + " found in hash. Selecting it.")
-      }
-      list.push({
-          "label": name,
-          "value": id, 
-          "selected": qs['server'] === id
-      });
     }
+    return info;
+  }
 
-    let selectedServer = selected('server');
-    if (selectedServer && found == false && !server_list_in_hash()) {
-      serverNotFound(selectedServer);
-      return;
-    }
-
-    // Move TestData servers to end of list and possibly remove based on checkbox.
+  function modifyServerList(list, found) {
     let listCopy = list.slice(); // Shallow copy.
-    let len = list.length;
-    for (i = 0; i < len; i++) {
+    let listLength = list.length;
+    for (let i = 0; i < listLength; i++) {
       if (list[i]["label"].startsWith("TestData") ||
           list[i]["label"].startsWith("URLWatcher")) {
         let tmp = list[i];
@@ -342,30 +362,31 @@ function servers(cb) {
     list = list.filter(function( element ) {
       return element !== undefined;
     });
-    if (list.length == 0) {
+    if (list.length === 0) {
       let msg = "All server names start with {TestData,URLWatcher} and ";
       msg += "'show TestData servers' option unchecked. "
       msg += "Ignoring option so at least one server in server drop-down list.";
       util.log(msg);
       list = listCopy;
     }
+    return list;
+  }
 
-    $('#overviewul').prepend('<li>' + (list.length) + " servers available.</li>");
-    util.log("Dataset list:");
-    util.log(list);
-    servers.info = info;
-    cb(list);
+  function reset(msg) {
+    console.error(msg);
+    alert(msg);
+    $(window).unbind("hashchange");
+    window.location.hash = "";
+    location.reload();
   }
 
   function serverNotFound(selectedServer) {
-    let msg = `Server '${selectedServer}' is not available from this interface.`;
-    console.error(msg);
-    alert(msg);
-    window.location.hash = "";
+    let msg = `Server '${selectedServer}' is not available from this interface or URL is invalid.`;
+    reset(msg);
   }
 
-  function server_list_in_hash() {
-    var qs = parseQueryString();
+  function listInHash() {
+    let qs = parseQueryString();
     if (!qs['server']) {
       return "";
     }
@@ -383,16 +404,6 @@ function datasets(cb) {
 
   datasets.label = "Datasets";
 
-  datasets.onselect = function () {
-    util.log('datasets.onselect(): Called.');
-
-    $('#output').hide();
-    $('#datasetinfo').nextAll().hide();
-
-    $('#datasetinfo ul').empty();
-    $('#datasetinfo').show();
-  };
-
   util.log('datasets(): Called.');
   let url = servers.info[selected('server')]['url'] + "/catalog";
   get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
@@ -405,6 +416,15 @@ function datasets(cb) {
       process(res);
     };
   });
+
+  datasets.onselect = function () {
+    util.log('datasets.onselect(): Called.');
+    $('#output').hide();
+    $('#datasetinfo').nextAll().hide();
+
+    $('#datasetinfo ul').empty();
+    $('#datasetinfo').show();
+  };
 
   function process(res) {
 

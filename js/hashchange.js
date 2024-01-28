@@ -12,35 +12,39 @@ function hashchange() {
     // change the server and the parameter list will not be
     // updated.
     util.log("hashchange.bind(): Called.");
-    var qs = parseQueryString();
+    let qs = parseQueryString();
 
-    let Nchanged = 0;
-    for (var id in qs) {
+    let changed = {};
+    for (let id in qs) {
       util.log("hashchange.bind(): Value in query string = " + qs[id]);
-      var val = $('#' + id).parent().parent().attr('value');
-      util.log("hashchange.bind(): Drop-down value  = " + val);
+      let val = $('#' + id).parent().parent().attr('value');
+      util.log("hashchange.bind(): Value in drop-down = " + val);
       if (qs[id] !== val) {
-        Nchanged = Nchanged + 1;
+        changed[id] = true;
         util.log('hashchange.bind(): Query string value differs from that in ' + id + " dropdown.");
       } else {
         util.log('hashchange.bind(): Query string value same as that in ' + id + " dropdown.");
       }
     }
 
-    if (Nchanged > 1) {
-      util.log('hashchange.bind(): More than one query string value changed. Resetting app.');
+    let nChanged = Object.keys(changed).length;
+    if (nChanged > 1 || 'server' in changed) {
+      if (nChanged > 1) {
+        util.log('hashchange.bind(): More than one query string value changed. Resetting app.');
+      } else {
+        util.log('hashchange.bind(): Server changed. Resetting app.');
+      }
       $(window).unbind("hashchange");
       location.reload();
       return;
-    } else if (Nchanged === 1) {
+    } else if (nChanged === 1) {
       util.log('hashchange.bind(): One query string value changed.');
-      $(window).hashchange.byurledit = true;
     } else {
       util.log('hashchange.bind(): No query string value changed.');
     }
 
     if ($(window).hashchange.byurledit) {
-      util.log("hashchange(): Hash change made by manual edit of one parameter.");
+      util.log("hashchange(): Hash change made by manual edit of one non-server parameter.");
       util.log("hashchange(): Current hash: " + location.hash);
 
       for (let id in qs) {
@@ -53,6 +57,5 @@ function hashchange() {
             ._trigger("select",null,{item: qs[id]});
         }
     }
-    //$(window).hashchange.byurledit = true;
   });
 }

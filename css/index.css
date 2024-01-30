@@ -38,6 +38,7 @@ details > summary {
 }
 #all-example-details {
 	display: none;
+	margin-bottom: 0.7em;
 }
 #server-example-details {
 	display: none;

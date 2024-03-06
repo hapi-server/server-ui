@@ -17,7 +17,7 @@ dataset    = 'DATASET'
 #    listCSV_EXAMPLE
 parameters = 'PARAMETERS'
 start      = 'START' # min STARTMIN
-stop       = 'STOP'  # max STOPMAX
+stop       = 'STOP' # max STOPMAX
 
 data, meta = hapi(server, dataset, parameters, start, stop)
 
@@ -26,10 +26,11 @@ from hapiplot import hapiplot
 hapiplot(data, meta)
 
 # Notes:
-# 1. To convert the ISO 8601 strings in data['TIMENAME'] to Python
+# 1. To convert ISO 8601 strings the primary time parameter to Python
 #    datetimes, use
 #      from hapiclient import hapitime2datetime
-#      Time = hapitime2datetime(data['TIMENAME'])
+#      time_name = meta["parameters"][0]["name"] # Primary time parameter is always first.
+#      Time = hapitime2datetime(data[time_name])
 # 2. Details about the data and metadata structures `data`
 #    and `meta` are given at 
 #    https://github.com/hapi-server/client-python-notebooks/blob/master/hapi_demo.ipynb

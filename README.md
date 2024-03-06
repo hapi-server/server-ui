@@ -11,7 +11,7 @@ This repository contains
 
 ## Basic
 
-To use the basic landing page with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to the URL that ends in `hapi/`.
+To use the basic landing page with your HAPI server, download [single.htm](https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm) and fill in the placeholders prefixed by `__`, save as `index.htm` and place in the directory associated with responses to a URL that ends in `/hapi`.
 
 ## Advanced
 
@@ -21,16 +21,14 @@ To use the landing page with an advanced user interface,
 git clone https://github.com/hapi-server/server-ui
 ```
 
-or download and extract the [zip archive of the code](https://github.com/hapi-server/server-ui/archive/refs/heads/master.zip) (and replace `server-ui` with `server-ui-master` in the following).
+Then, edit `all.txt` and configure your server so that responses to a URL that ends in `/hapi` are associated with the `sever-ui` directory.
 
-Then [edit `all.txt`](#ui-configuration) and copy the contents of `server-ui` into your root HAPI server directory.
-
-Or, for testing, edit [edit `all.txt`](#ui-configuration), cd to `server-ui`, and execute
+Or, for testing, cd to the `server-ui` directory, edit `all.txt`, and execute
 
 ```
-cd server-ui; python3 -m http.server
-# or
 cd server-ui; python2 -m SimpleHTTPServer
+# or
+cd server-ui; python3 -m http.server
 # or
 cd server-ui; npm install; npm start
 ```
@@ -39,39 +37,35 @@ and open `http://localhost:8000/` in a web browser.
 
 ### UI Configuration
 
-By default, the list of servers at `http://localhost:8000/` will be that in https://github.com/hapi-server/servers/blob/master/all_.txt.
+By default, the list of servers shown at `http://localhost:8000/` will be that in https://github.com/hapi-server/servers/blob/master/all_.txt.
 
-To use your own list, rename `all_.txt` to `all.txt` and enter the URL of your HAPI server.
+To use your own list, rename `all_.txt` to `all.txt` and enter the URL of your HAPI server in `all.txt`.
 
 ### UI Use
 
 You can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.
 
-`http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi`
+`http://hapi-server.org/servers/#server=https://hapi-server.org/servers/SSCWeb/hapi`
 
-Several servers may be listed, e.g.,
+Note that this will only work if the server(s) allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing) or the proxy server below is used.
 
-`http://hapi-server.org/servers-dev/#server=http://hapi-server.org/servers/SSCWeb/hapi,https://cdaweb.gsfc.nasa.gov/hapi`
+# Proxy Server
 
-Note that this will only work if the servers allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing).
+If a server in `all.txt` or the `server` [passed as a URL parameter](ui-use) does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to use a proxy server to access resources from that server.
 
-# Proxy
-
-If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to use a proxy server to access resources from that server.
-
-A very basic webserver with a proxy can be run on port `8000` using
+A server with a proxy can be run on port `8000` using
 
 ```
 npm install
-npm run proxyserver
-# or
+npm run proxy-server --port 8000
+# or, equivalently,
 npm install
-node proxy/proxy.js 8000
+node server/server.js --port 8000
 ```
 
-See the comments in [`proxy/proxy.js`](https://github.com/hapi-server/server-ui/blob/master/proxy/proxy.js) to constrain URLs that can be proxied.
+See the comments in [`server/server.js`](https://github.com/hapi-server/server-ui/blob/master/proxy/proxy.js) to constrain URLs that can be proxied.
 
-By default, if an request to `URL` fails, an attempt to retrieve it is made via the proxy request `/proxy?url=URL`. The URL for the proxy is set in the header of [`index.htm`](https://github.com/hapi-server/server-ui/blob/master/index.htm).
+By default, if an request to `URL` fails, an attempt to retrieve it is made via the proxy request `proxy?url=URL`. The URL for the proxy is set in the header of [`index.htm`](https://github.com/hapi-server/server-ui/blob/master/index.htm).
 
 # Reporting issues
 

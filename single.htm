@@ -98,8 +98,8 @@
       $("#viviz").hide();
     }
 
-    if (!window.location.hostname == 'localhost') {
-      $('#verifierp').append('Remove validation link on production sites.');
+    if (window.location.hostname !== 'localhost') {
+      $('#verifierp').hide('Remove validation link on production sites.');
     } else {
       let note = " <span style='background-color:yellow'>If HAPI server URL domain name is localhost, plot server must be run on localhost for this link to work. See <code>hapi-server -h</code>.</span>"
       if ($("#viviz").attr("href").match('localhost')) {

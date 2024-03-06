@@ -1,6 +1,7 @@
 {
   "name": "hapi-server-ui",
   "version": "0.9.0",
+  "type": "commonjs",
   "people": {
     "name": "Bob Weigel",
     "email": "rweigel@gmu.edu",
@@ -11,13 +12,24 @@
     "url": "https://github.com/hapi-server/server-ui.git"
   },
   "dependencies": {
+    "dayjs": "^1.11.10",
     "express": "^4",
     "http-server": "^0.12.3",
-    "superagent": "^3.0",
-    "superagent-proxy": "^3.0.0"
+    "log": "git+https://github.com/rweigel/log.git#main",
+    "node-fetch-native": "^1.6.1",
+    "serve-index": "^1.9.1",
+    "superagent": "^5.1.2",
+    "yargs": "^8.0.2"
   },
   "scripts": {
-    "start": "node_modules/http-server/bin/http-server --port 8000",
-    "proxyserver": "node proxy/proxy.js 8002"
+    "start": "node_modules/http-server/bin/http-server",
+    "proxy-server": "node server/server.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-promise": "^6.1.1"
   }
 }

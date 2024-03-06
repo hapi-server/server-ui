@@ -1,6 +1,6 @@
 function get(options, cb) {
 
-  $("#ajaxerror").hide().empty();
+  let proxyURL = window["HAPIUI"]["options"]["proxy"];
 
   let specURL = 'https://github.com/hapi-server/data-specification/blob/master';
   specURL += '/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing';
@@ -12,17 +12,12 @@ function get(options, cb) {
   util.log("get(): Called with options: " + JSON.stringify(options));
 
   options.tryProxy = options.tryProxy || true;
-  options.showAjaxError = options.showAjaxError || false;
   options.directURLFailed = options.directURLFailed || false;
   options.dataType = options.dataType || "text";
-  options.timeout = options.timeout || 20000;
-  options.chunk =  options.chunk || false;
-  options.timer = timerSettings(options.timer || {});
+  options.timeout = options.timeout || window["HAPIUI"]["options"]["metadataTimeout"] || 20000;
+  options.chunk = options.chunk || false;
 
-  // If option not given, use what is indicated by checkbox
-  if ($('#showrequests').prop('checked') && options["showRequest"] === undefined) {
-    options.showRequest = $('#showrequests').prop('checked');
-  }
+  options.timer = options.timer || {};
 
   util.log("get(): Given options and defaults: " + JSON.stringify(options));
 
@@ -33,175 +28,218 @@ function get(options, cb) {
   }
 
   let urlo = url;
-  if (options.tryProxy && PROXY_URL && options.directURLFailed) {
-    url = PROXY_URL + encodeURIComponent(url);
+  if (options.tryProxy && proxyURL && options.directURLFailed) {
+    url = proxyURL + encodeURIComponent(url);
   }
 
-  // Client-side cache of response.
+  // Store client-side cache of response.
   if (typeof(get.cache) === "undefined") {
     get.cache = {};
   }
 
   if (get.cache[urlo]) {
-    util.log("get(): Client-side cache hit for " + urlo);
+    util.log(`get(): Client-side cache hit for ${urlo}`);
     cb(false, get.cache[urlo]);
     return;
   }
 
-  let timerId = timer(null, options.timer);
-
   util.log("get(): Requesting " + url);
-
-  //util.log("get(): tryProxy = " + tryProxy);
-  //util.log("get(): directURLFailed = " + directURLFailed);
-  //util.log("get(): PROXY_URL = " + PROXY_URL);
-  //util.log("get(): showAjaxError = " + showAjaxError);
-
-  if (options.showRequest) {
-    $('#requests').html("Requesting " + link(url));
-    $('#requests').show();
+  if (options.requestURLElement) {
+    $(options.requestURLElement).html("Requesting: " + html.aLink(url));
+  }
+  let timerID = timer(url, options.timer);
+  if (timerID === null) {
+    console.error(`get(): Returning because active request for url = ${url}`);
+    console.error("get(): Check for redundant requests.");
+    get.callBackQueue = get.callBackQueue || {};
+    get.callBackQueue[url] = get.callBackQueue[url] || [];
+    get.callBackQueue[url].push(cb);
+    return;
   }
 
-  if (options.chunk) {
+  if (options.chunk === true) {
     getChunks();
   } else {
     getAll();
   }
 
   function getAll() {
+
     $.ajax({
-        type: "GET",
-        url: url,
-        async: true,
-        dataType: options.dataType,
-        timeout: options.timeout,
-        success: function (data, textStatus, jqXHR) {
-          util.log("get(): Got " + url);
-          timer(timerId);
-          if (options.showRequest) {
-            $("#requests").html("Received: " + link(url.replace("&param","&amp;param")));
-            $("#requests").show();
+      type: "GET",
+      url: url,
+      async: true,
+      dataType: options.dataType,
+      timeout: options.timeout,
+      success: function (data, textStatus, jqXHR) {
+        let contentType = jqXHR.getResponseHeader("content-type");
+        let dataLength = jqXHR.responseText.length;
+        let nRecords = -1;
+
+        util.log("get(): Received " + url);
+        util.log(`get(): options.dataType: ${options.dataType}; response content-type: ${contentType}`);
+        timer(timerID, "stop");
+        if (options.requestURLElement) {
+          $(options.requestURLElement).html("Received: " + html.aLink(url));
+        }
+
+        if (options.dataType === "json") {
+          if (!contentType || contentType.startsWith("application/json") === false) {
+            if (typeof data !== "object") {
+              let msg = `Error: ${html.aLink(url)} returned content-type = '${contentType}'`;
+              msg += ` but expected 'application/json'. Attempt to parse as JSON failed.`;
+              errorHandler(msg);
+              return;
+            }
           }
-          if (options.dataType === "json" && data["status"] && parseInt(data["status"]["code"]) !== 1200) {
-            ajaxError(url, data["status"]["message"], jqXHR);
-            cb(true, data);
+          if (data["status"] && parseInt(data["status"]["code"]) !== 1200) {
+            let msg = `Error: ${url} returned HAPI status code != 1200`;
+            errorHandler(msg);
             return;
           }
-
-          // Cache response.
-          if (options.dataType === "json") {
-            get.cache[urlo] = JSON.parse(JSON.stringify(data));
-          } else {
-            get.cache[urlo] = data; // Cache response.
+          if (typeof(data["data"]) === "object") {
+            if (data["data"] !== undefined) {
+              nRecords = data["data"].length;
+            } else {
+              nRecords = data.length;
+            }
           }
-          cb(false, data);
-        },
-        error: function (xhr, textStatus, errorThrown) {
-          util.log("get(): Error for " + url);
-          timer(timerId);
-          errorHandler(xhr, textStatus, errorThrown);
         }
+
+        if (options.dataType === "text" && typeof(data) === "string") {
+          // TODO: Remove header
+          nRecords = (data.match(/\n/g) || []).length;
+        }
+
+        // Cache response.
+        if (typeof data === "object") {
+          // Deep copy to avoid modifying cache.
+          get.cache[urlo] = JSON.parse(JSON.stringify(data));
+        } else {
+          get.cache[urlo] = data;
+        }
+
+        if (get.callBackQueue && get.callBackQueue[url]) {
+          while (get.callBackQueue[url].length > 0) {
+            console.error("get(): Calling back from queue for " + url);
+            let cbq = get.callBackQueue[url].shift();
+            cbq(null, data, dataLength, nRecords);
+          }
+        }
+
+        if (cb) {
+          cb(null, data, dataLength, nRecords);
+        }
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        util.log("get(): Error for " + url);
+        timer(timerID, "stop");
+        errorHandler(xhr);
+      }
     });
   }
 
   function getChunks() {
 
     // https://gist.github.com/jfsiii/034152ecfa908cf66178
-    run();
-    async function run() {
-      let response;
-      try {
-        response = await fetch(url);
-      } catch (e) {
-        util.log("get(): Error for " + url);
-        timer(timerId);
+    fetch(url)
+      .then(processChunkedResponse)
+      .then((result) => {
+        util.log('get(): Fetch of chunks complete.')
+        $(options.requestURLElement).html("Received: " + html.aLink(url));
+        timer(timerID, "stop");
+      })
+      .catch((e) => {
+        util.log('get(): Fetch catch() error:')
+        util.log(e);
         errorHandler(e);
+        timer(timerID);
+      })
+
+    function processChunkedResponse(response) {
+      if (response.status !== 200) {
+        let err = new Error(`get(): Fetch of chunks failed with HTTP status code = ${response.status}`);
+        errorHandler(err);
         return;
       }
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let result = await reader.read();
-      let length = 0;
-      let nrecords = 0;
-      let c = false;
-      while (!result.done) {
+      reader = response.body.getReader();
+      decoder = new TextDecoder();
 
-        length = length + result.value.length;
-        if (c === false && length > 3000000) {
-          msg = 'Large data response. Continue? ';
-          msg += '(Uncheck Options > Show data to suppress display of data in browser.)'
-          c = confirm(msg);
-          if (c === false) {
-            break;
-          }
-        }
-        const text = decoder.decode(result.value);
+      let nRecords = 0;
+      let dataLength = 0;
 
-        nrecords += (text.match(/\n/g) || []).length;
-        $("#data").append(text);
-        result = await reader.read();
+      return readChunk();
+
+      function readChunk() {
+        return reader.read().then(appendChunks);
       }
 
-      util.log("get(): Got all chunks for " + url);
-      timer(timerId);
-      if (cb) cb(null, length, nrecords);
+      function appendChunks(result) {
+        let text = decoder.decode(result.value);// || new Uint8Array, {stream: !result.done});
+        util.log(`get(): Got chunk of ${text.length} bytes`); 
+        nRecords += (text.match(/\n/g) || []).length;
+        dataLength = dataLength + new Blob([text]).size;
+        $("#data").append(text);
+        if (result.done) {
+          util.log("get(): Received all chunks for " + url);
+          if (cb) cb(null, null, dataLength, nRecords);
+        } else {
+          return readChunk();
+        }
+      }
     }
-  }
 
-  function ajaxError(url, message, xhr) {
-
-    let errmsg = xhr.statusText || xhr.responseText;
-    let msg = 
-      "Error encountered when attempting to retrieve "
-      + "<a target='_blank' href='" + url + "'>"
-      + url.replace("&para","&#38;para") + "</a>"
-      + "<br><br>Error: <pre>" + errmsg + "</pre>"
-      + "Message:<pre>" + message + "</pre>"
-      + "The Javascript debugger console may have a more descriptive error message."
-    $('#ajaxerror').html(msg).show();
-    // Determining if CORS is cause of error is difficult:
-    // https://stackoverflow.com/q/19325314
-    console.error(errmsg)
-    console.error(xhr);
   }
 
   function errorHandler(xhr, textStatus, errorThrown) {
 
-    if (options.dataType === "json") {
-      let responseJSON;
-      try {responseJSON = JSON.parse(xhr.responseText);} catch (e) {}
-      if (responseJSON && parseInt(responseJSON["status"]["code"]) !== 1200) {
-        ajaxError(url, responseJSON["status"]["message"], xhr);
-        cb(true, data);
-        return;
-      }
+    if (get.callBackQueue && get.callBackQueue[url]) {
+      let len = get.callBackQueue[url];
+      console.error(`get(): Deleting callback queue of length ${len} for ${url}.`);
+      delete get.callBackQueue[url];
     }
 
-    if (options.tryProxy && options.directURLFailed == false && PROXY_URL) {
-      var opts = {
-                    ...options,
-                    directURLFailed: true,
-                    tryProxy: false,
-                  };
+    if (options.tryProxy && options.directURLFailed == false && proxyURL) {
+      let opts = {...options, directURLFailed: true, tryProxy: false};
       util.log("get(): Attempting to proxy retrieve " + url);
       get(opts, cb);
     } else {
-      if (options.showAjaxError) {
-        var message = "";
-        if (options.directURLFailed && PROXY_URL) {
-          message = `Failed to retrieve<br><br><a href='${urlo}'>${urlo}</a>`
-                  + "<br>and<br>"
-                  + `<a href='${url}'>${url}</a>`
-                  + "<br><br>"
-                  + "The first URL failure <i>may</i> be due to the server not supporting "
-                  + `<a href='${specURL}'>CORS headers</a>. `
-                  + "The second URL failure is usually a result of a server issue or an URL with a typo.";
-        } else {
-          message = `Failed to retrieve '${url}'`;
-        }
-        ajaxError(url, message, xhr);
+      if (options.directURLFailed === true && proxyURL) {
+        let urlHead = url.replace("proxy?url=", "proxy?head=true&url=")
+        $.ajax({
+            type: "GET",
+            url: urlHead,
+            async: true,
+            timeout: options.timeout,
+            dataType: options.dataType,
+            success: (head, textStatus, jqXHR) => {
+              let msgo = `Direct request of ${html.aLink(urlo)} failed.`
+              let msg = msgo + `<br>Proxy request of ${html.aLink(url)} failed.`
+              msg = msg + `<br><br>Another proxy <code>HEAD</code> request for the first URL found a HTTP status code = <code>${head.status}<code>`;
+              if (head.status !== 200) {
+                cb(msg, null);
+                return;
+              }
+              msg = msg + `<br>This is unexpected. Try again?`;
+              cb(msg, null);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+              let msgx = "Failed to retrieve"
+                        + "<br><br>" + html.aLink(urlo)
+                        + "<br>and<br>" + html.aLink(url)
+                        + "<br>and<br>" + html.aLink(urlHead);
+            cb(msgx, null);
+            }
+          });
+      } else {
+        // xhr will be AJAX xhr or fetch Error.
+        let emsg = xhr.statusText || xhr.responseText || xhr.message;
+        let msg = 
+                  "Error encountered when attempting to retrieve "
+                  + html.aLink(url)
+                  + "<br><br>Error: <pre>" + emsg + "</pre>"
+        cb(msg, null);
       }
-      cb("Error", null);
     }
   }
 }

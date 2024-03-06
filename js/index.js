@@ -1,26 +1,26 @@
-// Catch and report uncaught errors.
-window.onerror = function (message, fileName, lineNumber) {
-  fileName = fileName.replace(window.location,"");
-  let msg = "Error. Please post URL to the ";
-  msg += '<a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.'
-  msg += `<br>Error Location: ${fileName.replace(window.location.origin + window.location.pathname,"")}#L${lineNumber}`
-  msg += `<br>Error Message: <code>${message}</code>.`
-  status(msg,'error');
-}
+function main() {
 
-let qsInitial = parseQueryString();
+  window["HAPIUI"]["qsInitial"] = query.qsInitial();
 
-function main(OPTIONS) {
+  // Unbind all event listeners.
+  $("*").unbind();
 
+  // Set window.onerror event.
+  util.catchAppErrors();
+
+  // Create <details> element for UI test links.
+  tests();
+
+  // Initialize tooltips.
   tooltips();
 
   // Bind events to changes in checkbox state.
-  checkboxes(OPTIONS);
+  checkboxes();
 
   // Bind events to changes in the hash part of the URL
-  hashchange();
+  hash.hashchange();
 
-  // Remove hash when clear clicked
+  // Remove hash when reset clicked
   $('#clear').show().on('click', function () {
     window.location = window.location.pathname;
   });
@@ -29,141 +29,74 @@ function main(OPTIONS) {
   // is -HAPI Servers- and the function servers() is called when there is 
   // interaction. On hover over the text entry area, "Enter text to narrow
   // list" is shown as a tooltip. On hover over the expand key on right,
-  // "Show full list" is shown as a tooltip. 
+  // "Show full list" is shown as a tooltip.
   dropdowns(
-      ["server","dataset","parameters","start","stop","return","format","type","style"],
-      [servers,datasets,parameters,starttime,stoptime,returntype,format,type,style],
+      ["server","dataset","parameters","start","stop","return","format","style"],
+      [servers,datasets,parameters,starttime,stoptime,returntype,format,style],
       "#dropdowns");
+
 }
 
-// Determine selected value for a drop-down.
+// Determine selected value for a drop-down from hash.
 function selected(name) {
-
-  clearInterval(get.interval);
 
   // When drop-down value is selected, URL should be up-to-date.
   // Use value in URL.
   if (location.hash !== "") {
-    let qs = parseQueryString();
+    let qs = query.parseQueryString();
     if (qs[name]) {
       return qs[name];
     }
   }
-  if (name === 'plotserver') {
-    return $('#plotserver').val();
-  }
   return "";
 }
 
-// Create a HTML link.
-function link(url, text) {
-  if (!url) {
-    //console.error("Invalid link URL.");
-    //return;
-  }
-  if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("//") && !url.startsWith("mailto")) {
-      //url = "//" + url;
-  }
-  urls = url.replace(selected("server") + "/hapi/", "");
-  if (arguments.length > 1) {
-    return "<a target='_blank' title='" 
-            + url.replace("&param","&amp;param") + "' href='" 
-            + url + "'>" 
-            + text + "</a>";
-  } else {
-    return "<a target='_blank' title='" 
-            + url.replace("&param","&amp;param") + "' href='" 
-            + url + "'>" 
-            + urls.replace("&param","&amp;param") + "</a>";
-  }
-}
+function about(url, HAPI) {
 
-// Create a mailto link.
-function mailtoLink(name, addr, subj) {
-  if (!name) name = "";
-  if (name.trim() !== "") name = name + " ";
-  return name + "&lt;" + link("mailto:" + addr + "?subject=" + subj, addr) + "&gt;"
-}
+  $("#aboutRequestWarning").empty().hide();
+  $("#aboutRequestURL").empty().hide();
+  $("#aboutRequestTiming").empty().hide();
 
-// Create a "Download X" link.
-function downloadlink(url, what) {
-
-    $("#downloadlink")
-      .empty()
-      .append(
-          "<span>" 
-          + link(url, "Download " + what) 
-          + "</span>")
-      .show();
-    $("#downloadlink > span > a").css('font-weight', 'bold');
-}
-
-function showJSONOnClick(id, url, listID) {
-
-  if (!listID) listID = '#' + id + "info";
-
-  let idjson = id + "json";
-  let showLink = `<a id="${idjson}" title='${url}'>HAPI JSON for ${id}</a>`;
-  $(listID + ' > ul').append('<li>' + showLink + '</li>');
-
-  $("#" + idjson).off("click", "**");
-  function setClick() {
-    $("#" + idjson).click(() => {
-      document.getElementById("json-details").scrollIntoView();
-      $('#output details').attr('open',false)
-      $("#json-details").show().attr('open',true);
-      get({"url": url, showAjaxError: true, dataType: "json"}, (err, data) => {
-        $("#json").width($("#infodiv").width()-15).height($(window).height()/2);
-        $("#output").show();
-        $("#json").text(JSON.stringify(data, null, 2));
-        hljs.highlightBlock(document.getElementById("json"));
-        downloadlink(url, "JSON");
-      });
-    });
+  if (parseFloat(HAPI) < 3.0) {
+    return;
   }
 
-  setClick();
-  // Used to need (function(url) {setClick(url)})(url). Why no longer needed?
-
-}
-
-function about(url) {
-
+  // Called after /catalog request if /catalog response has HAPI >= 3.0. 
+  let defaultOptions = {
+    "dataType": "json",
+    "requestURLElement": "#aboutRequestURL",
+    "timeout": window["HAPIUI"]["options"]["metadataTimeout"],
+    "timer": {
+      "element": "#aboutRequestTiming"
+    }
+  };
   url = url + "/about";
-  get({url: url, showAjaxError: false, dataType: "json"}, (err, body) => {
-    if (err) {
-      util.log("about(): No /about response or problem with response.");
+  let getOptions = {url: url, ...defaultOptions};
+  get(getOptions, (err, json) => {
+    if (!err) {
+      process(json);
       return;
     }
-    process(body);
+    $("#aboutRequestWarning").html(err).show();
+    setTimeout(() => $("#aboutRequestWarning").empty().hide(), 5000);
+    util.log("about(): Problem with /about response from " + url);
   });
 
-  function process(body) {
-
-    let bodyObj;
-    try {
-      bodyObj = JSON.parse(body);
-    } catch {
-      util.log("about.process(): /about response not JSON parseable.");
-      return;
-    }
-
-    if (bodyObj["contact"]) {
+  function process(json) {
+    html.showJSONOnClick("about", url, "#serverinfo");
+    if (typeof json["contact"] === "string") {
       // Default is to show what is in all.txt. This updates based on info
       // in /about response.
-      let newContact = "Server contact: " + mailtoLink(null, bodyObj["contact"], url);
+      let newContact = "Server contact: " + html.mailtoLink(null, json["contact"], url);
       $('#servercontact').html(newContact);
     }
-    if (bodyObj["citation"]) {
-      if (bodyObj["citation"].trim().startsWith("http")) {
-        let citation = link(bodyObj["citation"], "Server citation");
+    if (typeof json["citation"] === "string") {
+      if (json["citation"].trim().startsWith("http")) {
+        let citation = html.aLink(json["citation"], "Server citation");
         $('#serverinfo > ul').append("<li>" + citation + "</li>");
       } else {
-        $('#serverinfo > ul').append(`<li>Server Citation: ${bodyObj["citation"]}"</li>`);
+        $('#serverinfo > ul').append(`<li>Server Citation: ${json["citation"]}"</li>`);
       }
-    }
-    if (bodyObj["contact"]) {
-      showJSONOnClick("about", url, "#serverinfo");
     }
   }
 }
@@ -172,50 +105,52 @@ function about(url) {
 function servers(cb) {
 
   util.log('servers(): Called.');
-  let SERVER_LIST_HASH = listInHash();
-  if (SERVER_LIST_HASH !== "") {
-    util.log("servers(): Server given in hash: " + SERVER_LIST_HASH);
-    process(SERVER_LIST_HASH);
-    return;
-  } else {
-    get({url: SERVER_LIST, showAjaxError: false}, function (err, text) {
+
+  let defaultOptions = {
+    "requestURLElement": "#allRequestURL",
+    "timeout": window["HAPIUI"]["options"]["allTimeout"],
+    "timer": {
+      "element": "#allRequestTiming"
+    }
+  };
+
+  let serverList = window["HAPIUI"]["options"]["serverList"];
+  let serverListFallback = window["HAPIUI"]["options"]["serverListFallback"];
+  $("#allRequestError").empty().hide();
+  $("#allRequestWarning").empty().hide();
+
+  let getOptions = {url: serverList, ...defaultOptions};
+  get(getOptions, function (err, text) {
+    if (!err) {
+      process(text, serverList);
+      return;
+    }
+    util.log(serverList + " not found.\n" + "Trying fall-back of " + serverListFallback);
+    let warning = serverList + " not found. Will try " + serverListFallback;
+    $("#allRequestWarning").html(warning).show();
+    get({url: serverListFallback, ...defaultOptions}, function (err, alltxt) {
       if (!err) {
-        process(text);
-      } else {
-        util.log(SERVER_LIST + " not found.\n" + "Trying fall-back of " + SERVER_LIST_FALLBACK);
-        let warning = SERVER_LIST + " not found. Will try " + SERVER_LIST_FALLBACK;
-        status(warning,'warning');
-        get({url: SERVER_LIST_FALLBACK}, function (err, text) {
-          if (!err) {
-            process(text);
-          } else {
-            let msg = `Unable to load a server list. Tried ${SERVER_LIST} and ${SERVER_LIST_FALLBACK}`;
-            status(msg,'error');
-          }
-        });
+        setTimeout( () => $("#allRequestWarning").empty().hide(), 2000);
+        process(alltxt, serverList);
+        return;
       }
+      let msg = `Unable to load a server list. Tried ${serverList} and ${serverListFallback}`;
+      $("#allRequestError").html(msg).show();
     });
-  }
+  });
 
   servers.label = "Servers";
-  servers.tooltips = ["Enter text to search","Show full list"];
+  servers.tooltips = ["Enter text to search","List available servers"];
+  servers.clearFollowing = true;
 
   servers.onselect = function () {
 
     util.log('servers.onselect(): Called.');
 
-    let SERVER_LIST_HASH = listInHash();
-    if (SERVER_LIST_HASH !== "") {
-      util.log('servers.onselect(): No further processing b/c server list in hash.');
-      process(SERVER_LIST_HASH);
-      return;
-    }
-
     let selectedServer = selected('server');
     if (!servers.info[selectedServer]) {
-      // Will occur if user typed server=X and X not is server list
-      serverNotFound(selectedServer);
-      return;
+      // This will occur if HAPI URL is entered into server dropdown.
+      servers.info[selectedServer] = {"url": selectedServer};
     }
 
     let url = servers.info[selectedServer]['url'];
@@ -232,34 +167,51 @@ function servers(cb) {
     $('#serverinfo').nextAll().hide();
     $('#serverinfo > ul').empty();
 
-    let contactEmail = servers.info[selected('server')]['contactEmail'];
+    let contactEmail = servers.info[selected('server')]['contactEmail'] || "";
     let contactName = servers.info[selected('server')]['contactName'] || "";
-    let li1 = '<li>Server URL: <code>' + link(url) + '</code></li>';
-    let li2 = '<li id="servercontact">Server Contact: ' 
-            + mailtoLink(contactName, contactEmail, url) + '</li>';
-
+    let li1 = '<li>Server URL: <code>' + html.aLink(url) + '</code></li>';
     $('#serverinfo > ul').append(li1);
-    $('#serverinfo > ul').append(li2);
+    if (contactEmail && contactName) {
+      let mailtoLink = html.mailtoLink(contactName, contactEmail, url);
+      let li2 = `<li id="servercontact">Server Contact: ${mailtoLink}</li>`;
+      $('#serverinfo > ul').append(li2);
+    }
+
     $('#serverinfo').show();
 
-    examples(selected('server'), url, (html) => {
-      let id = "#server-example-details-body";
-      if (!html) {$("#server-example-details").hide()}
-      $(id).empty();
-      $(id).html(html);
-      $("#server-example-details").show().prop('open',true);
-    });
-
+    showSingleServerExamples();
   };
 
-  function process(alltxt) {
+  function showSingleServerExamples() {
+    $('#all-example-details-body > div').hide();
+    $(`#${util.validHTMLID(selected('server'))}-examples`).show();
+  }
+
+  function process(alltxt, serverListURL) {
+    let SERVER_URL_HASH = serverIsURL();
+    if (SERVER_URL_HASH !== "") {
+      alltxt = alltxt + "\n" + `${SERVER_URL_HASH},${SERVER_URL_HASH},${SERVER_URL_HASH}`;
+    }
+
+    if (!alltxt) {
+      $("#allRequestError").html(`Problem with the server list response from ${html.aLink(serverListURL)}.`).show();
+      return;
+    }
+    if (alltxt.trim().length === 0) {
+      $("#allRequestError").html(`Server list from ${html.aLink(serverListURL)} is empty.`).show();
+      return;
+    }
+    let info = parseAllTxt(alltxt);
+    if (!info) {
+      $("#allRequestError").html(`Server list from ${html.aLink(serverListURL)} is empty.`).show();
+      return;
+    }
+
+    let selectedServer = selected("server");
+    //let qs = query.parseQueryString();
+    //window["HAPIUI"]["qsInitial"]['server'] === id
 
     servers.ids = [];
-    let selectedServer = selected("server");
-    let qs = parseQueryString();
-
-    let info = parseServerList(alltxt);
-
     let found = false;
     let list = [];
     for (let id of Object.keys(info)) {
@@ -269,81 +221,49 @@ function servers(cb) {
         found = true;
       }
 
-      if (qs['server'] === id) {
-        util.log("servers(): Server value for " + id + " found in hash. Selecting it.")
+      if (window["HAPIUI"]["qsInitial"]['server'] === id) {
+        util.log("servers.process(): Server value for " + id + " found in hash. Setting as selected in drop-down.")
       }
       list.push({
           "label": info[id]['name'],
           "value": id, 
-          "selected": qs['server'] === id
+          "selected": window["HAPIUI"]["qsInitial"]['server'] === id
       });
     }
 
-    if (selectedServer && found == false && !listInHash()) {
+    if (selectedServer && found == false) {
       // Will occur if user typed a server name in drop-down and it is not in list
       serverNotFound(selectedServer);
       return;
     }
 
+    //if (serverIsURL() === "") {
+    if (serverIsURL() === "" && $('#showexamplequeries').prop('checked')) {
+      // This can cause a request to be made to the a URL that is already in
+      // flight, which get() throws and error for.
+      $("#all-example-details-body").empty();
+      examples(info, function (html) {
+        if (!html) return;
+        $("#all-example-details-body").append(html).show();
+        if (selected('server')) {
+          showSingleServerExamples();
+        }
+      });
+    }
+
     // Move TestData servers to end of list and possibly remove based on checkbox.
     list = modifyServerList(list, found);
-
-    $("#all-example-details-body").empty();
-    examples(info, null, function (html) {
-      if (!html) return;
-      $("#all-example-details").show();
-      $("#all-example-details-body").append(html).show();
-    });
-
-    $('#overviewul').prepend('<li>' + (list.length) + " servers available.</li>");
-    util.log("Dataset list:");
+    $('#nServers').text(list.length);
+    util.log("servers.process(): Server list:");
     util.log(list);
-    servers.info = info;
-    cb(list);
-  }
 
-  function parseServerList(alltxt) {
-
-    let info = {};
-    // Split and remove empty lines
-    let allarr = alltxt.split("\n").filter(x => x !== "");
-
-    for (let i = 0; i < allarr.length; i++) {
-
-      if (allarr[i].substring(0,1) === "#") {
-        continue;
-      }
-
-      if (allarr[i].split(",").length == 1) {
-        // Only URL given. Will occur with SERVER_LIST_HASH given.
-        let id = allarr[i].split(',')[0].trim();
-        info[id] = {};
-        info[id]['url'] = id;
-        info[id]['name'] = id;
-        info[id]['contactName'] = "";
-        info[id]['contactEmail'] = "";
-        info[id]['contactName'] = "";
-      } else {
-        let line = allarr[i].split(',');
-        for (let col in line) {
-          line[col] = line[col].trim();
-        }
-        let id = line[2];
-        if (!id) {
-          console.error('No id found in ' + allarr[i]);
-          continue;
-        }
-        info[id] = {};
-        info[id]['url'] = line[0];
-        info[id]['name'] = line[1] || id;
-        info[id]['contactName'] = line[3] || '';
-        info[id]['contactEmail'] = line[4] || '';
-        if (info[id]['contactName'] == info[id]['contactEmail']) {
-          info[id]['contactName'] = '';
-        }
-      }
+    if (list.length === 0) {
+      $("#allRequestError").html(`Problem parsing server list from ${html.aLink(serverListURL)}.`).show();
+      return;
     }
-    return info;
+    servers.info = info;
+    delete window["HAPIUI"]["qsInitial"]['server'];
+    cb(list);
   }
 
   function modifyServerList(list, found) {
@@ -355,11 +275,13 @@ function servers(cb) {
         let tmp = list[i];
         delete list[i];
         if ($('#showtestdatalink').prop('checked') || found == true) {
+          // Append to end
           list.push(tmp);
         }
       }
     }
     list = list.filter(function( element ) {
+      // Remove undefined elements due to deletion above.
       return element !== undefined;
     });
     if (list.length === 0) {
@@ -375,9 +297,8 @@ function servers(cb) {
   function reset(msg) {
     console.error(msg);
     alert(msg);
-    $(window).unbind("hashchange");
     window.location.hash = "";
-    location.reload();
+    main();
   }
 
   function serverNotFound(selectedServer) {
@@ -385,8 +306,8 @@ function servers(cb) {
     reset(msg);
   }
 
-  function listInHash() {
-    let qs = parseQueryString();
+  function serverIsURL() {
+    let qs = query.parseQueryString();
     if (!qs['server']) {
       return "";
     }
@@ -402,73 +323,97 @@ function servers(cb) {
 // Datasets drop-down callback
 function datasets(cb) {
 
-  datasets.label = "Datasets";
-
   util.log('datasets(): Called.');
+
+  datasets.label = "Datasets";
+  datasets.tooltips = ["Enter text to search","List datasets"];
+  datasets.clearFollowing = true;
+
   let url = servers.info[selected('server')]['url'] + "/catalog";
-  get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
+  let getOptions = {
+    "url": url,
+    "dataType": "json",
+    "requestURLElement": "#catalogRequestURL",
+    "timeout": window["HAPIUI"]["options"]["metadataTimeout"],
+    "timer": {
+      "element": "#catalogRequestTiming"
+    }
+  };
+  $("#datasetsRequestError").empty().hide();
+  get(getOptions, function (err, res) {
     if (!err) {
-      if (res["HAPI"]) {
-        if (parseFloat(res["HAPI"]) >= 3.0) {
-          about(servers.info[selected('server')]['url']);
-        }
-      }
       process(res);
-    };
+      return;
+    }
+    $("#datasetsRequestError").html(err).show();
   });
 
   datasets.onselect = function () {
     util.log('datasets.onselect(): Called.');
-    $('#output').hide();
-    $('#datasetinfo').nextAll().hide();
 
-    $('#datasetinfo ul').empty();
-    $('#datasetinfo').show();
+    util.log('datasets.onselect(): Hiding output.');
+    $('#output').hide();
   };
 
   function process(res) {
+
+    about(servers.info[selected('server')]['url'], res["HAPI"]);
+
+    $('#server-example-details').attr('open',false);
 
     datasets.json = res;
     res = res.catalog;
 
     // Show number of datasets
-    let nDatasets = '<li>' + (res.length) + ' dataset' + util.plural(res) + '</li>';
-    $('#serverinfo > ul').append(nDatasets);
+    let nDatasets = res.length + ' dataset' + util.plural(res) + ". ";
+    $('#nDatasets').text(nDatasets);
 
-    // TODO: Get list of watched servers from OPTIONS["urlwatcher"] and don't
-    // show if server not in list.
-    let watcherLink = OPTIONS["urlwatcher"] + '#category='+ selected('server');
-    let serverTests = '<li id="statuslink" style="display:none">'
-                    + link(watcherLink, "View server response tests")
-                    + '</li>'
-    $('#serverinfo ul').append(serverTests);
-    if ($("#showstatuslink").prop('checked')) {
-      $('#statuslink').show();
-    }
+    let getOptions = {
+      "url": "https://hapi-server.org/urlwatcher/log/tests.json",
+      "dataType": "json",
+      "timeout": window["HAPIUI"]["options"]["metadataTimeout"],
+      "requestURLElement": "#urlwatcherRequestURL",
+      "timer": {
+        "element": "#urlwatcherRequestTiming"
+      }
+    };
+
+    $("#urlwatcherRequestError").empty().hide();
+    get(getOptions, function (err, json) {
+      if (err) {
+        $("#urlwatcherRequestError").html(err).show();
+        return;
+      }
+      if (json && json[selected('server')]) {
+        let watcherLink = window["HAPIUI"]["options"]["urlwatcher"] + '#category=' + selected('server');
+        let serverTests = '<li id="statuslink" style="display:none">'
+                        + html.aLink(watcherLink, "View server response tests")
+                        + '</li>'
+        $('#serverinfo ul').append(serverTests);
+        if ($("#showstatuslink").prop('checked')) {
+          $('#statuslink').show();
+        }
+      }
+    });
 
     let info = {};
     let list = [];
-    for (var i = 0; i < res.length; i++) {
+    for (let i = 0; i < res.length; i++) {
       info[res[i]['id']] = {};
-      for (key of Object.keys(res[i])) {
+      for (let key of Object.keys(res[i])) {
         info[res[i]['id']][key] = res[i][key];
       }
-      if (qsInitial['dataset'] === res[i]['id']) {
-        util.log("datasets(): dataset value for " 
-            + res[i]['id'] 
-            + " found in hash. Will select it.")
-      }
-      var title = res[i]['id'];
-      if (res[i]['title']) {
-        title = "<code style='font-size:80%'>[" + res[i]['id'] + "]</code> " + res[i]['title'];
+      if (window["HAPIUI"]["qsInitial"]['dataset'] === res[i]['id']) {
+        util.log(`datasets(): dataset value for ${res[i]['id']} found in initial hash. Will select it.`)
       }
       list.push({
-                  "label": title,
+                  "label": res[i]['id'] || res[i]['title'],
                   "value": res[i]['id'], 
-                  "selected": qsInitial['dataset'] === res[i]['id']
+                  "selected": window["HAPIUI"]["qsInitial"]['dataset'] === res[i]['id']
       });
     }
     datasets.info = info;
+    delete window["HAPIUI"]["qsInitial"]['dataset'];
     cb(list);
   }
 }
@@ -478,111 +423,126 @@ function parameters(cb) {
 
   util.log('parameters(): Called.');
 
-  parameters.label = "Parameters";
+  let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
+  url = util.hapi2to3(url);
 
-  parameters.clearfollowing = function () {
-    if (selected('format')) {
-      output();
-      return false;
-    } else {
-      return true;
+  let getOptions = {
+    "url": url,
+    "dataType": "json",
+    "timeout": window["HAPIUI"]["options"]["metadataTimeout"],
+    "requestURLElement": "#parametersRequestURL",
+    "timer": {
+      "element": "#parametersRequestTiming"
     }
+  };
+
+  $("#parametersRequestError").empty().hide();
+  get(getOptions, function (err, res) {
+    if (err) {
+      $("#parametersRequestError").html(err).show();
+      return;
+    }
+    process(res, url);
+  });
+
+  parameters.label = "Parameters";
+  parameters.tooltips = ["Enter text to search","List parameters in dataset"];
+  parameters.allowEmptyValue = true;
+  parameters.selectMultiple = true;
+  parameters.clearFollowing = false;
+
+  parameters.clearfollowing = () => {
+    if (selected('format')) {
+      util.log("parameters.clearfollowing(): 'format' is selected. Updating #output.");
+      output();
+    }
+    return false;
   }
 
   parameters.onselect = function () {
 
     util.log('parameters.onselect(): Called.');
 
-    if (!selected('format')) {
-        $('#output').hide();
+    if (selected('format')) {
+      util.log("parameters.onselect(): 'format' is selected. Updating #output.");
+      output();
+    } else {
+      util.log("parameters.onselect(): 'format' is not selected. Hiding #output.");
+      $('#output').hide();
     }
+
+    util.log("parameters.onselect(): Hiding info blocks after #parameterinfo.");
     $('#parameterinfo').nextAll().hide();
+    util.log("parameters.onselect(): Emptying <ul> in #parameterinfo.");
     $('#parameterinfo ul').empty();
 
-    if (0) {
-      if (selected('parameters') === '*all*') {
-        alert('*all* selected');
+    if (window["HAPIUI"]["options"]["allowAllParameters"] === true) {
+      if (selected('parameters') === '') {
         // Loop through all parameters and create bulleted list.
+        //return;
       }
     }
 
+    util.log(`parameters.onselect(): selected('parameters') = '${selected('parameters')}'.`);
     let meta = parameters.info[selected('parameters')];
     let url = servers.info[selected('server')]['url'] 
-              + "/info?id=" + selected('dataset') 
-              + "&parameters=" + selected('parameters');
+            + "/info?id=" + selected('dataset') 
+            + "&parameters=" + selected('parameters');
     url = util.hapi2to3(url);
 
-    $('#parameterinfo ul')
-      .append("<li>id: <code>" + selected('parameters') + "</code></li>");
-
-    for (key of Object.keys(meta)) {
+    if (meta) {
+      $('#parameterinfo ul').append(`<li>id: <code>${selected('parameters')}</code></li>`);
+      for (let key of Object.keys(meta)) {
         if (key !== "bins") {
-            $('#parameterinfo ul')
-              .append('<li>' + key + ": " + JSON.stringify(meta[key]) + '</li>');
+          $('#parameterinfo ul').append(`<li>${key}: ${JSON.stringify(meta[key])}</li>`);
         }
+      }
+
+      html.showJSONOnClick("parameter", url, "#parameterinfo");
+      $('#parameterinfo').show();
     }
 
-    showJSONOnClick("parameter", url);
-
-    $('#parameterinfo').show();
-  };
-
-  let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
-  console.log(datasets.json.HAPI);
-  url = util.hapi2to3(url);
-
-  get({url: url, showAjaxError: true, dataType: "json"}, function (err, res) {
-    if (!err) process(res, url);
-  });
+  }
 
   function process(res, url) {
 
-    $('#datasetinfo ul')
-        .append('<li>id: <code>' + selected('dataset') + '</code></li>');
+    util.log('datasets.onselect(): Hiding info blocks after #datasetinfo.');
+    $('#datasetinfo').nextAll().hide();
 
-    var description = res['description']
+    util.log('datasets.onselect(): Emptying #datasetinfo <ul>.');
+    $('#datasetinfo ul').empty();
+
+    util.log('datasets.onselect(): Showing #datasetinfo.');
+    $('#datasetinfo').show();
+
+    $('#datasetinfo ul').append(`<li>id: <code>${selected('dataset')}</code></li>`);
+
+    let description = res['description']
     if (description && /\\n/.test(description)) {
       // Preserve formatting in description.
       description = "<pre>" + description.replace("\\n", "<br/>") + "</pre>";
     }
     if (description) {
-      $('#datasetinfo ul')
-          .append('<li>Description: ' + description + '</li>');
+      $('#datasetinfo ul').append('<li>Description: ' + description + '</li>');
     }
 
     // Show number of parameters
-    $('#datasetinfo ul')
-        .append(""
-                + "<li>"
-                + (res.parameters.length) 
-                + " parameters</li>");
+    $('#nParameters').html(`<code>${res.parameters.length}</code> parameter${util.plural(res.parameters)}.`);
+    $('#datasetinfo ul').append(`<li>Start: <code>${res['startDate']}</code></li>`);
+    $('#datasetinfo ul').append(`<li>Stop: <code>${res['stopDate']}</code></li>`);
 
-    $('#datasetinfo ul')
-      .append('<li>Start: ' + res['startDate'] + '</li>');
-    $('#datasetinfo ul')
-      .append('<li>Stop: ' + res['stopDate'] + '</li>');
-
-
-    let cadence = res['cadence'] || "not given";
-    $('#datasetinfo ul')
-      .append('<li>Cadence: ' 
-              + cadence
-                  .replace("PT","")
-                  .replace("D"," days, ") 
-                  .replace("H"," hours, ") 
-                  .replace("M"," minutes, ") 
-                  .replace("S"," seconds")
-                  .replace(/, $/,"")
-                  .replace("1 days", "1 day")
-                  .replace("1 hours", "1 hour")
-                  .replace("1 minutes", "1 minute")
-                  .replace("1 seconds", "1 second")
-              + '</li>');
+    let cadence = res['cadence'];
+    if (cadence) {
+      cadence = `Cadence: ${util.ISODuration2Words(cadence)} (<code>${cadence}</code>)`;
+    } else {
+      cadence = "not specified"
+    }
+    $('#datasetinfo ul').append(`<li>${cadence}</li>`);
 
     if (res['resourceURL']) {
         $('#datasetinfo ul')
           .append('<li>' 
-                + link(res['resourceURL'], "Dataset documentation or metadata") 
+                + html.aLink(res['resourceURL'], "Dataset documentation or metadata") 
                 + '</li>');
     }
     if (res['contact']) {
@@ -590,21 +550,27 @@ function parameters(cb) {
           .append('<li>Dataset contact: ' + res['contact'] + '</li>');
     }
 
-    showJSONOnClick("dataset", url);
+    html.showJSONOnClick("dataset", url, "#datasetinfo");
 
     let surl = servers.info[selected('server')]['url'];
     if (!surl.startsWith("http")) {
         surl = window.location.origin + window.location.pathname + surl;
     }
-    let vurl = VERIFIER
-              + '?url=' + surl
-              + '&id=' + datasets.info[selected('dataset')]['id'];
+    let vurl = window["HAPIUI"]["options"]["verifier"]
+             + '?url=' + surl
+             + '&id=' + datasets.info[selected('dataset')]['id'];
 
     vurl = util.hapi2to3(vurl);
 
-    $('#datasetinfo ul')
-      .append('<li id="verifierlink" style="display:none"><a target="_blank" href=' + vurl + '>Check this dataset using the HAPI Verifier</a></li>');
-
+    let link = `<a target="_blank" href="${vurl}">Check this dataset using the HAPI Verifier</a>`;
+    let warning = "";
+    if (new URL(surl).hostname.startsWith("localhost") === true) {
+      if (new URL(vurl).hostname.startsWith("localhost") === false) {
+        warning = "<br>(Server URL host name is <code>localhost</code> and verifier URL host name is not <code>localhost</code>. Verifier links may not work.)";
+      }
+    }
+    let li = `<li id="verifierlink" style="display:none">${link} ${warning}</li>`;
+    $('#datasetinfo ul').append(li);
     if ($("#showverifierlink").prop('checked')) {
       $('#verifierlink').show();
     }
@@ -612,43 +578,36 @@ function parameters(cb) {
     datasets.info[selected('dataset')]['info'] = res;
 
     res = res.parameters;
-
     let info = {};
     let list = [];
-    for (var k = 0; k < res.length; k++) {
-        info[res[k]['name']] = {};
-        for (key of Object.keys(res[k])) {
-          info[res[k]['name']][key] = res[k][key];
-        }
-        if (qsInitial['parameters'] === res[k]['name']) {
-          util.log("parameters(): parameter value for " 
-              + res[k]['name'] 
-              + " found in hash. Will select it.")
-        }
-        let label = res[k]['label'] || "";
-        if (Array.isArray(res[k]['label'])) {
-          label = res[k]['label'].join(", ");
-        }
-        let sdescription = res[k]['description'] || label;
-        if (sdescription.length > 40) {
-          sdescription = sdescription.slice(0, 40) + "...";
-        }
-        if (sdescription) {
-          sdescription = ": " + sdescription;
-        }
-        list.push({
-            "label": '<code>' + res[k]['name'] + '</code>' + sdescription,
-            "value": res[k]['name'], 
-            "selected": qsInitial['parameters'] === res[k]['name'],
-            "title": res[k]['description'] || ""
-        });
+    for (let k = 0; k < res.length; k++) {
+      info[res[k]['name']] = {};
+      for (let key of Object.keys(res[k])) {
+        info[res[k]['name']][key] = res[k][key];
+      }
+      if (window["HAPIUI"]["qsInitial"]['parameters'] === res[k]['name']) {
+        util.log(`parameters(): parameter value for '${res[k]['name']}' found in hash. Will select it.`)
+      }
+
+      let label = res[k]['label'] || "";
+      if (Array.isArray(res[k]['label'])) {
+        label = res[k]['label'].join(", ");
+      }
+      label = res[k]['description'] || label;
+
+      list.push({
+          "label": label,
+          "value": res[k]['name'],
+          "selected": window["HAPIUI"]["qsInitial"]['parameters'] === res[k]['name'],
+          "title": res[k]['description'] || ""
+      });
     }
 
-    if (0) {
+    if (window["HAPIUI"]["options"]["allowAllParameters"] === true) {
       list.unshift({
-                      "label": "*All*",
-                      "value": "*all*",
-                      "selected": qsInitial['parameters'] === "*all*"
+                      "label": "All parameters",
+                      "value": "",
+                      "selected": window["HAPIUI"]["qsInitial"]['parameters'] === "*all*"
                   });
     }
 
@@ -656,6 +615,7 @@ function parameters(cb) {
     parameters.info = info;
     parameters.list = list;
 
+    delete window["HAPIUI"]["qsInitial"]['parameters'];
     cb(list);
   }
 }
@@ -663,156 +623,99 @@ function parameters(cb) {
 // Start time drop-down callback
 function starttime(cb) {
 
+  // Because only one value is set in drop-down, it is automatically selected
+  // and the next drop-down is called.
   util.log('starttime(): Called.');
 
   starttime.label = "Start";
-
-  starttime.isvalid = function () {return checktimes('start')}
-
-  starttime.clearfollowing = function () {
-    util.log('starttime.clearfollowing(): Called.');
-    if (selected('format')) {
-      if (starttime.isvalid()) {
-        output(); // Update output
-      }
-      return false;
-    } else {
-      return true;
-    }
-  }
+  starttime.clearFollowing = false;
 
   starttime.onselect = function () {
     util.log('starttime.onselect(): Called.');
-    return checktimes('start');
+    if (selected('format')) {
+      if (util.checkTimes('start', selected('start'), selected('stop'))) {
+        output(); // Update output
+      }
+    }
   };
 
-  let meta = datasets.info[selected('dataset')]['info'];
-  let start = meta['sampleStartDate'];
-  let stop = meta['sampleStopDate'];
-
-  let qs = parseQueryString();
-  list = [{}];
-  if (qsInitial['server'] == qs['server'] 
-      && qsInitial['dataset'] == qs['dataset'] 
-      && qsInitial['start'] !== undefined) {
-    list[0].label = qsInitial['start'];
-    list[0].value = qsInitial['start'];
-  } else if (start && stop) {
+  let qs = query.parseQueryString();
+  let list = [{}];
+  if (window["HAPIUI"]["qsInitial"]['server'] == qs['server'] 
+      && window["HAPIUI"]["qsInitial"]['dataset'] == qs['dataset'] 
+      && window["HAPIUI"]["qsInitial"]['start'] !== undefined) {
+    list[0].label = window["HAPIUI"]["qsInitial"]['start'];
+    list[0].value = window["HAPIUI"]["qsInitial"]['start'];
+  } else {
+    let meta = datasets.info[selected('dataset')]['info'];
+    let start = defaultDate.start(meta);
     list[0].label = start;
     list[0].value = start;
-  } else {
-    list[0].label = meta['startDate'];
-    list[0].value = meta['startDate'];
   }
+  delete window["HAPIUI"]["qsInitial"]['start'];
   cb(list);
 }
 
 // Stop time drop-down callback
 function stoptime(cb) {
 
+  // Because only one value is set in drop-down, it is automatically selected
+  // and the next drop-down is called.
   util.log('stoptime(): Called.');
 
   stoptime.label = "Stop";
-
-  stoptime.isvalid = function () {return checktimes('stop')}
-
-  stoptime.clearfollowing = function () {
-    util.log('starttime.clearfollowing(): Called.');
-    if (selected('format')) {
-      if (stoptime.isvalid()) {
-        output(); // Update output
-      }
-      return false;
-    } else {
-      return true;
-    }
-  }
+  stoptime.clearFollowing = false;
 
   stoptime.onselect = function () {
     util.log('stoptime.onselect(): Called.');
-    return checktimes('stop');
+    if (selected('format')) {
+      if (util.checkTimes('stop', selected('start'), selected('stop'))) {
+        output(); // Update output
+      }
+    }
   };
 
-  let meta = datasets.info[selected('dataset')]['info'];
-  let start = meta['sampleStartDate'];
-  let stop = meta['sampleStopDate'];
-
-  let qs = parseQueryString();
-  list = [{}];
-  if (qsInitial['server'] == qs['server'] 
-      && qsInitial['dataset'] == qs['dataset'] 
-      && qsInitial['stop'] !== undefined) {
-    list[0].label = qsInitial['stop'];
-    list[0].value = qsInitial['stop'];
-    cb(list);
-    return;
-  }
-
-  if (start && stop) {
+  let qs = query.parseQueryString();
+  let list = [{}];
+  if (window["HAPIUI"]["qsInitial"]['server'] === qs['server'] 
+      && window["HAPIUI"]["qsInitial"]['dataset'] == qs['dataset'] 
+      && window["HAPIUI"]["qsInitial"]['stop'] !== undefined) {
+    list[0].label = window["HAPIUI"]["qsInitial"]['stop'];
+    list[0].value = window["HAPIUI"]["qsInitial"]['stop'];
+  } else {
+    let meta = datasets.info[selected('dataset')]['info'];
+    let stop = defaultDate.stop(meta);
     list[0].label = stop;
     list[0].value = stop;
-    cb(list);
-    return;
   }
-
-  stop = util.defaultStop(meta);
-
-  list[0].label = stop;
-  list[0].value = stop;
-
+  delete window["HAPIUI"]["qsInitial"]['stop'];
   cb(list);
-}
-
-function checktimes(which) {
-
-  if (selected('start') && selected('stop')) {
-    util.log("stoptime select event.")
-    util.log("starttime = " + selected('start'))
-    util.log("stoptime = " + selected('stop'))
-    var t = dayjs(util.doy2ymd(selected('start').replace("Z","")))
-          < dayjs(util.doy2ymd(selected('stop').replace("Z","")));
-    util.log("---> start < stop? " + t);
-    if (t == false) {
-      util.log(which + " changed; start >= stop. Setting color of " + which + " to red.");
-      $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
-      return false;
-    } else {
-      util.log(which + " changed; start < stop. Setting colors to black.");
-      $('#startlist').css('color','black').removeClass('tooltip').attr('title','');
-      $('#stoplist').css('color','black').removeClass('tooltip').attr('title','');
-      return true;
-    }
-  }
-  return true;
 }
 
 // Return drop-down callback
 function returntype(cb) {
 
-  format.clearfollowing = function () {
-    if (selected('return')) {
-      output();
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   returntype.label = "Return";
+  returntype.tooltips = ["","List output options"];
+  returntype.clearFollowing = true;
 
-  returntype.onselect = function () {};
+  returntype.onselect = function () {
+    $(window).scrollTop(0);
+  };
 
-  var values = 
+  let values = 
               [
                   {label:"Data", value:"data"},
                   {label:"Image", value:"image"},
                   {label:"Script", value:"script"}
               ];
-  for (var i = 0; i < values.length; i++) {
-    if (qsInitial['return'] === values[i]['value']) {
+
+  for (let i = 0; i < values.length; i++) {
+    if (window["HAPIUI"]["qsInitial"]['return'] === values[i]['value']) {
       values[i]['selected'] = true;
     }
   }
+  delete window["HAPIUI"]["qsInitial"]['return'];
   cb(values);
 }
 
@@ -820,77 +723,74 @@ function returntype(cb) {
 function format(cb) {
 
   util.log('format(): Called.');
-
-  format.label = "Format";
-
-  format.clearfollowing = function () {
-    if (selected('type')) {
-      output();
-      return false;
-    } else {
-      return true;
-    }
-  }
+  format.clearFollowing = true;
 
   format.onselect = function () {
-    //$('#output').children().hide();
-    if (selected("return") === "image"  || 
-        selected("return") === "script" || 
-        selected("format") === "json")
-    {
+    $(window).scrollTop(0);
+    if (selected("style") || selected("return") === 'script') {
+      // Update output
       output();
     }
+    // Keep state of following drop-down.
+    //style.lastSelected = selected('style');
   };
 
   let values = [];
-  let autoOpen = false;
   if (selected("return").match("data")) {
-    autoOpen = false;
+    format.label = "Output Format";
+    format.tooltips = ["","List output format options"];
     values = 
               [
                 {label: "CSV", value: "csv"},
                 {label: "JSON", value: "json"}
               ];
   }
+
   if (selected("return").match("image")) {
+    format.label = "Plot Server";
+    format.tooltips = ["","List plot servers"];
     values =
-              [
-                {label: "SVG", value: "svg"},
-                {label: "PNG", value: "png"},
-                {label: "PDF", value: "pdf"}
-              ];
-    if (selected('server') === 'CDAWeb' && selected('plotserver') === 'native') {
-      values =
-                [
-                  {label: "GIF", value: "gif"},
-                  {label: "PNG", value: "png"},
-                  {label: "PDF", value: "pdf"}
-                ];
+        [
+            {
+                label: "hapiplot",
+                value: "hapiplot"
+            },
+            {
+              label: "Autoplot",
+              value: "autoplot"
+            }
+      ];
+    if (selected('server') === 'CDAWeb') {
+      values.push({
+        label: "CDAWeb",
+        value: "cdaweb"
+      });
     }
-
   }
+
   if (selected("return").match("script")) {
-    values =
-              [
-                  {label: "IDL", value: "idl"},
-                  {label: "IDL/SPEDAS", value:"idl-spedas"},
-                  {label: "Javascript", value:"javascript"},
-                  {label: "MATLAB", value:"matlab"},
-                  {label: "Python", value:"python"},
-                  {label: "Python/SPEDAS", value:"python-spedas"},
-                  {label: "Python/Kamodo", value:"python-kamodo"},
-                  {label: "Python/Kamodo-alt", value:"python-kamodo-alt"},
-                  {label: "Autoplot", value: "autoplot"},
-                  {label: "curl", value: "curl"},
-                  {label: "wget", value: "wget"}
-              ];
+    format.tooltips = ["","List script languages"];
+    format.label = "Language";
+    values = _scriptList();
   }
 
-  for (var i = 0; i < values.length; i++) {
-    if (qsInitial['format'] === values[i]['value']) {
-      values[i]['selected'] = true;
+  let autoOpen = false;
+  if (values.length > 0) {
+    let selectDefault = true;
+    if (selected("return").match("script")) {
+      if (window["HAPIUI"]["qsInitial"]['format'] === undefined) {
+        autoOpen = true;
+      }
+      if (!selected('format') && !window["HAPIUI"]["qsInitial"]['format']) {
+        selectDefault = false;
+      }
+    }
+    if (selectDefault === true) {
+      let queryParameterValue = window["HAPIUI"]["qsInitial"]['format'];
+      values = query.chooseDefault(queryParameterValue, values);
     }
   }
+  delete window["HAPIUI"]["qsInitial"]['format'];
   cb(values, autoOpen);
 }
 
@@ -899,66 +799,60 @@ function style(cb) {
 
   util.log('style(): Called.');
 
-  style.label = "Style";
-  style.onselect = function () {output()}
+  style.clearFollowing = false;
+  style.onselect = function () {
+    output();
+  }
 
-  var values = [];
+  let values = [];
+  if (selected("return") === "image") {
+    values =
+              [
+                {label: "SVG", value: "svg"},
+                {label: "PNG", value: "png"},
+                {label: "PDF", value: "pdf"}
+              ];
+
+    if (selected('server') === 'CDAWeb' && selected('format') === 'cdaweb') {
+      values =
+                [
+                  {label: "GIF", value: "gif"},
+                  {label: "PNG", value: "png"},
+                  {label: "PDF", value: "pdf"}
+                ];
+    }
+  }
 
   if (selected("return") === "data") {
-    var values = [];
-    if (selected('format') == 'csv') {
-      var values = 
-          [
-              {
-                  label: "No Header",
-                  value: "noheader",
-                  selected: true
-              },
-              {
-                label: "Header",
-                value: "header"
-              }
-          ];
+    style.label = "Header Options";
+    style.label = "Output header options";
+    style.tooltips = ["","List output header options"];
+    values =
+        [
+            {
+                label: "No Header",
+                value: "noheader"
+            },
+            {
+              label: "Header",
+              value: "header"
+            }
+        ];
+  }
+
+  if (values.length > 0) {
+    let useDefault = window["HAPIUI"]["qsInitial"]['style'];
+    for (let i = 0; i < values.length; i++) {
+      // lastSelected was stored in style.lastSelected when format.onselect().
+      // If lastSelected is in list, select it instead of using initial
+      // query string value. TODO: This is hacky.
+      //if (style.lastSelected === values[i]['value']) {
+      //  useDefault = style.lastSelected;
+      //}
     }
+    values = query.chooseDefault(useDefault, values);
   }
-
-  for (var i = 0; i < values.length; i++) {
-    if (qsInitial['style'] === values[i]['value']) {
-      values[i]['selected'] = true;
-    }
-  }
-
-  cb(values);
-}
-
-// Type drop-down callback
-function type(cb) {
-
-  util.log('type(): Called.');
-
-  type.label = "Type";
-
-  type.clearfollowing = function () {
-    if (selected('style')) {
-      output();
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  type.onselect = function () {};
-  var values = [];
-  if (false && selected("return").match("image")) {
-      values = 
-              [
-                  {
-                      label: "Time Series", 
-                      value: "timeseries", 
-                      selected: true
-                  }
-              ];
-  }
+  delete window["HAPIUI"]["qsInitial"]['style'];
   cb(values);
 }
 
@@ -967,93 +861,34 @@ function output() {
 
   util.log('output(): Called.');
 
-  let selectedParameters = selected('parameters');
+  if (!selected('return')) {
+    util.log("output(): Warning: output called but 'return' not selected. Returning.")
+    return;
+  }
 
-  if (!selected('return')) {return;}
-
+  util.log("output(): Showing #output element.")
   $('#output').show();
 
   if (selected('return').match(/script/)) {
     script();
-    document.getElementById("script-details").scrollIntoView();
-    $('#output details').attr('open',false);
-    $("#script-details").show().attr('open',true);
   }
 
   if (selected('return').match(/data/)) {
-
-    let parameterString = "&parameters=" + selectedParameters
-
-    let url = servers.info[selected('server')]['url'] 
-                + "/data?id=" + selected('dataset')
-                + parameterString
-                + "&time.min=" + selected('start')
-                + "&time.max=" + selected('stop')
-
-    url = util.hapi2to3(url);
-
-    if (selected('format') === 'csv') {
-      if (selected('style') === 'header') {
-        url = url + "&include=header";
-      }
-    }
-    if (selected('format') === 'json') {
-      url = url + "&format=json";
-    }
-
-    downloadlink(url, "data");
-
-    if ($("#showdata").prop('checked') === false) {
-      return;
-    }
-
-    $("#data").empty();
-    $('#timing').empty();
-
-    document.getElementById("data-details").scrollIntoView();
-    $('#output details').attr('open',false);
-    $("#data-details").show().attr('open',true);
-
-    util.log('Getting ' + url);
-    get({url: url, chunk: true, timer: {'element': '#datatime'}}, function(err, length, nrecords) {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      let msg = `(${nrecords} records, ${util.sizeOf(length)})`;
-      $("#records-and-size").empty().text(msg);
-      $("#data").width($("#infodiv").width()-15).height($(window).height()/2);
-      $("#data").show();
-     });
+    data();
   }
 
   if (selected('return').match(/image/)) {
+    //$('#plotserver').trigger('change');
 
-    let qs = parseQueryString();
-    qs['plotserver'] = $('#plotserver').val();
-    $(window).hashchange.byurledit = false;
-    location.hash = decodeURIComponent($.param(qs));
+    let selectedParameters = selected('parameters').trim();
+    if (selectedParameters === "") {
+      selectedParameters = Object.keys(parameters.info);
+    } else {
+      selectedParameters = selectedParameters.split(",");
+    }
 
-    $('#timing').empty();
-
-    let url = plot({'element': '#imagetime'});
-
-    downloadlink(url, selected("format"));
-
-    document.getElementById("image-details").scrollIntoView();
-    $('#output details').attr('open',false);
-    $("#image-details").show().attr('open',true)
-
-    if (/png|svg/.test(selected("format"))) {
-      url = url.replace(`format=${selected("format")}`, 'format=gallery');
-      let galleryHTML = "&nbsp;|&nbsp;"
-                      + "<span>View more in gallery:&nbsp;" 
-                      + link(url + "&mode=thumb", "&#9638;&nbsp;Thumbnails", true)
-                      + "&nbsp;|&nbsp;"
-                      + link(url, "&#9707;&nbsp;Filmstrip", true)
-                      + "</span>";
-
-      $("#downloadlink").append(galleryHTML).show();
+    for (let parameter of selectedParameters) {
+      plot(parameter);
     }
   }
 }

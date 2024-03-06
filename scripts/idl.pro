@@ -7,9 +7,12 @@
 
 server     = 'SERVER';
 dataset    = 'DATASET';
+
 parameters = 'PARAMETERS';
-; Use parameters=[''] to request all data. Multiple parameters
+; Use parameters='' to request all data. Multiple parameters
 ; can be requested using a comma-separated listCSV_EXAMPLE
+
+; start min = STARTMIN, stop max = STOPMAX
 start      = 'START';
 stop       = 'STOP';
 

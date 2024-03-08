@@ -1527,6 +1527,7 @@ $.widget( "ui.autocomplete", {
 				this.previous = this._value();
 			},
 			blur: function( event ) {
+				console.log("blur")
 				if ( this.cancelBlur ) {
 					delete this.cancelBlur;
 					return;

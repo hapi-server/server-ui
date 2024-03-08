@@ -30,10 +30,8 @@ function main() {
   // interaction. On hover over the text entry area, "Enter text to narrow
   // list" is shown as a tooltip. On hover over the expand key on right,
   // "Show full list" is shown as a tooltip.
-  dropdowns(
-      ["server","dataset","parameters","start","stop","return","format","style"],
-      [servers,datasets,parameters,starttime,stoptime,returntype,format,style],
-      "#dropdowns");
+  let dfuncs = [servers,datasets,parameters,starttime,stoptime,returntype,format,style];
+  dropdowns(dfuncs, "#dropdowns");
 
 }
 
@@ -140,6 +138,7 @@ function servers(cb) {
   });
 
   servers.label = "Servers";
+  servers.id = "server";
   servers.tooltips = ["Enter text to search","List available servers"];
   servers.clearFollowing = true;
 
@@ -325,9 +324,16 @@ function datasets(cb) {
 
   util.log('datasets(): Called.');
 
+  datasets.id = "dataset";
   datasets.label = "Datasets";
   datasets.tooltips = ["Enter text to search","List datasets"];
   datasets.clearFollowing = true;
+  datasets.onselect = function () {
+    util.log('datasets.onselect(): Called.');
+
+    util.log('datasets.onselect(): Hiding output.');
+    $('#output').hide();
+  };
 
   let url = servers.info[selected('server')]['url'] + "/catalog";
   let getOptions = {
@@ -339,6 +345,7 @@ function datasets(cb) {
       "element": "#catalogRequestTiming"
     }
   };
+
   $("#datasetsRequestError").empty().hide();
   get(getOptions, function (err, res) {
     if (!err) {
@@ -347,13 +354,6 @@ function datasets(cb) {
     }
     $("#datasetsRequestError").html(err).show();
   });
-
-  datasets.onselect = function () {
-    util.log('datasets.onselect(): Called.');
-
-    util.log('datasets.onselect(): Hiding output.');
-    $('#output').hide();
-  };
 
   function process(res) {
 
@@ -445,6 +445,7 @@ function parameters(cb) {
     process(res, url);
   });
 
+  parameters.id = "parameters";
   parameters.label = "Parameters";
   parameters.tooltips = ["Enter text to search","List parameters in dataset"];
   parameters.allowEmptyValue = true;
@@ -585,7 +586,10 @@ function parameters(cb) {
       for (let key of Object.keys(res[k])) {
         info[res[k]['name']][key] = res[k][key];
       }
-      if (window["HAPIUI"]["qsInitial"]['parameters'] === res[k]['name']) {
+      let selectParameter = false;
+      let urlParameters = window["HAPIUI"]["qsInitial"]['parameters'];
+      if (urlParameters && urlParameters.split(",").includes(res[k]['name'])) {
+        selectParameter = true;
         util.log(`parameters(): parameter value for '${res[k]['name']}' found in hash. Will select it.`)
       }
 
@@ -598,7 +602,7 @@ function parameters(cb) {
       list.push({
           "label": label,
           "value": res[k]['name'],
-          "selected": window["HAPIUI"]["qsInitial"]['parameters'] === res[k]['name'],
+          "selected": selectParameter,
           "title": res[k]['description'] || ""
       });
     }
@@ -627,6 +631,7 @@ function starttime(cb) {
   // and the next drop-down is called.
   util.log('starttime(): Called.');
 
+  starttime.id = "start";
   starttime.label = "Start";
   starttime.clearFollowing = false;
 
@@ -663,6 +668,7 @@ function stoptime(cb) {
   // and the next drop-down is called.
   util.log('stoptime(): Called.');
 
+  stoptime.id = "Stop";
   stoptime.label = "Stop";
   stoptime.clearFollowing = false;
 
@@ -695,6 +701,7 @@ function stoptime(cb) {
 // Return drop-down callback
 function returntype(cb) {
 
+  returntype.id = "return";
   returntype.label = "Return";
   returntype.tooltips = ["","List output options"];
   returntype.clearFollowing = true;
@@ -723,6 +730,7 @@ function returntype(cb) {
 function format(cb) {
 
   util.log('format(): Called.');
+  format.id = "format";
   format.clearFollowing = true;
 
   format.onselect = function () {
@@ -799,6 +807,7 @@ function style(cb) {
 
   util.log('style(): Called.');
 
+  style.id = "style";
   style.clearFollowing = false;
   style.onselect = function () {
     output();

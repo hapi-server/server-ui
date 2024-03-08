@@ -105,15 +105,6 @@ tests.throwError = function(msg) {
 
 tests.testArray = [
   {
-    "url": "#server=TestData2.0&dataset=dataset1&return=script&format=python",
-    "label": "Request Python script given only server and dataset from TestData2.0",
-    "wait": 1000,
-    "testFunction": function (url, cb) {
-      let result = $('#script').text().includes('hapiclient');
-      cb(null, result);
-    }
-  },
-  {
     "url": "#server=TestData2.0&dataset=dataset1&parameters=scalar&start=1970-01-01T00:00:00Z&stop=1970-01-01T00:00:30Z&return=script",
     "label": "Show script options",
     "wait": 1000,
@@ -124,39 +115,81 @@ tests.testArray = [
     }
   },
   {
-    "url": "#server=https://hapi-server.org/servers/TestData3.1/hapi",
-    "label": "Enter server=URL in hash",
+    "url": "#server=TestData2.0&dataset=dataset1&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=script&format=python",
+    "label": "Request script without parameters",
     "wait": 1000,
-    "onclick": "",
     "testFunction": function (url, cb) {
-      let result = $('#dataset').is(":visible")
-      result = result && $("#dataset").autocomplete( "option", "source" ).length > 0;
+      let result = $("#script").text().includes("parameters = ''");
       cb(null, result);
     }
   },
   {
-    "url": "#server=https://hapi-server.org/servers/TestData3.1/hapix",
-    "label": "Enter server=URL with 404 URL in hash",
+    "url": "#server=TestData2.0&dataset=dataset1&return=script&format=python",
+    "label": "Request script without parameters, start, and stop",
     "wait": 1000,
-    "onclick": "",
     "testFunction": function (url, cb) {
-      let result = $("#datasetsRequestError").text().includes("Failed to");
+      let result = $("#script").text().includes("parameters = ''");
       cb(null, result);
     }
   },
   {
-    "url": "",
-    "label": "Enter URL in server dropdown",
-    "wait": 0,
-    "onclick": "",
+    "url": "#server=TestData2.0&dataset=dataset1&return=data",
+    "label": "Request data without parameters, start, and stop",
+    "wait": 1000,
     "testFunction": function (url, cb) {
-      main();
-      url = "https://hapi-server.org/servers/TestData3.1/hapi";
-      $('input[id=server]')
-        .val(url)
-        .data("autocomplete")
-        ._trigger("select", null, {item: url});
-      cb(null, true);
+      let texts = $('#data').text().split("\n");
+      let result = texts.length === 11
+                && texts[0].startsWith('1970-01-01')
+                && texts[0].split(",").length > 10;
+      cb(null, result);
+    }
+  },
+  {
+    "url": "#server=TestData2.0&dataset=dataset1&parameters=scalar&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader",
+    "label": "Show data for one parameters from TestData2.0",
+    "wait": 1000,
+    "testFunction": function (url, cb) {
+      let texts = $('#data').text().split("\n");
+      let result = texts.length === 11
+                && texts[0].startsWith('1970-01-01') 
+                && texts[0].split(",").length === 2;
+      cb(null, result);
+    }
+  },
+  {
+    "url": "#server=TestData2.0&dataset=dataset1&parameters=scalar,scalarint&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader",
+    "label": "Show data for two parameters from TestData2.0",
+    "wait": 1000,
+    "testFunction": function (url, cb) {
+      let texts = $('#data').text().split("\n");
+      let result = texts.length === 11
+                && texts[0].startsWith('1970-01-01') 
+                && texts[0].split(",").length === 3;
+      cb(null, result);
+    }
+  },
+  {
+    "url": "#server=TestData2.0&dataset=dataset1&parameters=&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader",
+    "label": "Show data for all parameters from TestData2.0",
+    "wait": 1000,
+    "testFunction": function (url, cb) {
+      let texts = $('#data').text().split("\n");
+      let result = texts.length === 11
+                && texts[0].startsWith('1970-01-01') 
+                && texts[0].split(",").length > 10;
+      cb(null, result);
+    }
+  },
+  {
+    "url": "#server=TestData2.0&dataset=dataset3&parameters=&start=1970-01-01Z&stop=1970-01-03Z&return=image&format=hapiplot&style=svg",
+    "label": "Plot all parameters from TestData2.0",
+    "beforeTestWait": "1000",
+    "beforeTest": function() {
+      window.location.hash = "";
+    },
+    "wait": 1000,
+    "testFunction": function (url, cb) {
+      cb(null, $("#output").find("img").length > 10)
     }
   },
   {
@@ -212,27 +245,39 @@ tests.testArray = [
     }
   },
   {
-    "url": "#server=TestData2.0&dataset=dataset1&parameters=&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader",
-    "label": "Show data for all parameters from TestData2.0",
+    "url": "#server=https://hapi-server.org/servers/TestData3.1/hapi",
+    "label": "Enter server=URL in hash",
     "wait": 1000,
+    "onclick": "",
     "testFunction": function (url, cb) {
-      let texts = $('#data').text().split("\n");
-      let result = texts.length === 11
-                && texts[0].startsWith('1970-01-01') 
-                && texts[0].split(",").length > 10;
+      let result = $('#dataset').is(":visible")
+      result = result && $("#dataset").autocomplete( "option", "source" ).length > 0;
       cb(null, result);
     }
   },
   {
-    "url": "#server=TestData2.0&dataset=dataset3&parameters=&start=1970-01-01Z&stop=1970-01-03Z&return=image&format=hapiplot&style=svg",
-    "label": "Plot all parameters from TestData2.0",
-    "beforeTestWait": "1000",
-    "beforeTest": function() {
-      window.location.hash = "";
-    },
+    "url": "#server=https://hapi-server.org/servers/TestData3.1/hapix",
+    "label": "Enter server=URL with 404 URL in hash",
     "wait": 1000,
+    "onclick": "",
     "testFunction": function (url, cb) {
-      cb(null, $("#output").find("img").length > 10)
+      let result = $("#datasetsRequestError").text().includes("Failed to");
+      cb(null, result);
+    }
+  },
+  {
+    "url": "",
+    "label": "Enter URL in server dropdown",
+    "wait": 0,
+    "onclick": "",
+    "testFunction": function (url, cb) {
+      main();
+      url = "https://hapi-server.org/servers/TestData3.1/hapi";
+      $('input[id=server]')
+        .val(url)
+        .data("autocomplete")
+        ._trigger("select", null, {item: url});
+      cb(null, true);
     }
   },
   {

@@ -301,16 +301,18 @@ span.id {
   color: #006400;
 }
 
-.dropdown-input {
-	width: 100%;
-	display: table-cell;
-	color: black;
-	font-weight: bold;
-	text-align: center;
+.dropdown-list {
+	padding: 3px;
+	display: inline-block;
 }
 
-.dropdown {
-	display: none;
+.dropdown-input {
+	color: black;
+	width: 82%; /* Bold causes width to increase and input to appear on newline if this is not done. */
+	font-weight: bold;
+	float: right;
+	margin-right: 2px;
+	text-align: center;
 }
 
 #serverinfo {

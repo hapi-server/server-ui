@@ -15,10 +15,15 @@ function dropdowns(funs, wrapper, i) {
     return;
   }
 
-  util.log("dropdowns(): Calling " + funs[i].name + "() to get dropdown list entries.");
+  util.log(`dropdowns(): Calling ${funs[i].name}() to get dropdown list entries.`);
 
   // Call dropdown function, which generates list then calls cb() with a menu list.
-  funs[i](cb);
+  //setTimeout(() => funs[i](cb), 1000); // To simulate slow response.
+  let timeoutId = setTimeout(() => {
+    $("#dropdowns" + (i)).text("Fetching content ...").show()
+  }, 300);
+
+  funs[i](cb)
 
   function bindCloseEvents() {
 
@@ -125,6 +130,8 @@ function dropdowns(funs, wrapper, i) {
 
 	function cb(list, autoOpen) {
 
+    clearTimeout(timeoutId);
+
     util.log('dropdowns.cb(): Called with list');
     util.log(list);
 
@@ -168,6 +175,7 @@ function dropdowns(funs, wrapper, i) {
             + ' label="' + label + '"'
             + ' title="' + tip1 + '"'
             + ' value="'+ label + '"/>')
+
 
     let input = 'input[id=' + id + ']';
 

@@ -213,8 +213,8 @@ function get(options, cb) {
             timeout: options.timeout,
             dataType: options.dataType,
             success: (head, textStatus, jqXHR) => {
-              let msgo = `Direct request of ${html.aLink(urlo)} failed.`
-              let msg = msgo + `<br>Proxy request of ${html.aLink(url)} failed.`
+              let msgo = `<br><br>Direct request of ${html.aLink(urlo)} failed.`
+              let msg = msgo + `<br><br>Proxy request of ${html.aLink(url)} failed.`
               msg = msg + `<br><br>Another proxy <code>HEAD</code> request for the first URL found a HTTP status code = <code>${head.status}<code>`;
               if (head.status !== 200) {
                 cb(msg, null);

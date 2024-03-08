@@ -666,7 +666,7 @@ function stoptime(cb) {
   // and the next dropdown is called.
   util.log('stoptime(): Called.');
 
-  stoptime.id = "Stop";
+  stoptime.id = "stop";
   stoptime.label = "Stop";
   stoptime.clearFollowing = false;
 

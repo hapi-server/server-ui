@@ -42,6 +42,7 @@ tests.runTest = function(testNumber) {
   console.log(`tests(): Setting location.hash=${testObject['url']} in ${beforeTestWait} ms.`);
   setTimeout(() => {
     location.hash = testObject['url'];
+    $(window).trigger('hashchange');
     setTimeout(() => {
       console.log(`tests(): Calling testFunction for '${testObject['label']}' in ${testObject['wait']} ms.`);
       testFunction(testObject['url'], (err, result) => {
@@ -146,7 +147,7 @@ tests.testArray = [
   },
   {
     "url": "#server=TestData2.0&dataset=dataset1&parameters=scalar&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader",
-    "label": "Show data for one parameters from TestData2.0",
+    "label": "Show data for one parameter from TestData2.0",
     "wait": 1000,
     "testFunction": function (url, cb) {
       let texts = $('#data').text().split("\n");

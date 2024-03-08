@@ -311,7 +311,7 @@ span.id {
 	width: 82%; /* Bold causes width to increase and input to appear on newline if this is not done. */
 	font-weight: bold;
 	float: right;
-	margin: 2px;
+	margin: 1px;
 	text-align: center;
 }
 

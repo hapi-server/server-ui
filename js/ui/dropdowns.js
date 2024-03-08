@@ -3,7 +3,7 @@ function dropdowns(funs, wrapper, i) {
   if (i === undefined) {
     i = 0;
     addDestroyMethod();
-    // Destroy all drop-downs.
+    // Destroy all dropdowns.
     $('.dropdown').destroy();
     $('.ui-autocomplete').remove();
     handleHTMLInSearch();
@@ -11,11 +11,11 @@ function dropdowns(funs, wrapper, i) {
   }
 
   if (i === funs.length) {
-    util.log("dropdowns(): Last drop-down already set. Returning.");
+    util.log("dropdowns(): Last dropdown already set. Returning.");
     return;
   }
 
-  util.log("dropdowns(): Calling " + funs[i].name + "() to get drop-down list entries.");
+  util.log("dropdowns(): Calling " + funs[i].name + "() to get dropdown list entries.");
 
   // Call dropdown function, which generates list then calls cb() with a menu list.
   funs[i](cb);
@@ -134,7 +134,7 @@ function dropdowns(funs, wrapper, i) {
     }
 
     if (!list || list.length == 0) {
-      util.log("dropdowns(): Dropdown has no values. Setting next drop-down.");
+      util.log("dropdowns(): Dropdown has no values. Setting next dropdown.");
       dropdowns(funs, wrapper, i+1);
       return;
     }
@@ -146,13 +146,11 @@ function dropdowns(funs, wrapper, i) {
 
     let iclass = "";
     let tip1 = "";
-    let tip2 = "";
     let tips = funs[i].tooltips;
     if (tips) {
       iclass = "tooltip";
       if (tips.length > 0) {
         tip1 = tips[0];
-        tip2 = tips[1];
       }
     }
 
@@ -160,16 +158,16 @@ function dropdowns(funs, wrapper, i) {
     $(wrapper+(i))
       .append('<span class="ui-widget list"></span>');
     $(wrapper + (i) + " .ui-widget")
-      .append('<input'
+        .append('<span'
+          + ' class="dropdown-list ' + iclass + '"'
+          + ' id="' + id + '-list"'
+          + ' style="cursor:pointer">▶</span>')
+        .append('<input'
             + ' class="dropdown-input ' + iclass + '"'
             + ' id="' + id + '"'
             + ' label="' + label + '"'
             + ' title="' + tip1 + '"'
             + ' value="'+ label + '"/>')
-      .append('<span'
-            + ' class="dropdown-list ' + iclass + '"'
-            + ' id="' + id + '-list"'
-            + ' style="cursor:pointer">▶</span>')
 
     let input = 'input[id=' + id + ']';
 
@@ -215,7 +213,7 @@ function dropdowns(funs, wrapper, i) {
     }
 
     if (autoOpen) {
-			util.log(`dropdowns.cb(): '${id}' drop-down called with open = true. Opening it.`);
+			util.log(`dropdowns.cb(): '${id}' dropdown called with open = true. Opening it.`);
       $(input).data("autocomplete").search("");
     }
 
@@ -290,7 +288,7 @@ function dropdowns(funs, wrapper, i) {
 
       function resetLabel(el) {
         let id = $(el).attr('id');
-        util.log("dropdowns.setAutocomplete.resetLabel(): Called for drop-down with id = " + id + ".");
+        util.log("dropdowns.setAutocomplete.resetLabel(): Called for dropdown with id = " + id + ".");
         if ($(el).val() === "") {
           util.log("dropdowns.setAutocomplete.resetLabel(): No value in input.");
           let valuelast = $(el).attr('valuelast')
@@ -316,11 +314,11 @@ function dropdowns(funs, wrapper, i) {
       }
 
       function close(event, ui) {
-        // Triggered when drop-down list disappears (when _close() in autocomplete() is called.)
+        // Triggered when dropdown list disappears (when _close() in autocomplete() is called.)
         let id = $(this).attr('id');
         setAutocomplete[id]["open"] = false;
         $(this).attr('lastevent','close');
-        util.log(`dropdowns.setAutocomplete.close(): Close event on drop-down with id = '${id}'`);
+        util.log(`dropdowns.setAutocomplete.close(): Close event on dropdown with id = '${id}'`);
         resetLabel(this, event, ui);
         $(`#${id}-list`).html("▶");
       }
@@ -336,7 +334,7 @@ function dropdowns(funs, wrapper, i) {
       }
 
       function select(event, ui) {
-        // Triggered when clicking on a drop-down list item or pressing enter
+        // Triggered when clicking on a dropdown list item or pressing enter
         // after typing.
         let id = $(this).attr('id');
         $(this).attr('lastevent','select');
@@ -366,7 +364,7 @@ function dropdowns(funs, wrapper, i) {
         $(this).attr('valuelast',value);
 
         if (value === valuelast) {
-          let msg = "dropdowns.setAutocomplete.select(): New value is same as old. Closing drop-down and taking no action.";
+          let msg = "dropdowns.setAutocomplete.select(): New value is same as old. Closing dropdown and taking no action.";
           util.log(msg);
           $(this).autocomplete("close");
           return;
@@ -374,13 +372,13 @@ function dropdowns(funs, wrapper, i) {
 
         if (funs[i].clearFollowing === false) {
           let msg = "dropdowns.setAutocomplete.select(): clearFollowing = false. ";
-          util.log(msg + `Not clearing values in all drop-downs after '${id}'.`);
+          util.log(msg + `Not clearing values in all dropdowns after '${id}'.`);
           util.log(`dropdowns.setAutocomplete.select(): Modifying hash to have new value.`);
         } else {
           let msg = "dropdowns.setAutocomplete.select(): New value is not same as old clearFollowing != false.";
-          util.log(msg + ` Clearing values in all drop-downs after '${id}'`);
+          util.log(msg + ` Clearing values in all dropdowns after '${id}'`);
           $(this).parent().parent().nextAll("span").hide().html('').attr('value','');
-          util.log(`dropdowns.setAutocomplete.select(): Creating hash based on drop-downs left after clearing.`);
+          util.log(`dropdowns.setAutocomplete.select(): Creating hash based on dropdowns left after clearing.`);
         }
 
         let qsNew = {};
@@ -397,24 +395,24 @@ function dropdowns(funs, wrapper, i) {
         // Trigger onselect callback for dropdowns.
         let err;
         if (funs[i].onselect) {
-          util.log(`dropdowns.setAutocomplete.select(): Triggering onselect callback for current drop-down '${id}'.`);
+          util.log(`dropdowns.setAutocomplete.select(): Triggering onselect callback for current dropdown '${id}'.`);
           err = funs[i].onselect();
         }
 
         if (typeof(err) === "string") {
-          util.log(`dropdowns.setAutocomplete.select(): Not setting next drop-down due to error: ${err}`);
+          util.log(`dropdowns.setAutocomplete.select(): Not setting next dropdown due to error: ${err}`);
         } else {
           if (funs[i].clearFollowing === true) {
             let msg = `dropdowns.setAutocomplete.select(): `
-            util.log(msg + `Setting drop-down after '${id}' b/c clearFollowing = false.`);
+            util.log(msg + `Setting dropdown after '${id}' b/c clearFollowing = false.`);
             dropdowns(funs, wrapper, i+1);
           } else if ($(wrapper + (i+1)).find('input').length === 0) {
             let msg = `dropdowns.setAutocomplete.select(): `;
-            util.log(msg + `Setting drop-down after '${id}' b/c it does not exist.`);
+            util.log(msg + `Setting dropdown after '${id}' b/c it does not exist.`);
             dropdowns(funs, wrapper, i+1);
           } else {
-            let msg = `dropdowns.setAutocomplete.select(): Not setting drop-down after '${id}' `;
-            util.log(msg + `b/c clearFollowing = false and next drop-down exists.`);
+            let msg = `dropdowns.setAutocomplete.select(): Not setting dropdown after '${id}' `;
+            util.log(msg + `b/c clearFollowing = false and next dropdown exists.`);
           }
         }
       }
@@ -667,5 +665,4 @@ function dropdowns(funs, wrapper, i) {
       }
     }
   }
-
 }

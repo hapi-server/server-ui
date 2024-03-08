@@ -3,11 +3,14 @@ function tooltips() {
   let instances = $.tooltipster.instances();
   $.each(instances, function(i, instance) {instance.destroy(); });
 
+  let linkDelay = 500;
+  let helpDelay = 1000;
+
   // Configure tooltips
   $('.tooltip').tooltipster({
     theme: 'tooltipster-noir',
     side: 'top',
-    delay: 500,
+    delay: linkDelay,
     animationDuration: 0
   });
 
@@ -15,7 +18,7 @@ function tooltips() {
     contentAsHTML: true,
     theme: 'tooltipster-noir',
     side: 'right',
-    delay: 500,
+    delay: helpDelay,
     animationDuration: 0
   });
 
@@ -34,9 +37,11 @@ function tooltips() {
             contentAsHTML: true,
             theme: 'tooltipster-noir',
             side: 'right',
-            delay: 500,
+            delay: helpDelay,
             animationDuration: 0
-          })
-          .tooltipster('show');
+          });
+        setTimeout(function() {
+          $(this).tooltipster('show');
+        }.bind(this), helpDelay);
       });
 }

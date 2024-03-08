@@ -25,20 +25,20 @@ function main() {
     window.location = window.location.pathname;
   });
 
-  // Set up main drop-downs. When server drop-down is set, the default text
+  // Set up main dropdowns. When server dropdown is set, the default text
   // is -HAPI Servers- and the function servers() is called when there is 
   // interaction. On hover over the text entry area, "Enter text to narrow
   // list" is shown as a tooltip. On hover over the expand key on right,
   // "Show full list" is shown as a tooltip.
-  let dfuncs = [servers,datasets,parameters,starttime,stoptime,returntype,format,style];
+  let dfuncs = [servers, datasets, parameters, starttime, stoptime, returntype, format, style];
   dropdowns(dfuncs, "#dropdowns");
 
 }
 
-// Determine selected value for a drop-down from hash.
+// Determine selected value for a dropdown from hash.
 function selected(name) {
 
-  // When drop-down value is selected, URL should be up-to-date.
+  // When dropdown value is selected, URL should be up-to-date.
   // Use value in URL.
   if (location.hash !== "") {
     let qs = query.parseQueryString();
@@ -99,7 +99,7 @@ function about(url, HAPI) {
   }
 }
 
-// Servers drop-down callback
+// Servers dropdown callback
 function servers(cb) {
 
   util.log('servers(): Called.');
@@ -139,7 +139,7 @@ function servers(cb) {
 
   servers.label = "Servers";
   servers.id = "server";
-  servers.tooltips = ["Enter text to search","List available servers"];
+  servers.tooltips = ["Enter text to search any list"];
   servers.clearFollowing = true;
 
   servers.onselect = function () {
@@ -221,7 +221,7 @@ function servers(cb) {
       }
 
       if (window["HAPIUI"]["qsInitial"]['server'] === id) {
-        util.log("servers.process(): Server value for " + id + " found in hash. Setting as selected in drop-down.")
+        util.log("servers.process(): Server value for " + id + " found in hash. Setting as selected in dropdown.")
       }
       list.push({
           "label": info[id]['name'],
@@ -231,7 +231,7 @@ function servers(cb) {
     }
 
     if (selectedServer && found == false) {
-      // Will occur if user typed a server name in drop-down and it is not in list
+      // Will occur if user typed a server name in dropdown and it is not in list
       serverNotFound(selectedServer);
       return;
     }
@@ -286,7 +286,7 @@ function servers(cb) {
     if (list.length === 0) {
       let msg = "All server names start with {TestData,URLWatcher} and ";
       msg += "'show TestData servers' option unchecked. "
-      msg += "Ignoring option so at least one server in server drop-down list.";
+      msg += "Ignoring option so at least one server in server dropdown list.";
       util.log(msg);
       list = listCopy;
     }
@@ -319,14 +319,13 @@ function servers(cb) {
 
 }
 
-// Datasets drop-down callback
+// Datasets dropdown callback
 function datasets(cb) {
 
   util.log('datasets(): Called.');
 
   datasets.id = "dataset";
   datasets.label = "Datasets";
-  datasets.tooltips = ["Enter text to search","List datasets"];
   datasets.clearFollowing = true;
   datasets.onselect = function () {
     util.log('datasets.onselect(): Called.');
@@ -418,7 +417,7 @@ function datasets(cb) {
   }
 }
 
-// Parameters drop-down callback
+// Parameters dropdown callback
 function parameters(cb) {
 
   util.log('parameters(): Called.');
@@ -447,7 +446,6 @@ function parameters(cb) {
 
   parameters.id = "parameters";
   parameters.label = "Parameters";
-  parameters.tooltips = ["Enter text to search","List parameters in dataset"];
   parameters.allowEmptyValue = true;
   parameters.selectMultiple = true;
   parameters.clearFollowing = false;
@@ -624,11 +622,11 @@ function parameters(cb) {
   }
 }
 
-// Start time drop-down callback
+// Start time dropdown callback
 function starttime(cb) {
 
-  // Because only one value is set in drop-down, it is automatically selected
-  // and the next drop-down is called.
+  // Because only one value is set in dropdown, it is automatically selected
+  // and the next dropdown is called.
   util.log('starttime(): Called.');
 
   starttime.id = "start";
@@ -661,11 +659,11 @@ function starttime(cb) {
   cb(list);
 }
 
-// Stop time drop-down callback
+// Stop time dropdown callback
 function stoptime(cb) {
 
-  // Because only one value is set in drop-down, it is automatically selected
-  // and the next drop-down is called.
+  // Because only one value is set in dropdown, it is automatically selected
+  // and the next dropdown is called.
   util.log('stoptime(): Called.');
 
   stoptime.id = "Stop";
@@ -698,12 +696,11 @@ function stoptime(cb) {
   cb(list);
 }
 
-// Return drop-down callback
+// Return dropdown callback
 function returntype(cb) {
 
   returntype.id = "return";
   returntype.label = "Return";
-  returntype.tooltips = ["","List output options"];
   returntype.clearFollowing = true;
 
   returntype.onselect = function () {
@@ -726,7 +723,7 @@ function returntype(cb) {
   cb(values);
 }
 
-// Format drop-down callback
+// Format dropdown callback
 function format(cb) {
 
   util.log('format(): Called.');
@@ -739,14 +736,13 @@ function format(cb) {
       // Update output
       output();
     }
-    // Keep state of following drop-down.
+    // Keep state of following dropdown.
     //style.lastSelected = selected('style');
   };
 
   let values = [];
   if (selected("return").match("data")) {
     format.label = "Output Format";
-    format.tooltips = ["","List output format options"];
     values = 
               [
                 {label: "CSV", value: "csv"},
@@ -756,7 +752,6 @@ function format(cb) {
 
   if (selected("return").match("image")) {
     format.label = "Plot Server";
-    format.tooltips = ["","List plot servers"];
     values =
         [
             {
@@ -777,7 +772,6 @@ function format(cb) {
   }
 
   if (selected("return").match("script")) {
-    format.tooltips = ["","List script languages"];
     format.label = "Language";
     values = _scriptList();
   }
@@ -802,7 +796,7 @@ function format(cb) {
   cb(values, autoOpen);
 }
 
-// Style drop-down callback.
+// Style dropdown callback.
 function style(cb) {
 
   util.log('style(): Called.');
@@ -835,7 +829,6 @@ function style(cb) {
   if (selected("return") === "data") {
     style.label = "Header Options";
     style.label = "Output header options";
-    style.tooltips = ["","List output header options"];
     values =
         [
             {
@@ -865,7 +858,7 @@ function style(cb) {
   cb(values);
 }
 
-// Form URL and place it in DOM based on drop-down change.
+// Form URL and place it in DOM based on dropdown change.
 function output() {
 
   util.log('output(): Called.');

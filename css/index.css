@@ -308,7 +308,9 @@ span.id {
 
 .dropdown-input {
 	color: black;
-	width: 82%; /* Bold causes width to increase and input to appear on newline if this is not done. */
+	/* font-weight causes width to increase and input to appear on newline if 
+	width is not set */
+	width: 82%; 
 	font-weight: bold;
 	float: right;
 	margin: 1px;
@@ -327,8 +329,19 @@ span.id {
   display: none;
 }
 
+#developer-details {
+  font-size: 70%;
+}
+
 #footer {
-  font-size: 90%;
+  font-size: 80%;
+	margin-left: 0em;
+	background-color: white;
+	position: fixed;
+	margin: 0.5em;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 
 #examplelist {
@@ -336,11 +349,6 @@ span.id {
 	margin-top: -5px;
 	width: 12em;
 }
-
-#footer {
- margin-left: 15.5em;
-}
-
 
 #selections {
 	float: left;

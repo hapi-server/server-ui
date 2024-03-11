@@ -162,9 +162,12 @@ function dropdowns(funs, wrapper, i) {
     }
 
     let label = '-' + (funs[i].label || funs[i].name) + '-';
-    $(wrapper+(i))
+    let elId = `dropdowns${i}`
+    $(wrapper)
+      .append(`<span id="${elId}" class="dropdown"></span>`);
+    $(`#${elId}`)
       .append('<span class="ui-widget list"></span>');
-    $(wrapper + (i) + " .ui-widget")
+    $(`#${elId} .ui-widget`)
         .append('<span'
           + ' class="dropdown-list ' + iclass + '"'
           + ' id="' + id + '-list"'
@@ -592,9 +595,8 @@ function dropdowns(funs, wrapper, i) {
             setCheckboxValues(ul, isSearchResult);
             let input = $(acData.element[0]);
             $(input).data("autocomplete")._close();
-            $(input).data("autocomplete")._trigger("select", undefined, {item: input.val()});
           });
-          //bindBlur();
+
           function bindBlur() {
             // A more standard way to close the list, but the list is typically
             // large enough that a user mouseleave is almost always followed by a

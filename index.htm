@@ -96,8 +96,16 @@
     let PLOTSERVER  = '__PLOTSERVER__';
     let PROXYSERVER = '__PROXYSERVER__';
 
-    function allURL(url) { return url.startsWith('__') ? "all.txt" : url; }
-    function proxyServerURL(url) { return url.startsWith('__') ? false : url; }
+    function serverList(url) {
+      return url.startsWith('__') ? "all.txt" : url;
+    }
+
+    function proxyServerURL(url) {
+      if (url.startsWith('__')) {
+        return "https://hapi-server.org/servers/proxy?url=";
+      }
+      return url;
+    }
 
     function verifierURL(url) {
       if (url.startsWith('__')) {
@@ -121,12 +129,12 @@
     window["HAPIUI"] = 
       {
         "options": {
-          "serverList": allURL(SERVER_LIST),
-          "serverListFallback": "https://raw.githubusercontent.com/hapi-server/servers/master/all_.txt",
+          "serverList": serverList(SERVER_LIST),
+          "serverListFallback": "https://hapi-server.org/all_.txt",
 
           "plotserver": plotServerURL(PLOTSERVER),
           "verifier": verifierURL(VERIFIER),
-          "proxy": proxyServerURL(PROXYSERVER), // false means no proxy
+          "proxy": proxyServerURL(PROXYSERVER), // false => no proxy
 
           "metadataTimeout": 10000,
           "allTimeout": 5000,
@@ -156,6 +164,15 @@
   <div id="selections">
 
     <!-- Left column -->
+    <div id="dropdowns">
+    </div>
+    <button id="clear" class="simple tooltip-right" type="button" title="Clear all selections">
+      Clear
+    </button>
+
+    <br>
+    <br>
+
     <details id="options-details">
       <summary>
         <span>Options</span>
@@ -243,25 +260,37 @@
       </button>
     </details>
 
-    <div id="dropdowns">
-      <span id="dropdowns0" class="dropdown"></span>
-      <span id="dropdowns1" class="dropdown"></span>
-      <span id="dropdowns2" class="dropdown"></span>
-      <span id="dropdowns3" class="dropdown"></span>
-      <span id="dropdowns4" class="dropdown"></span>
-      <span id="dropdowns5" class="dropdown"></span>
-      <span id="dropdowns6" class="dropdown"></span>
-      <span id="dropdowns7" class="dropdown"></span>
-      <span id="dropdowns8" class="dropdown"></span>
-    </div>
-    <button id="clear" class="simple tooltip-right" type="button" title="Clear all selections">
-      Clear
-    </button>
-
     <div id="logo">
       <a href="https://hapi-server.org">
         <img src="https://hapi-server.github.io/logos/HAPI-bw.svg" alt="HAPI Logo"/></a>
     </div>
+
+    <div id="footer">
+      <a href="https://github.com/hapi-server/server-ui" style="text-decoration:none">
+        <img src="css/images/github-mark.svg" alt="GitHub logo" height="16px"/>
+      </a>
+    </div>
+
+    <details id="developer-details" closed>
+      <summary>Help</summary>
+      <p>
+        The <code>parameter</code> argument may be omitted in the hash fragment
+        (<a href="#server=TestData2.0&dataset=dataset1&parameters=&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader">example</a>).
+      </p>
+      <p>
+        A server URL may be used instead of a server id
+        (<a href="#server=https://hapi-server.org/servers/TestData3.1/hapi">example</a>)
+        provided the server supports
+        <a href="https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing">
+          CORS.
+        </a>
+      </p>
+      <p>
+        Auto-generated scripts are available from an <a href="/api">API</a>.
+      </p>
+      <br>
+    </details>
+
   </div>
 
   <!-- Main column -->
@@ -523,34 +552,6 @@
       <ul></ul>
     </div>
 
-  </div>
-
-  <div id="footer">
-    <details id="developer-details" closed>
-      <summary>API Notes</summary>
-      <p>
-        The <code>parameter</code> argument may be omitted in the hash fragment
-        (<a href="#server=TestData2.0&dataset=dataset1&parameters=&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader">example</a>).
-      </p>
-      <p>
-        A server URL may be used instead of a server id
-        (<a href="#server=https://hapi-server.org/servers/TestData3.1/hapi">example</a>)
-        provided the server supports
-        <a href="https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing">
-          CORS.
-        </a>
-      </p>
-      <p>
-        Scripts are available without using this interface using an <a href="/api">API</a>.
-      </p>
-      <br>
-    </details>
-    <br>
-    <a href="https://github.com/hapi-server/server-ui" style="text-decoration:none">
-      <img src="css/images/github-mark.svg" alt="GitHub logo" height="16px"/>
-    </a>
-    Submit feature requests or report any issues on the 
-    <a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.
   </div>
 
 </body>

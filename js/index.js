@@ -99,7 +99,7 @@ function about(url, HAPI) {
   }
 }
 
-// Servers dropdown callback
+// Servers dropdown
 function servers(cb) {
 
   util.log('servers(): Called.');
@@ -319,7 +319,7 @@ function servers(cb) {
 
 }
 
-// Datasets dropdown callback
+// Datasets dropdown
 function datasets(cb) {
 
   util.log('datasets(): Called.');
@@ -417,7 +417,7 @@ function datasets(cb) {
   }
 }
 
-// Parameters dropdown callback
+// Parameters dropdown
 function parameters(cb) {
 
   util.log('parameters(): Called.');
@@ -622,7 +622,7 @@ function parameters(cb) {
   }
 }
 
-// Start time dropdown callback
+// Start time dropdown
 function starttime(cb) {
 
   // Because only one value is set in dropdown, it is automatically selected
@@ -659,7 +659,7 @@ function starttime(cb) {
   cb(list);
 }
 
-// Stop time dropdown callback
+// Stop time dropdown
 function stoptime(cb) {
 
   // Because only one value is set in dropdown, it is automatically selected
@@ -696,7 +696,7 @@ function stoptime(cb) {
   cb(list);
 }
 
-// Return dropdown callback
+// Return dropdown
 function returntype(cb) {
 
   returntype.id = "return";
@@ -723,7 +723,7 @@ function returntype(cb) {
   cb(values);
 }
 
-// Format dropdown callback
+// Format dropdown
 function format(cb) {
 
   util.log('format(): Called.');
@@ -796,7 +796,7 @@ function format(cb) {
   cb(values, autoOpen);
 }
 
-// Style dropdown callback.
+// Style dropdown
 function style(cb) {
 
   util.log('style(): Called.');
@@ -858,7 +858,7 @@ function style(cb) {
   cb(values);
 }
 
-// Form URL and place it in DOM based on dropdown change.
+// Place returntype response in DOM
 function output() {
 
   util.log('output(): Called.');

@@ -330,15 +330,17 @@ span.id {
 }
 
 #developer-details {
-  font-size: 70%;
+	margin-top: 1em;
+	font-size: 70%;
 }
 
 #footer {
   font-size: 80%;
-	margin-left: 0em;
+	margin-left: 1em;
 	background-color: white;
 	position: fixed;
-	margin: 0.5em;
+	margin: 1em;
+	width: 15em;
 	bottom: 0;
 	left: 0;
 	right: 0;

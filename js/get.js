@@ -123,7 +123,7 @@ function get(options, cb) {
           while (get.callBackQueue[url].length > 0) {
             console.error("get(): Calling back from queue for " + url);
             let cbq = get.callBackQueue[url].shift();
-            cbq(null, data, dataLength, nRecords);
+            cbq(null, get.cache[urlo], dataLength, nRecords);
           }
         }
 
@@ -213,7 +213,7 @@ function get(options, cb) {
             timeout: options.timeout,
             dataType: options.dataType,
             success: (head, textStatus, jqXHR) => {
-              let msgo = `<br><br>Direct request of ${html.aLink(urlo)} failed.`
+              let msgo = `<br>Direct request of ${html.aLink(urlo)} failed.`
               let msg = msgo + `<br><br>Proxy request of ${html.aLink(url)} failed.`
               msg = msg + `<br><br>Another proxy <code>HEAD</code> request for the first URL found a HTTP status code = <code>${head.status}<code>`;
               if (head.status !== 200) {

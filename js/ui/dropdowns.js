@@ -34,9 +34,18 @@ function dropdowns(funs, wrapper, i) {
       }
       if (input.length > 0) {
         input.first().data("autocomplete")._close();
-        //input.first().data("autocomplete")._trigger("select", undefined, {item: input.val()});
+          //input.first().data("autocomplete")._trigger("select", undefined, {item: input.val()});
       } else {
         console.log("dropdowns.bindCloseEvents(): No open open dropdowns found.");
+      }
+
+      let einput = $('input[value=""].dropdown-input');
+      if (einput.length > 1) {
+        console.error("dropdowns.bindCloseEvents(): More than one input with empty value found. This should not happen. Closing first only.");
+      }
+      if (einput.length > 0) {
+        console.error("dropdowns.bindCloseEvents(): Input with empty value found. Closing it so label is reset.");
+        einput.first().data("autocomplete")._trigger("close");
       }
     }
 
@@ -240,7 +249,7 @@ function dropdowns(funs, wrapper, i) {
       util.log(`dropdowns.cb(): Binding keypress event on ${input} to trigger select event when enter key pressed.`);
       $(input).keypress(function(e) {
         util.log("dropdowns.cb.keypress(): Event handler for .keypress() called.");
-        var value = $(this).attr('value');
+        var value = $(e.target).attr('value');
         if(e.keyCode == 13) {
           // Return key
           let msg = `dropdowns.cb.keypress(): Enter key pressed. select event. `;
@@ -248,7 +257,8 @@ function dropdowns(funs, wrapper, i) {
           $(input)
             .val(value).data("autocomplete")
             ._trigger("select", event, {item: value});
-        }
+            $(input).data("autocomplete")._close();
+          }
         if (e.keyCode == 9) {
           // TAB
         }
@@ -535,6 +545,10 @@ function dropdowns(funs, wrapper, i) {
             }
           }
 
+          // TODO: For performance, consider using https://clusterize.js.org/ for large lists.
+          // Could also cache list HTML for full list. However, most time seems to be in rendering.
+          // which would be addressed by clusterize.js.
+
           console.log("dropdowns.setRenderMenu._renderMenu(): Created ul list");
           console.log("dropdowns.setRenderMenu._renderMenu(): Setting ul list");
           $(ul).append(liHTML);
@@ -595,16 +609,16 @@ function dropdowns(funs, wrapper, i) {
             setCheckboxValues(ul, isSearchResult);
             let input = $(acData.element[0]);
             $(input).data("autocomplete")._close();
+            $(input).data("autocomplete")._trigger("select", undefined, {item: input.val()});
           });
 
+          //bindBlur();
           function bindBlur() {
             // A more standard way to close the list, but the list is typically
             // large enough that a user mouseleave is almost always followed by a
             // click somewhere on the document to close the list. As an alternative,
             // we could set this blur event to only occur after mouseleave.
-            $(ul).blur(function (event) {
-              console.log(event.target);
-              return;
+            $(ul).blur(function () {
               setCheckboxValues(ul, isSearchResult);
               let input = $(acData.element[0]);
               $(input).data("autocomplete")._close();

@@ -55,11 +55,12 @@ function examples(serversObj, cb) {
             util.log(`examples(): Got ${url}`);
 
             if (!infoObj["parameters"] || infoObj["parameters"].length === 0) {
-              util.log(`examples(): Problem response from ${url}`);
+              util.log(`examples(): Problem with response from ${url}`);
               return;
             } else if (infoObj["parameters"].length === 1) {
               linkObj["parameters"] = infoObj["parameters"][0]["name"];
             } else {
+              console.log(infoObj["parameters"])
               linkObj["parameters"] = infoObj["parameters"][1]["name"];
             }
             if (infoObj["sampleStartDate"]) {

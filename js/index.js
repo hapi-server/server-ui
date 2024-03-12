@@ -139,7 +139,7 @@ function servers(cb) {
 
   servers.label = "Servers";
   servers.id = "server";
-  servers.tooltips = ["Enter text to search any list"];
+  //servers.tooltips = ["Enter text to search any list"];
   servers.clearFollowing = true;
 
   servers.onselect = function () {

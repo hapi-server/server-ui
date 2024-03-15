@@ -10,7 +10,7 @@ const getFiles     = require('./getFiles.js');
 const createScript = require('../../js/shared/createScript.js');
 const parseAllTxt  = require('../../js/shared/parseAllTxt.js');
 const defaultDate  = require('../../js/shared/defaultDate.js');
-const _scriptList  = require('../../js/shared/_scriptList.js');
+const _scriptList  = require('../../scripts/_scriptList.js');
 
 module.exports = {file: file, options: options};
 

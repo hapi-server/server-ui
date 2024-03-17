@@ -60,7 +60,6 @@ function examples(serversObj, cb) {
             } else if (infoObj["parameters"].length === 1) {
               linkObj["parameters"] = infoObj["parameters"][0]["name"];
             } else {
-              console.log(infoObj["parameters"])
               linkObj["parameters"] = infoObj["parameters"][1]["name"];
             }
             if (infoObj["sampleStartDate"]) {

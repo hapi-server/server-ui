@@ -39,7 +39,12 @@ function get(options, cb) {
 
   if (get.cache[urlo]) {
     util.log(`get(): Client-side cache hit for ${urlo}`);
-    cb(false, get.cache[urlo]);
+    if (typeof get.cache[urlo] === "object") {
+      // Deep copy to avoid modifying cache.
+      cb(false, JSON.parse(JSON.stringify(get.cache[urlo])));
+    } else {
+      cb(false, get.cache[urlo]);
+    }
     return;
   }
 
@@ -194,7 +199,7 @@ function get(options, cb) {
   function errorHandler(xhr, textStatus, errorThrown) {
 
     if (get.callBackQueue && get.callBackQueue[url]) {
-      let len = get.callBackQueue[url];
+      let len = get.callBackQueue[url].length;
       console.error(`get(): Deleting callback queue of length ${len} for ${url}.`);
       delete get.callBackQueue[url];
     }

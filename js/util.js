@@ -1,15 +1,5 @@
 let util = {
 
-  reset: function() {
-    function reset(msg) {
-      console.error(msg);
-      alert(msg);
-      $(window).unbind("hashchange");
-      window.location.hash = "";
-      location.reload();
-    }
-  },
-
   doy2ymd: function (dateTime) {
 
     if (/^[0-9]{4}-[0-9]{3}/.test(dateTime)) {

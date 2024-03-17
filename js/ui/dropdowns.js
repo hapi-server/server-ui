@@ -49,6 +49,7 @@ function dropdowns(funs, wrapper, i) {
       }
     }
 
+    $(document).unbind('click');
     $(document).click(function (event) {
       console.log("dropdowns.bindCloseEvents(): Document click event.");
       if ($(event.target).parents(".ui-widget").length > 0) {
@@ -197,6 +198,10 @@ function dropdowns(funs, wrapper, i) {
     util.log(`dropdowns.cb(): Binding events on ${input}.`);
     bindEvents(id, input);
 
+    if (list.length === 0) {
+      // Error.
+    }
+
     if (list.length > 0) {
       util.log(`dropdowns.cb(): '${id}' dropdown has values. Showing it.`);
       $(wrapper+(i)).show();
@@ -213,24 +218,33 @@ function dropdowns(funs, wrapper, i) {
       if (i === 0) {
 				// This will prevent entry of a value that is not in the list, however.
 				// May want to have option to not hide it.
-				util.log(`dropdowns.cb(): First dropdown ('${id}') has only one item. Hiding it.`);
-        $(wrapper+(i)).hide();
+				//util.log(`dropdowns.cb(): First dropdown ('${id}') has only one item. Hiding it.`);
+        //$(wrapper+(i)).hide();
       }
     }
 
     if (list.length > 1) {
       // Select first item with attribute selected=true.
+      let selected = [];
       for (let k = 0; k < list.length; k++) {
         if (list[k].selected == true) {
-          util.log(`dropdowns.cb(): '${id}' dropdown has a value with selected = true. Triggering select on it.`) ;
-          $(input)
-            .val(list[k].value)
-            .data("autocomplete")
-            ._trigger("select", undefined, {item: list[k].value});
-          break;
+          selected.push(list[k].value);
         }
       }
-    }
+      if (selected.length > 0) {
+        if (selected.length == 1) {
+          util.log(`dropdowns.cb(): '${id}' dropdown has an item with selected = true. Triggering select on it.`) ;
+        } else {
+          util.log(`dropdowns.cb(): '${id}' dropdown has ${selected.length} items with selected = true. Triggering select on them.`) ;
+        }
+        $(input)
+          .val(selected.join(","))
+          .data("autocomplete")
+          ._trigger("select", undefined, {item: selected.join(",")});
+      } else {
+        util.log(`dropdowns.cb(): '${id}' dropdown has no items with selected = true.`) ;
+      }
+  }
 
     if (autoOpen) {
 			util.log(`dropdowns.cb(): '${id}' dropdown called with open = true. Opening it.`);
@@ -365,8 +379,8 @@ function dropdowns(funs, wrapper, i) {
 
         // ui.item.value is the value selected from the list.
         // event.target.value is the value in the input field after hitting enter.
-        //let value = ui ? ui.item && ui.item.value || event.target.value : "";
-        let value = ui.item.value || event.target.value;
+        let value = ui ? ui.item && ui.item.value || event.target.value : "";
+        //let value = ui.item.value || event.target.value;
         let valuelast = $(this).attr('valuelast');
 
         util.log(`dropdowns.setAutocomplete.select(): Setting input.val('${value}').`);
@@ -374,7 +388,7 @@ function dropdowns(funs, wrapper, i) {
 
         let i = parseInt($(this).parent().parent().attr("id").replace(/[a-z]/gi,""));
         if (funs[i].allowEmptyValue !== true && value === "") {
-          let msg = "dropdowns.setAutocomplete.select(): value = '' and allowEmptyValue !== true.";
+          let msg = "dropdowns.setAutocomplete.select(): value = '' and allowEmptyValue !== true. ";
           util.log(msg +`Setting to valuelast = '${valuelast}', closing, and returning.`);
           $('input[id=' + id + ']').attr('value', valuelast);
           $('input[id=' + id + ']').autocomplete("close");
@@ -411,7 +425,7 @@ function dropdowns(funs, wrapper, i) {
             }
         });
         util.log(`dropdowns.setAutocomplete.select(): Setting hash.`);
-        hash.update(qsNew, false);
+        hash.update(qsNew);
 
         // Trigger onselect callback for dropdowns.
         let err;

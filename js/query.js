@@ -24,8 +24,8 @@ query.qsInitial = function() {
     qs['parameters'] = "*all*";
   }
 
-  // Allow for server, dataset, and return to be given in URL and return=script.
-  if (qs['server'] && qs['dataset'] && qs['return'] === 'script') {
+  // Allow for server, dataset, and return to be given in URL and return=....
+  if (qs['server'] && qs['dataset'] && qs['return'] !== undefined) {
     if (qs['parameters'] === undefined) {
       qs['parameters'] = "*all*";
     }

@@ -35,16 +35,17 @@ tests.runTest = function(testNumber) {
   if (testObject['beforeTest']) {
     testObject['beforeTest']();
   } else {
+    util.log(`tests.runTest(): Setting window.location.hash=''.`)
     window.location.hash = "";
   }
 
   $("#test-" + testNumber).text("… ");
-  console.log(`tests(): Setting location.hash=${testObject['url']} in ${beforeTestWait} ms.`);
+  console.log(`tests.runTest(): Setting window.location.hash='${testObject['url']}' in ${beforeTestWait} ms.`);
   setTimeout(() => {
-    location.hash = testObject['url'];
-    $(window).trigger('hashchange');
+    util.log(`tests.runTest(): Setting window.location.hash='${testObject['url']}'.`)
+    window.location.hash = testObject['url'];
     setTimeout(() => {
-      console.log(`tests(): Calling testFunction for '${testObject['label']}' in ${testObject['wait']} ms.`);
+      console.log(`tests.runTest(): Calling testFunction for '${testObject['label']}' in ${testObject['wait']} ms.`);
       testFunction(testObject['url'], (err, result) => {
         testObject['passed'] = result;
         testObject['error'] = err;
@@ -55,7 +56,7 @@ tests.runTest = function(testNumber) {
 
   function finished(err, testObject) {
     let resultString = testObject['passed'] ? 'PASS' : 'FAIL';
-    let msg = `tests(): %c${resultString}%c for '${testObject['label']}'`;
+    let msg = `tests.finished(): %c${resultString}%c for '${testObject['label']}'`;
     if (testObject['passed']) {
       $("#test-" + testNumber).text("✓ ");
       console.log(msg,"background: green", "background: none");

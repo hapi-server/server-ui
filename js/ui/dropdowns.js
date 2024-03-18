@@ -161,14 +161,11 @@ function dropdowns(funs, wrapper, i) {
     util.log(`dropdowns(): Creating dropdown with id = '${id}'.`);
     $(wrapper+(i)).empty();
 
-    let iclass = "";
-    let tip1 = "";
-    let tips = funs[i].tooltips;
-    if (tips) {
-      iclass = "tooltip";
-      if (tips.length > 0) {
-        tip1 = tips[0];
-      }
+    let title1 = "";
+    let title2 = "";
+    if (i == 0) {
+      title1 = "Show/hide list";
+      title2 = "Enter text to search";
     }
 
     let label = '-' + (funs[i].label || funs[i].name) + '-';
@@ -179,14 +176,15 @@ function dropdowns(funs, wrapper, i) {
       .append('<span class="ui-widget list"></span>');
     $(`#${elId} .ui-widget`)
         .append('<span'
-          + ' class="dropdown-list ' + iclass + '"'
+          + ' class="dropdown-list"'
           + ' id="' + id + '-list"'
+          + ' title="' + title1 + '"'
           + ' style="cursor:pointer">▶</span>')
         .append('<input'
-            + ' class="dropdown-input ' + iclass + '"'
+            + ' class="dropdown-input"'
             + ' id="' + id + '"'
             + ' label="' + label + '"'
-            + ' title="' + tip1 + '"'
+            + ' title="' + title2 + '"'
             + ' value="'+ label + '"/>')
 
 
@@ -324,7 +322,7 @@ function dropdowns(funs, wrapper, i) {
       function resetLabel(el) {
         let id = $(el).attr('id');
         util.log("dropdowns.setAutocomplete.resetLabel(): Called for dropdown with id = " + id + ".");
-        if ($(el).val() === "") {
+        if ($(el).val() === "" && funs[i].allowEmptyValue !== true) {
           util.log("dropdowns.setAutocomplete.resetLabel(): No value in input.");
           let valuelast = $(el).attr('valuelast')
           if (valuelast !== undefined) {
@@ -520,15 +518,12 @@ function dropdowns(funs, wrapper, i) {
             let valueHTML = valueText;
 
             let valueLen = valueText.length;
-            let tooltip = false;
             if (valueLen < 70) {
               if (valueLen + label.length > 80) {
                 label = label.slice(0, 80 - valueLen) + "...";
-                tooltip = true;
               }
             } else {
               label = "";
-              tooltip = true;
             }
             if (title === label) {
               title = "";
@@ -550,11 +545,10 @@ function dropdowns(funs, wrapper, i) {
             if (selectMultiple) {
               labelHTML = checkboxLabelHTML(i, valueText, labelHTML);
               // No class ui-menu-item b/c autocomplete() triggers _close() on click.
-              let class_ = `class='${tooltip ? "tooltip" : ""}'`;
-              liHTML += `<li ${class_} ${title} ${role}>${labelHTML}</li>\n`;
+              liHTML += `<li ${title} ${role}>${labelHTML}</li>\n`;
             } else {
               let aHTML = `<a class='ui-corner-all' tabindex='-1'>${labelHTML}</a>`;
-              let class_ = `class='ui-menu-item ${tooltip ? "tooltip" : ""}'`;
+              let class_ = `class='ui-menu-item'`;
               liHTML += `<li id="${valueText}" ${class_} ${title} ${role}>${aHTML}</li>\n`;
             }
           }
@@ -637,7 +631,7 @@ function dropdowns(funs, wrapper, i) {
               let input = $(acData.element[0]);
               $(input).data("autocomplete")._close();
               $(input).data("autocomplete")._trigger("select", undefined, {item: input.val()});
-              });
+            });
           }
         }
 
@@ -645,12 +639,17 @@ function dropdowns(funs, wrapper, i) {
 
           $(el).click(function(event) {
 
+            console.log("dropdowns.setRenderMenu.setCheckboxClick.click(): Click event.");
+
             let target = event.target;
             if (target.tagName !== "INPUT") {
               // Click event set on label element, which has INPUT and SPAN.
               // so two events alway fired. This prevents the second event.
+              console.log("dropdowns.setRenderMenu.setCheckboxClick.click(): Click event not on INPUT element.");
               return;
             }
+
+            console.log("dropdowns.setRenderMenu.setCheckboxClick.click(): Click event on INPUT element.");
 
             if ($(target).hasClass('select-all')) {
               if ($(target).prop('checked')) {
@@ -675,6 +674,8 @@ function dropdowns(funs, wrapper, i) {
         }
 
         function setCheckboxValues(ul, isSearchResult) {
+
+          console.log("dropdowns.setRenderMenu.setCheckboxValues.setCheckboxClick(): Called.");
 
           let input = $(acData.element[0]);
           if ($("input.select-all").prop('checked') && !isSearchResult) {

@@ -39,10 +39,11 @@ let util = {
   },
 
   hapi2to3: function (url, version) {
+
     if (!version) {
       version = datasets.json.HAPI || "2.0";
     }
-    if (version.substr(0,1) == "2") {
+    if (version.substr(0,1) == "3") {
       url.replace("/info?id=","/info?dataset=");
       url.replace("/time.min=","/start=");
       url.replace("/time.max=","/stop=");
@@ -85,13 +86,13 @@ let util = {
       util.log("util.checkTimes(): start < stop ? " + t);
       if (t === false) {
         util.log("util.checkTimes(): " + which + " changed; start >= stop. Setting color of " + which + " to red.");
-        $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
+        $('#' + which + 'list').css('color','red').attr('title','start ≥ stop');
         $('#' + which).mouseover();
         return false;
       } else {
         util.log(which + " changed; start < stop. Setting colors to black.");
-        $('#startlist').css('color','black').removeClass('tooltip').attr('title','');
-        $('#stoplist').css('color','black').removeClass('tooltip').attr('title','');
+        $('#startlist').css('color','black').attr('title','');
+        $('#stoplist').css('color','black').attr('title','');
         return true;
       }
     }

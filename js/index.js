@@ -11,9 +11,6 @@ function main() {
   // Create <details> element for UI test links.
   tests();
 
-  // Initialize tooltips.
-  tooltips();
-
   // Bind events to changes in checkbox state.
   checkboxes();
 
@@ -26,10 +23,8 @@ function main() {
   });
 
   // Set up main dropdowns. When server dropdown is set, the default text
-  // is -HAPI Servers- and the function servers() is called when there is 
-  // interaction. On hover over the text entry area, "Enter text to narrow
-  // list" is shown as a tooltip. On hover over the expand key on right,
-  // "Show full list" is shown as a tooltip.
+  // is -Servers- and the function servers() is called when there is 
+  // interaction.
   let dfuncs = [servers, datasets, parameters, starttime, stoptime, returntype, format, style];
   dropdowns(dfuncs, "#dropdowns");
 
@@ -139,7 +134,6 @@ function servers(cb) {
 
   servers.label = "Servers";
   servers.id = "server";
-  //servers.tooltips = ["Enter text to search any list"];
   servers.clearFollowing = true;
 
   servers.onselect = function () {
@@ -534,7 +528,7 @@ function parameters(cb) {
     if (cadence) {
       cadence = `Cadence: ${util.ISODuration2Words(cadence)} (<code>${cadence}</code>)`;
     } else {
-      cadence = "not specified"
+      cadence = "Cadence: not specified";
     }
     $('#datasetinfo ul').append(`<li>${cadence}</li>`);
 

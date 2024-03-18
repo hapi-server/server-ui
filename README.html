@@ -1,0 +1,755 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>README</title>
+  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%22100%22>📖</text></svg>">
+  <link id="hljs-css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css">
+  <style>
+    #toc>ol ol {
+      display: none
+    }
+
+    body {
+      background-image: url("https://rweigel.github.io/biedit/img/paper.png")
+    }
+
+    .body {
+      display: flex;
+      min-width: 50%;
+      max-height: 100%;
+      position: absolute;
+      background-image: url("https://rweigel.github.io/biedit/img/paper.png");
+    }
+
+    #toc {
+      flex: 0 1 auto;
+      margin-top: 0em;
+      margin-right: 1em;
+      max-width: 12em;
+      overflow: hidden auto;
+    }
+
+    #toc .toctext {
+      color: darkblue;
+    }
+
+    #toc .toctext-empty {
+      min-width: 1em;
+      border-bottom: 1px solid blue;
+    }
+
+    #toc ol {
+      margin: 0.25em 0em 0em 0.5em;
+      list-style-type: decimal;
+      padding-inline-start: 1em;
+    }
+
+    #toc a {
+      text-decoration: none;
+    }
+
+    #display {
+      flex: 1 1 80%;
+      overflow: hidden auto;
+      overflow-wrap: break-word;
+    }
+
+    #display .abstract {
+      text-align: center;
+      font-size: 100%;
+      font-weight: bold;
+      color: black;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    #display .title {
+      text-align: center;
+      font-size: 150%;
+      font-weight: bold;
+      color: black;
+      margin-top: 0.2em;
+      margin-bottom: 0.2em;
+    }
+
+    #display .subtitle {
+      text-align: center;
+      font-size: 120%;
+      font-weight: bold;
+      color: black;
+      margin-top: 0.2em;
+    }
+
+    #display .date {
+      text-align: right;
+      color: black;
+    }
+
+    #display .block {
+      display: flex;
+      flex: 1 1 auto;
+    }
+
+    #display .block>.comment {
+      display: none;
+    }
+
+    #display .hr {
+      width: 100%;
+      height: 1px;
+      display: block;
+      margin: 0.5em;
+      border-top: 1px solid black;
+    }
+
+    #display a {
+      text-decoration-line: none;
+      text-decoration-color: black;
+      color: darkblue;
+    }
+
+    #display a.broken-internal-link {
+      text-decoration-line: underline;
+      text-decoration-style: wavy;
+      text-underline-offset: 2px;
+      text-decoration-color: red;
+    }
+
+    #display span.broken-internal-link {
+      font-size: 0.75em;
+      color: red;
+    }
+
+    #display a:focus-visible {
+      outline: none;
+      background-color: yellow;
+    }
+
+    #display p {
+      width: 100%;
+      display: block;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    #display pre {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    #display h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      width: 100%;
+      text-decoration: none;
+      color: inherit;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    #display h1 {
+      color: darkblue;
+      border-bottom: 2px solid darkblue;
+    }
+
+    #display h2 {
+      border-bottom: 1px solid black;
+    }
+
+    #display h3 {
+      border-bottom: 1px dotted black;
+    }
+
+    #display img {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      max-width: 100%;
+    }
+
+    figure {
+      display: block;
+      margin-block: 0em;
+      margin-inline: 0px;
+    }
+
+    details>summary {
+      font-weight: bold;
+    }
+
+    details {
+      padding-left: 0.5em;
+    }
+
+    details[open] {
+      border: 1px solid black;
+      padding: 0em 0em 0em 0.5em;
+    }
+
+    table {
+      padding: 0px;
+      display: block;
+      width: 100%;
+    }
+
+    table tr {
+      border-top: 1px solid rgb(204, 204, 204);
+      background-color: white;
+      margin: 0px;
+      padding: 0px;
+    }
+
+    table tr:nth-child(2n) {
+      background-color: rgb(248, 248, 248);
+    }
+
+    table tr th {
+      font-weight: bold;
+      border: 1px solid rgb(204, 204, 204);
+      text-align: left;
+      margin: 0px;
+      padding: 6px 13px;
+    }
+
+    table tr td {
+      border: 1px solid rgb(204, 204, 204);
+      text-align: left;
+      margin: 0px;
+      padding: 6px 13px;
+    }
+
+    table tr th :first-child,
+    table tr td :first-child {
+      margin-top: 0px;
+    }
+
+    table tr th :last-child,
+    table tr td :last-child {
+      margin-bottom: 0px;
+    }
+
+    #display code {
+      width: 100%;
+      background-color: rgba(0, 0, 0, 0.03);
+      border-radius: 0px;
+      white-space: pre-wrap;
+    }
+
+    #display code~.line-number {
+      margin-top: 3px;
+      margin-right: 3px;
+    }
+
+    #display pre {
+      width: 100%;
+      text-indent: 0.75em;
+      margin: 0.5em 0px;
+      white-space: pre-wrap;
+      border-left: 3px solid black;
+      background-color: rgba(0, 0, 0, 0.03);
+      line-height: 1.25;
+      overflow-x: clip;
+    }
+
+    #display pre code {
+      background-color: rgba(0, 0, 0, 0);
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display pre.language-python {}
+
+    #display li>div {
+      display: flex;
+    }
+
+    #display li {
+      min-height: 1em;
+      width: 100%;
+    }
+
+    #display ul {
+      width: 100%;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      margin-left: 1em;
+      padding-left: 0.35em;
+    }
+
+    #display ul.compact {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display ol {
+      width: 100%;
+      margin-left: 1em;
+      padding-left: 0.5em;
+    }
+
+    #display>.section>.block &>ol.compact {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display>.section>.block>ol.loose {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    #display>.section>.block>ol.compact {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display ol.compact p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display ol.loose p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display ul.compact p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    #display ul.loose p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    .inline-html .block .block-info {
+      display: none;
+    }
+
+    .inline-html {
+      width: 100%;
+    }
+
+    .section>.block ol~.block-info {}
+
+    .section>.block ul~.block-info {}
+
+    .section>.block pre~.block-info {}
+
+    .section>.block code~.block-info {}
+
+    pre .block-info {
+      font-size: 8px;
+      text-align: right;
+      text-indent: 0px;
+    }
+
+    .block-info {
+      text-align: right;
+      width: 24px;
+      font-family: monospace;
+      white-space: pre-line;
+      overflow-wrap: break-word;
+      font-size: 8px;
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+      border-right: 1px solid black;
+    }
+
+    .blockquote {
+      width: 100%;
+      display: block;
+      margin: 1em;
+      border: 1px solid black;
+      padding: 1em;
+      border-radius: 0.5em;
+    }
+
+    .inline {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    .latex-underline {
+      text-decoration: underline;
+    }
+
+    .katex {
+      font-size: inherit !important;
+    }
+
+    .katex-display {
+      text-align: center;
+      margin: 0em;
+      font-size: 1em !important;
+    }
+
+    .katex-display.fleqn>.katex {
+      padding-left: 0em;
+      margin: 0em;
+    }
+
+    .katex-warning {
+      border-right: 0.5em solid red;
+    }
+
+    .katex-error-expression {}
+
+    .katex-error-message {
+      color: red;
+    }
+
+    .page-break {
+      break-after: page;
+      width: 100%;
+      font-size: 0px;
+      border-top: 1px dotted black;
+    }
+
+    .solutionsfalse {
+      display: none;
+    }
+
+    .solutionstrue {
+      display: block;
+    }
+
+    @media print {
+      * {
+        overflow: visible !important;
+      }
+
+      @page {
+        size: auto;
+        margin: 0.5in 0.75in 0.75in;
+      }
+
+      .katex .hide-tail {
+        overflow: hidden !important;
+      }
+
+      .page-break {
+        border-top: none;
+      }
+
+      .body {
+        display: inline;
+        position: relative;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        width: 100%;
+        margin-block: 0.1em;
+      }
+
+      h1 {
+        font-size: 1.25em;
+        color: black;
+        border-bottom: 2px solid black;
+      }
+
+      h2 {
+        font-size: 1.15em;
+        border-bottom: 1px solid black;
+      }
+
+      h3 {
+        font-size: 1.1em;
+      }
+
+      h4,
+      h5,
+      h6 {
+        font-size: 1.05em;
+      }
+
+      .md-toc {
+        break-inside: avoid;
+        font-size: 14px;
+      }
+
+      pre {
+        break-inside: avoid;
+      }
+
+      p {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+      }
+
+      #toc {
+        display: none;
+        font-size: 100%;
+        margin: 0px;
+        width: 100%;
+        overflow-y: hidden;
+        padding-left: 0px;
+        padding-right: 0px;
+      }
+
+      #display {
+        margin-left: 0em;
+        width: 100%;
+        padding-left: 0px;
+        padding-right: 0px;
+        border: none;
+        overflow-wrap: break-word;
+      }
+
+      .katex {
+        font: 1em / 1.1 KaTeX_Main, "Times New Roman", serif;
+        white-space: nowrap;
+        text-indent: 0px;
+        text-rendering: auto;
+      }
+
+      .katex-display {
+        margin-top: 0px !important;
+        font-size: 1em !important;
+      }
+    }
+  </style>
+  <script>
+    function tocClickListen() {
+      let hs = document.querySelectorAll('#toc > ol ol');
+      let el, ns;
+      for (let i = 0; i < hs.length; i++) {
+        if (hs[i].previousElementSibling) {
+          el = hs[i].previousElementSibling.firstElementChild;
+          if (el.length == 0) {
+            continue;
+          }
+          el.addEventListener('click', event => {
+            ns = event.target.parentNode.nextElementSibling;
+            if (!ns) return;
+            if (ns.style.display === 'none') {
+    ns.style.display = 'block';
+            } else
+            {
+    ns.style.display = 'none';}
+          });
+        }
+      }
+    }
+    if (
+        document.readyState === "complete" ||
+        (document.readyState !== "loading" && 
+          !document.documentElement.doScroll)
+    ) {
+      tocClickListen();
+    } else {
+      document.addEventListener("DOMContentLoaded", tocClickListen);
+    }
+  </script>
+</head>
+
+<body class="body">
+  <div id="toc" style="min-width: 5em;">
+    <ol>
+      <li>
+        <a href="#about" raw="# About" lo="3">
+          <span class="toctext">About</span>
+        </a>
+      </li>
+      <li>
+        <a href="#installation-use" raw="# Installation/Use" lo="10">
+          <span class="toctext">Installation/Use</span>
+        </a>
+        <ol class="toc" style="display: none;">
+          <li>
+            <a href="#basic" raw="## Basic" lo="12" class="">
+              <span class="toctext">Basic</span>
+            </a>
+          </li>
+          <li>
+            <a href="#advanced" raw="## Advanced" lo="16" class="">
+              <span class="toctext">Advanced</span>
+            </a>
+            <ol class="toc" style="display: none;">
+              <li>
+                <a href="#ui-configuration" raw="### UI Configuration" lo="40">
+                  <span class="toctext">UI Configuration</span>
+                </a>
+              </li>
+              <li>
+                <a href="#ui-use" raw="### UI Use" lo="46">
+                  <span class="toctext">UI Use</span>
+                </a>
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </li>
+      <li>
+        <a href="#proxy-server" raw="# Proxy Server" lo="58">
+          <span class="toctext">Proxy Server</span>
+        </a>
+      </li>
+      <li>
+        <a href="#reporting-issues" raw="# Reporting issues" lo="76" class="">
+          <span class="toctext">Reporting issues</span>
+        </a>
+      </li>
+    </ol>
+  </div>
+  <div id="display">
+    <div class="section">
+      <div class="block">
+        <p padlength="0" lo="1" lf="1">Demos: <a href="https://hapi-server.org/servers/TestData2.0/hapi">Basic</a> | <a href="http://hapi-server.org/servers">Advanced</a></p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">1</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h1 lo="3" lf="3"><a name="about" number="1" lo="3" raw="# About" class="anchor hanchor" href="#about"><span class="hnumber">1</span>&nbsp;<span class="htext">About</span></a></h1>
+        <div class="block-info" style="display: none;"><span class="line-numbers">3</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="5" lf="5">This repository contains</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">5</span></div>
+      </div>
+      <div class="block">
+        <ol lo="7" lf="8" class="compact">
+          <li markerlength="3" padlength="0" lo="7" lf="7">
+            <div class="block">
+              <p padlength="0" lo="7" lf="7">a basic <a href="https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md">entry/overview/landing web page</a> template for a <a href="http://hapi-server.org/">HAPI server</a> (<a href="https://hapi-server.org/servers/TestData2.0/hapi">Demo</a>) and</p>
+              <div class="block-info" style="display: none;"><span class="line-numbers">7</span></div>
+            </div>
+          </li>
+          <li markerlength="3" padlength="0" lo="8" lf="10">
+            <div class="block">
+              <p padlength="0" lo="8" lf="8">code for a landing page with a advanced user interface for browsing servers and datasets, downloading data from your browser, generating &nbsp;10-line IDL/MATLAB/Python scripts to download data, and creating preview plots (<a href="http://hapi-server.org/servers">Demo</a>).</p>
+              <div class="block-info" style="display: none;"><span class="line-numbers">8</span></div>
+            </div>
+          </li>
+        </ol>
+        <div class="block-info" style="display: none;"><span class="line-numbers">7-8</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h1 lo="10" lf="10"><a name="installation-use" number="2" lo="10" raw="# Installation/Use" class="anchor hanchor" href="#installation-use"><span class="hnumber">2</span>&nbsp;<span class="htext">Installation/Use</span></a></h1>
+        <div class="block-info" style="display: none;"><span class="line-numbers">10</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h2 lo="12" lf="12" class=""><a name="basic" number="2.1" lo="12" raw="## Basic" class="anchor hanchor" href="#basic"><span class="hnumber">2.1</span>&nbsp;<span class="htext">Basic</span></a></h2>
+        <div class="block-info" style="display: none;"><span class="line-numbers">12</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="14" lf="14" class="">To use the basic landing page with your HAPI server, download <a href="https://raw.githubusercontent.com/hapi-server/server-ui/master/single.htm">single.htm</a> and fill in the placeholders prefixed by <code type="md">__</code>, save as <code type="md">index.htm</code> and place in the directory associated with responses to a URL that ends in <code type="md">/hapi</code>.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">14</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h2 lo="16" lf="16" class=""><a name="advanced" number="2.2" lo="16" raw="## Advanced" class="anchor hanchor" href="#advanced"><span class="hnumber">2.2</span>&nbsp;<span class="htext">Advanced</span></a></h2>
+        <div class="block-info" style="display: none;"><span class="line-numbers">16</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="18" lf="18" class="">To use the landing page with an advanced user interface,</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">18</span></div>
+      </div>
+      <div class="block">
+        <pre lo="20" lf="22" class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/hapi-server/server-ui</pre>
+        <div class="block-info" style="display: none;"><span class="line-numbers">20-22</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="24" lf="24" class="">Then, edit <code type="md">all.txt</code> and configure your server so that responses to a URL that ends in <code type="md">/hapi</code> are associated with the <code type="md">sever-ui</code> directory.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">24</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="26" lf="26" class="">Or, for testing, cd to the <code type="md">server-ui</code> directory, edit <code type="md">all.txt</code>, and execute</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">26</span></div>
+      </div>
+      <div class="block">
+        <pre lo="28" lf="34" class=""><div class="block"><code lo="29" class="">cd server-ui; python2 -m SimpleHTTPServer</code><div class="line-number">1</div></div><div class="block"><code lo="30" class=""># or</code><div class="line-number">2</div></div><div class="block"><code lo="31" class="">cd server-ui; python3 -m http.server</code><div class="line-number">3</div></div><div class="block"><code lo="32" class=""># or</code><div class="line-number">4</div></div><div class="block"><code lo="33" class="">cd server-ui; npm install; npm start</code><div class="line-number">5</div></div></pre>
+        <div class="block-info" style="display: none;"><span class="line-numbers">28-34</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="36" lf="36">and open <code type="md">http://localhost:8000/</code> in a web browser.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">38</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h3 lo="38" lf="38" class=""><a name="ui-configuration" number="2.2.1" lo="38" raw="### UI Configuration" class="anchor hanchor" href="#ui-configuration" lf="38"><span class="hnumber">2.2.1</span>&nbsp;<span class="htext">UI Configuration</span></a></h3>
+        <div class="block-info" style="display: none;"><span class="line-numbers">40</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="40" lf="40" class="">By default, the list of servers shown at <code type="md">http://localhost:8000/</code> will be that in <a href="https://github.com/hapi-server/servers/blob/master/all_.txt">https://github.com/hapi-server/servers/blob/master/all_.txt</a>.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">40</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="42" lf="42" class="">To use your own list, rename <code type="md">all_.txt</code> to <code type="md">all.txt</code> and enter the URL of your HAPI server in <code type="md">all.txt</code>.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">42</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h3 lo="44" lf="44" class=""><a name="ui-use" number="2.2.2" lo="44" raw="### UI Use" class="anchor hanchor" href="#ui-use" lf="44"><span class="hnumber">2.2.2</span>&nbsp;<span class="htext">UI Use</span></a></h3>
+        <div class="block-info" style="display: none;"><span class="line-numbers">46</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="46" lf="46" class="">You can pass the URL of a server to create a menu for by passing it as a parameter in the hash. The following will cause the UI to show datasets in the SSCWeb HAPI server.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">48</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="48" lf="48" class=""><code type="md">http://hapi-server.org/servers/#server=https://hapi-server.org/servers/SSCWeb/hapi</code></p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">48</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="50" lf="50" class="">Note that this will only work if the server(s) allow <a href="https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing">CORS</a> or the proxy server below is used.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">50</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h1 lo="52" lf="52" class=""><a name="proxy-server" number="3" lo="52" raw="# Proxy Server" class="anchor hanchor" href="#proxy-server" lf="52"><span class="hnumber">3</span>&nbsp;<span class="htext">Proxy Server</span></a></h1>
+        <div class="block-info" style="display: none;"><span class="line-numbers">58</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="54" lf="54">If a server in <code type="md">all.txt</code> or the <code type="md">server</code> <a href="ui-use">passed as a URL parameter</a> does not allow <a href="https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing">CORS</a>, you will need to use a proxy server to access resources from that server.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">60</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="56" lf="56" class="">A server with a proxy can be run on port <code type="md">8000</code> using</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">56</span></div>
+      </div>
+      <div class="block">
+        <pre lo="58" lf="64" class=""><div class="block"><code lo="59" class="">npm install</code><div class="line-number">1</div></div><div class="block"><code lo="60" class="">npm run proxy-server --port 8000</code><div class="line-number">2</div></div><div class="block"><code lo="61" class=""># or, equivalently,</code><div class="line-number">3</div></div><div class="block"><code lo="62" class="">npm install</code><div class="line-number">4</div></div><div class="block"><code lo="63" class="active">node server/server.js --port 8000</code><div class="line-number">5</div></div></pre>
+        <div class="block-info" style="display: none;"><span class="line-numbers">58-64</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="66" lf="66" class="">See the comments in <a href="https://github.com/hapi-server/server-ui/blob/master/proxy/proxy.js"><code type="md">server/server.js</code></a> to constrain URLs that can be proxied.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">72</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="68" lf="68">By default, if an request to <code type="md">URL</code> fails, an attempt to retrieve it is made via the proxy request <code type="md">proxy?url=URL</code>. The URL for the proxy is set in the header of <a href="https://github.com/hapi-server/server-ui/blob/master/index.htm"><code type="md">index.htm</code></a>.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">74</span></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="block">
+        <h1 lo="70" lf="70" class=""><a name="reporting-issues" number="4" lo="70" raw="# Reporting issues" class="anchor hanchor" href="#reporting-issues" lf="70"><span class="hnumber">4</span>&nbsp;<span class="htext">Reporting issues</span></a></h1>
+        <div class="block-info" style="display: none;"><span class="line-numbers">76</span></div>
+      </div>
+      <div class="block">
+        <p padlength="0" lo="72" lf="72" class="">Please submit issues and feature requests to the <a href="https://github.com/hapi-server/server-ui/issues">issue tracker</a>.</p>
+        <div class="block-info" style="display: none;"><span class="line-numbers">78</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

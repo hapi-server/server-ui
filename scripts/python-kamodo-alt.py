@@ -18,7 +18,7 @@ dataset    = 'DATASET'
 #    listCSV_EXAMPLE
 parameters = 'PARAMETERS'
 start      = 'START' # min STARTMIN
-stop       = 'STOP'  # max STOPMAX
+stop       = 'STOP' # max STOPMAX
 
 data, meta = hapi(server, dataset, parameters, start, stop)
 

@@ -17,7 +17,7 @@ dataset    = 'DATASET'
 #    listCSV_EXAMPLE
 parameters = 'PARAMETERS';
 start      = 'START' # min STARTMIN
-stop       = 'STOP'  # max STOPMAX
+stop       = 'STOP' # max STOPMAX
 
 param_list = hapi(trange=[start, stop], server=server, dataset=dataset, parameters=parameters)
 

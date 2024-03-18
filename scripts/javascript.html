@@ -9,15 +9,15 @@
     // Use parameters='' to request all data. Multiple parameters
     // can be requested using a comma-separated list, e.g., parameters='X_TOD,Y_TOD'
     parameters = 'PARAMETERS';
-    start      = 'START';
-    stop       = 'STOP';
+    start      = 'START'; // min STARTMIN
+    stop       = 'STOP'; // max STOPMAX
 
     function cb(data, meta) {
       let c = document.getElementById('console');
       c.insertAdjacentText('beforeend','\ndata = ' + JSON.stringify(data, null, 4));
       c.insertAdjacentText('beforeend','\n\nmeta = ' + JSON.stringify(meta, null, 4));
       console.log(data);
-      console.log(meta);      
+      console.log(meta);
     }
 
     // All options set to their default values

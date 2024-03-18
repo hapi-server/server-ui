@@ -1,0 +1,56 @@
+{
+  "AMDA": {
+    "dataset": "mms4-t96-model",
+    "parameters": "b_t96gse_mms4_xyz_gse",
+    "start": "2015-03-14T00:00:00Z",
+    "stop": "2015-03-14T06:00:00.000Z"
+  },
+  "CCMC_ISWA": {
+    "dataset": "dscovr_mag_1m",
+    "parameters": "B_x",
+    "start": "2023-12-25T14:45:00Z",
+    "stop": "2023-12-26T14:45:00Z"
+  },
+  "CDAWeb": {
+    "dataset": "AC_H3_MFI",
+    "parameters": "BGSEc",
+    "start": "1999-01-01T00:00:00Z",
+    "stop": "1999-01-01T03:00:00.000Z"
+  },
+  "DAS2": {
+    "dataset": "Cassini/MAG/VectorSC",
+    "parameters": "x",
+    "start": "2010-01-01T00:00:00",
+    "stop": "2010-01-02T00:00:00"
+  },
+  "INTERMAGNET": {
+    "dataset": "bou/definitive/PT1M/xyzf",
+    "parameters": "Field_Vector",
+    "start": "1999-01-01T00:00:00Z",
+    "stop": "1999-01-03T00:00:00.000Z"
+  },
+  "LISIRD": {
+    "dataset": "empire_tsi",
+    "parameters": "irradiance",
+    "start": "1947-02-14T00:00:00.000Z",
+    "stop": "1997-02-16T00:00:00.000Z"
+  },
+  "SSCWeb": {
+    "dataset": "dscovr",
+    "parameters": "X_GSE",
+    "start": "2015-02-11T23:48:06.000Z",
+    "stop": "2015-02-21T23:48:06.000Z"
+  },
+  "TestData2.0": {
+    "dataset": "dataset1",
+    "parameters": "scalar",
+    "start": "1970-01-01T00:00:00Z",
+    "stop": "1970-01-01T00:00:30Z"
+  },
+  "VirES-for-Swarm": {
+    "dataset": "GRACE_A_MAG",
+    "parameters": "B_FGM",
+    "start": "2008-01-01T00:00:04.787680Z",
+    "stop": "2008-01-01T01:00:04.787Z"
+  }
+}

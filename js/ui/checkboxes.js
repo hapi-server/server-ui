@@ -1,4 +1,4 @@
-function checkboxes(OPTIONS) {
+function checkboxes(useDefaults) {
 
   function savedefaults() {
     const state = {};
@@ -11,24 +11,34 @@ function checkboxes(OPTIONS) {
 
   let defaults = localStorage.getItem("server-ui-defaults");
 
-  if (defaults) {
+  if (defaults && useDefaults !== false) {
     defaults = JSON.parse(defaults);
   } else {
     defaults = {
                   showdata: true,
+                  showrequests: true,
                   showverifierlink: false,
-                  showtiming: true,
-                  showrequests: false,
-                  useimagecache: true, 
+                  showexamplequeries: true,
+                  showconsolemessages: false,
+                  showuitests: false,
+                  showtestdatalink: false,
+
+                  useimagecache: true,
                   usedatacache: true,
-                  console: false,
-                  plotserver: OPTIONS['plotserver']
               }
   }
 
+  if (defaults['showtiming']) {
+    defaults['showrequests'] = true;
+  }
   savedefaults();
 
   // TODO: Similar code.
+
+  $("#reset-options").unbind('click');
+  $("#reset-options").click(function() {
+    checkboxes(false);
+  });
 
   $('#showdata').attr('checked', defaults['showdata']);
   //if (defaults['showdata']) {}
@@ -42,25 +52,24 @@ function checkboxes(OPTIONS) {
     }
   });
 
-  $('#showrequests').attr('checked', defaults['showrequests']);
-  if (defaults['showrequests']) {$('#requests').show()}
-  $('#showrequests').change(function() {
+  $('#showexamplequeries').attr('checked', defaults['showexamplequeries']);
+  $('#showexamplequeries').change(function() {
     savedefaults();
     if (this.checked) {
-      $('#requests').show();
+      $("#all-example-details").show();
     } else {
-      $('#requests').hide();
+      $("#all-example-details").hide();
     }
   }).trigger('change');
 
-  $('#showtiming').attr('checked', defaults['showtiming']);
-  if (defaults['showtiming']) {$('#timing').show();}
-  $('#showtiming').change(function() {
+  $('#showrequests').attr('checked', defaults['showrequests']);
+  if (defaults['showrequests']) {$('.requestInfo').show()}
+  $('#showrequests').change(function() {
     savedefaults();
     if (this.checked) {
-      $('#timing').show();
+      $('.requestInfo').show();
     } else {
-      $('#timing').hide();
+      $('.requestInfo').hide();
     }
   }).trigger('change');
 
@@ -87,7 +96,7 @@ function checkboxes(OPTIONS) {
   $('#showtestdatalink').attr('checked', defaults['showtestdatalink']);
   $('#showtestdatalink').change(function() {
     savedefaults();
-    location.reload();
+    main();
     if (this.checked) {
       $('#testdatalink').show();
     } else {
@@ -131,33 +140,19 @@ function checkboxes(OPTIONS) {
     }
   }).trigger('change');
 
-  $('#console').attr('checked', defaults['console']);
-  $('#console').change(function() {
+  $('#showconsolemessages').attr('checked', defaults['showconsolemessages']);
+  $('#showconsolemessages').change(function() {
     savedefaults();
   }).trigger('change');
 
-  $('#plotserver').val(defaults['plotserver']);
-  $('#plotserver').change(function () {
-    // TODO: Validate
-    let qs = parseQueryString();
-    if (qs["return"] && qs["return"] === "image" && qs["format"]) {
-      // Need to clear all following drop-downs.
-      $("input[id='return']")
-        .parent().parent()
-        .nextAll("span")
-        .hide()
-        .html('')
-        .attr('value','');
-
-        util.log("plotserver changed. Triggering select event on #return drop-down.");
-        // Clear first so next trigger causes update.
-        $("#return").val("").data("autocomplete")._trigger("select",null,{item: ""});
-        $("#return").val("image").data("autocomplete")._trigger("select",null,{item: "image"});
+  $('#showuitests').attr('checked', defaults['showuitests']);
+  $('#showuitests').change(function() {
+    if (this.checked) {
+      $('#uitests').show();
+    } else {
+      $('#uitests').hide();
     }
-    qs['plotserver'] = $('#plotserver').val();
-    $(window).hashchange.byurledit = false;
-    location.hash = decodeURIComponent($.param(qs));
     savedefaults();
-  });
+  }).trigger('change');
 
 }

@@ -1,4 +1,4 @@
-util = {
+let util = {
 
   doy2ymd: function (dateTime) {
 
@@ -25,43 +25,12 @@ util = {
   },
 
   log: function (msg) {
-    if (!$('#console').is(":checked")) return;
+    if (!$('#showconsolemessages').is(":checked")) return;
     console.log(msg);
   },
 
   plural: function(arr) {
     return arr.length > 1 ? "s" : ""
-  },
-
-  defaultStop: function (meta) {
-    start = meta['startDate'];
-    let cadenceString = meta['cadence'] || "PT1M";
-    let cadenceMillis = dayjs.duration(cadenceString)['$ms'];
-    if (start.length == 11 && start.endsWith("Z")) {
-      // Safari date parsing workaround. 1999-01-01Z -> 1999-01-01
-      start = start.slice(0,1);
-    }
-    let stop;
-    if (cadenceMillis <= 100) { // 0.1 s or less
-      stop = dayjs(start).add(1,'minute').toISOString();
-    } else if (cadenceMillis <= 1000*10) { // 10 s or less
-      stop = dayjs(start).add(1,'hour').toISOString();
-    } else if (cadenceMillis <= 1000*60) { // 1 min or less
-      stop = dayjs(start).add(2,'day').toISOString();
-    } else if (cadenceMillis <= 1000*60*10) { // 10 min or less
-      stop = dayjs(start).add(4,'day').toISOString();
-    } else if (cadenceMillis <= 1000*60*60) { // 1 hr or less
-      stop = dayjs(start).add(10,'day').toISOString();
-    } else if (cadenceMillis <= 1000*60*60*24) { // 1 day or less
-      stop = dayjs(start).add(31,'day').toISOString();
-    } else if (cadenceMillis <= 1000*60*60*24*10) { // 10 days or less
-      stop = dayjs(start).add(1,'year').toISOString();
-    } else if  (cadenceMillis <= 1000*60*60*24*100) { // 100 days or less
-      stop = dayjs(start).add(10,'year').toISOString();
-    } else {
-      stop = meta['stopDate'];
-    }
-    return stop;
   },
 
   hapiVersion: function () {
@@ -81,10 +50,110 @@ util = {
     return url;
   },
 
-  sizeOf: function (bytes) {
+  ISODuration2Words: function (cadence) {
+    return cadence
+            .replace("PT","")
+            .replace("D"," days, ")
+            .replace("H"," hours, ")
+            .replace("M"," minutes, ")
+            .replace("S"," seconds")
+            .replace(/, $/,"")
+            .replace("1 days", "1 day")
+            .replace("1 hours", "1 hour")
+            .replace("1 minutes", "1 minute")
+            .replace("1 seconds", "1 second");
+  },
+
+  bytesWithSIUnits: function (bytes) {
     // https://stackoverflow.com/a/28120564
-    if (bytes == 0) { return "0.00 B"; }
+    if (bytes == 0) { return "0 B"; }
     var e = Math.floor(Math.log(bytes) / Math.log(1000));
-    return (bytes/Math.pow(1000, e)).toFixed(2)+' '+' KMGTP'.charAt(e)+'B';
+    let precision = 0;
+    if (bytes >= 1000 && bytes < 1000000) {
+      precision = 2;
+    }
+    let number = (bytes/Math.pow(1000, e)).toFixed(precision);
+    return `${number} ${' KMGTP'.charAt(e) + 'B'}`;
+  },
+
+  checkTimes: function(which, start, stop) {
+    if (start && stop) {
+      util.log("util.checkTimes(): starttime = " + start)
+      util.log("util.checkTimes(): stoptime = " + stop)
+      var t = dayjs(util.doy2ymd(start.replace("Z","")))
+            < dayjs(util.doy2ymd(stop.replace("Z","")));
+      util.log("util.checkTimes(): start < stop ? " + t);
+      if (t === false) {
+        util.log("util.checkTimes(): " + which + " changed; start >= stop. Setting color of " + which + " to red.");
+        $('#' + which + 'list').css('color','red').attr('title','start ≥ stop').addClass('tooltip');
+        $('#' + which).mouseover();
+        return false;
+      } else {
+        util.log(which + " changed; start < stop. Setting colors to black.");
+        $('#startlist').css('color','black').removeClass('tooltip').attr('title','');
+        $('#stoplist').css('color','black').removeClass('tooltip').attr('title','');
+        return true;
+      }
+    }
+    return true;
+  },
+
+  uniqueId: function(len) {
+    // Based on sempostma post at https://gist.github.com/6174/6062387
+    // See also https://stackoverflow.com/a/26410127
+    if (!len) len = 8;
+    let chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+    let nchars = chars.length;
+    let id = '';
+    for  (id = ''; id.length < len;) {
+      id += chars[(Math.random() * nchars) | 0];
+    }
+    return id;
+  },
+
+  validHTMLID: function(s) {
+    // Convert id to a hash if it contains disallowed characters for an HTML id.
+    // Based on following link, "TestData2.0" should not need hashing, I find problems if "." is in id.
+    // https://stackoverflow.com/questions/4247840/what-are-legal-characters-for-an-html-element-id
+    if (s.match(new RegExp("[^(a-z)(A-Z)(0-9)_-]"))) {
+      // https://stackoverflow.com/a/15710692
+      return s.split("").reduce(function(a, b) {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a;
+      }, 0);
+    }
+    return s;
+  },
+
+  postHashChange: function(hash) {
+    util.log("util.postHashChange(): Posting /hashchange?hash=" + hash);
+    let url = `hashchange?hash=${encodeURIComponent(hash)}`;
+    fetch(url).then((resp) => resp.text()).then(() => {}).catch((e) => {});
+  },
+
+  postError: function(hash, fileName, lineNumber, message) {
+    let url = `error?hash=${encodeURIComponent(hash)}`;
+    url += `&fileName=${encodeURIComponent(fileName.replace(/^#/, ""))}`;
+    url += `&lineNumber=${encodeURIComponent(lineNumber)}`;
+    url += `&message=${encodeURIComponent(message)}`;
+    fetch(url).then((resp) => resp.text()).then(() => {}).catch((e) => {});
+  },
+
+  catchAppErrors: function() {
+    $('#appError').empty().hide();
+    // Catch and report uncaught errors.
+    window.onerror = function (message, fileName, lineNumber) {
+      console.trace();
+      fileName = fileName.replace(window.location,"");
+      let msg = "";
+      //msg = "Error. Please post URL to the ";
+      //msg += '<a href="https://github.com/hapi-server/server-ui/issues">Issue Tracker</a>.';
+      let errorFile = window.location.origin + window.location.pathname;
+      fileName = fileName.replace(errorFile, "");
+      msg += `Error Message: <code>${message}</code>.`;
+      msg += `<br>Error Location: <code>${fileName}#L${lineNumber}</code>`;
+      $('#appError').html(msg).show();
+      util.postError(window.location.hash, fileName, lineNumber, message);
+    }
   }
 }

@@ -36,7 +36,7 @@ function dropdowns(funs, wrapper, i) {
         input.first().data("autocomplete")._close();
           //input.first().data("autocomplete")._trigger("select", undefined, {item: input.val()});
       } else {
-        console.log("dropdowns.bindCloseEvents(): No open open dropdowns found.");
+        util.log("dropdowns.bindCloseEvents(): No open open dropdowns found.");
       }
 
       let einput = $('input[value=""].dropdown-input');
@@ -51,18 +51,18 @@ function dropdowns(funs, wrapper, i) {
 
     $(document).unbind('click');
     $(document).click(function (event) {
-      console.log("dropdowns.bindCloseEvents(): Document click event.");
+      util.log("dropdowns.bindCloseEvents(): Document click event.");
       if ($(event.target).parents(".ui-widget").length > 0) {
-        console.log("dropdowns.bindCloseEvents(): Clicked element has ancestor with class 'ui-input'. Not closing dropdowns.");
+        util.log("dropdowns.bindCloseEvents(): Clicked element has ancestor with class 'ui-input'. Not closing dropdowns.");
         return;
       }
-      console.log("dropdowns.bindCloseEvents(): Clicked element does not have ancestor with class 'ui-input'. Closing dropdowns.");
+      util.log("dropdowns.bindCloseEvents(): Clicked element does not have ancestor with class 'ui-input'. Closing dropdowns.");
       closeAll();
     });
 
     $(document).on('keydown', (evt) => {
       if (evt.key == "Escape") {
-        console.log("dropdowns.bindCloseEvents(): Escape key pressed on document. Closing all open dropdowns.");
+        util.log("dropdowns.bindCloseEvents(): Escape key pressed on document. Closing all open dropdowns.");
         closeAll();
       }
     });
@@ -311,9 +311,9 @@ function dropdowns(funs, wrapper, i) {
       let listId = id + "-list";
       $("#"+listId).unbind('click');
       $("#"+listId).click(function (event) {
-        console.log(`dropdowns.setAutocomplete(): Click on element with id '${$(event.target).attr('id')}'.`);
+        util.log(`dropdowns.setAutocomplete(): Click on element with id '${$(event.target).attr('id')}'.`);
         if ($(event.target).attr('id') === listId && setAutocomplete[id]["open"] === false) {
-          console.log(`dropdowns.setAutocomplete(): '${id}' open = '${setAutocomplete[id]["open"]}'.`);
+          util.log(`dropdowns.setAutocomplete(): '${id}' open = '${setAutocomplete[id]["open"]}'.`);
           $(`#${id}`).attr('value','').css('color','black').autocomplete('search').focus();
           return;
         }
@@ -511,7 +511,7 @@ function dropdowns(funs, wrapper, i) {
             items = [...list.slice(0,2),...items];
           }
 
-          console.log("dropdowns.setRenderMenu._renderMenu(): Creating ul list");
+          util.log("dropdowns.setRenderMenu._renderMenu(): Creating ul list");
           for (let i = 0; i < items.length; i++) {
 
             let title = items[i].title ? `title='${items[i].title}'`: "";
@@ -563,11 +563,11 @@ function dropdowns(funs, wrapper, i) {
           // Could also cache list HTML for full list. However, most time seems to be in rendering.
           // which would be addressed by clusterize.js.
 
-          console.log("dropdowns.setRenderMenu._renderMenu(): Created ul list");
-          console.log("dropdowns.setRenderMenu._renderMenu(): Setting ul list");
+          util.log("dropdowns.setRenderMenu._renderMenu(): Created ul list");
+          util.log("dropdowns.setRenderMenu._renderMenu(): Setting ul list");
           $(ul).append(liHTML);
-          console.log("dropdowns.setRenderMenu._renderMenu(): Set ul list");
-          console.log("dropdowns.setRenderMenu._renderMenu(): Setting ul list data on each li");
+          util.log("dropdowns.setRenderMenu._renderMenu(): Set ul list");
+          util.log("dropdowns.setRenderMenu._renderMenu(): Setting ul list data on each li");
 
           $(ul).find('li').each(function(idx, el) {
             // Set click event on SPAN and INPUT elements.
@@ -578,7 +578,7 @@ function dropdowns(funs, wrapper, i) {
           });
 
           if (selectMultiple) setCheckboxFinished(ul, isSearchResult);
-          console.log("dropdowns.setRenderMenu._renderMenu(): Set ul list data on each li");
+          util.log("dropdowns.setRenderMenu._renderMenu(): Set ul list data on each li");
         }
 
         function checkboxLabelHTML(i, valueText, labelHTML) {
@@ -589,7 +589,7 @@ function dropdowns(funs, wrapper, i) {
             selectAll = true;
           }
           if (i === 0) {
-            console.log(`dropdowns.setRenderMenu.checkboxLabelHTML(): selectAll = ${selectAll}`);
+            util.log(`dropdowns.setRenderMenu.checkboxLabelHTML(): selectAll = ${selectAll}`);
           }
 
           let checked = "";
@@ -614,12 +614,12 @@ function dropdowns(funs, wrapper, i) {
         }
 
         function setCheckboxFinished(ul, isSearchResult) {
-          console.log("dropdowns.setRenderMenu.setCheckboxFinished(): Setting finished event on ul list.");
+          util.log("dropdowns.setRenderMenu.setCheckboxFinished(): Setting finished event on ul list.");
           $(ul).one('mouseenter', function () {
-            console.log("dropdowns.setRenderMenu.setCheckboxFinished(): mouseenter event on ul list.");
+            util.log("dropdowns.setRenderMenu.setCheckboxFinished(): mouseenter event on ul list.");
           });
           $(ul).one('mouseleave', function () {
-            console.log("dropdowns.setRenderMenu.setCheckboxFinished(): mouseleave event on ul list. Closing list.");
+            util.log("dropdowns.setRenderMenu.setCheckboxFinished(): mouseleave event on ul list. Closing list.");
             setCheckboxValues(ul, isSearchResult);
             let input = $(acData.element[0]);
             $(input).data("autocomplete")._close();
@@ -654,10 +654,10 @@ function dropdowns(funs, wrapper, i) {
 
             if ($(target).hasClass('select-all')) {
               if ($(target).prop('checked')) {
-                console.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all was clicked to be checked");
+                util.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all was clicked to be checked");
                 $(ul).find('input').prop('checked', true);
               } else {
-                console.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all was clicked to be unchecked");
+                util.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all was clicked to be unchecked");
                 $(ul).find('input:not(.primary-time)').prop('checked', false);
               }
             }
@@ -678,7 +678,7 @@ function dropdowns(funs, wrapper, i) {
 
           let input = $(acData.element[0]);
           if ($("input.select-all").prop('checked') && !isSearchResult) {
-            console.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all is checked. Setting value to ''.");
+            util.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all is checked. Setting value to ''.");
             input.val("");
             input.attr("value", "");
             return;
@@ -690,13 +690,13 @@ function dropdowns(funs, wrapper, i) {
           });
 
           if (parameters.length === 0) {
-            console.log("dropdowns.setRenderMenu.setCheckboxValues(): Nothing selected. Setting value to .primary-time value.");
+            util.log("dropdowns.setRenderMenu.setCheckboxValues(): Nothing selected. Setting value to .primary-time value.");
             input.val($(ul).find('input').eq(1).attr('id'));
             input.attr("value", $(ul).find('input').eq(1).attr('id'));
             return;
           }
 
-          console.log(`dropdowns.setRenderMenu.setCheckboxValues(): Setting value of input to '${parameters}'`);
+          util.log(`dropdowns.setRenderMenu.setCheckboxValues(): Setting value of input to '${parameters}'`);
           input.val(parameters);
           input.attr("value", parameters);
         }

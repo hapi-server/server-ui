@@ -577,7 +577,7 @@ function parameters(cb) {
     datasets.info[selected('dataset')]['info'] = res;
 
     res = res.parameters;
-    console.log(res)
+
     let info = {};
     let list = [];
     for (let k = 0; k < res.length; k++) {
@@ -605,7 +605,6 @@ function parameters(cb) {
           "title": res[k]['description'] || ""
       });
     }
-    console.log(list);
 
     if (window["HAPIUI"]["options"]["allowAllParameters"] === true) {
       list.unshift({

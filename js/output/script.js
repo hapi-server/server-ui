@@ -62,9 +62,7 @@ function script() {
 
     var clipboard = new ClipboardJS('.btn');
     clipboard.on('success', function () {
-        util.log('Copied script to clipboard.');
-        $('#copied').tooltipster('open');
-        setTimeout(() => $('#copied').tooltipster('close'), 800);
+      util.log('Copied script to clipboard.');
     });
 
     let type = "script";

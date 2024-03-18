@@ -39,14 +39,14 @@ let util = {
   },
 
   hapi2to3: function (url, version) {
-
     if (!version) {
       version = datasets.json.HAPI || "2.0";
     }
-    if (version.substr(0,1) == "3") {
-      url.replace("/info?id=","/info?dataset=");
-      url.replace("/time.min=","/start=");
-      url.replace("/time.max=","/stop=");
+    if (version.substr(0,1) === "3") {
+      url = url
+              .replace("id=","dataset=")
+              .replace("time.min=","start=")
+              .replace("time.max=","stop=");
     }
     return url;
   },

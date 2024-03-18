@@ -324,7 +324,7 @@ function dropdowns(funs, wrapper, i) {
       function resetLabel(el) {
         let id = $(el).attr('id');
         util.log("dropdowns.setAutocomplete.resetLabel(): Called for dropdown with id = " + id + ".");
-        if ($(el).val() === "") {
+        if ($(el).val() === "" && funs[i].allowEmptyValue !== true) {
           util.log("dropdowns.setAutocomplete.resetLabel(): No value in input.");
           let valuelast = $(el).attr('valuelast')
           if (valuelast !== undefined) {
@@ -637,7 +637,7 @@ function dropdowns(funs, wrapper, i) {
               let input = $(acData.element[0]);
               $(input).data("autocomplete")._close();
               $(input).data("autocomplete")._trigger("select", undefined, {item: input.val()});
-              });
+            });
           }
         }
 
@@ -645,12 +645,17 @@ function dropdowns(funs, wrapper, i) {
 
           $(el).click(function(event) {
 
+            console.log("dropdowns.setRenderMenu.setCheckboxClick.click(): Click event.");
+
             let target = event.target;
             if (target.tagName !== "INPUT") {
               // Click event set on label element, which has INPUT and SPAN.
               // so two events alway fired. This prevents the second event.
+              console.log("dropdowns.setRenderMenu.setCheckboxClick.click(): Click event not on INPUT element.");
               return;
             }
+
+            console.log("dropdowns.setRenderMenu.setCheckboxClick.click(): Click event on INPUT element.");
 
             if ($(target).hasClass('select-all')) {
               if ($(target).prop('checked')) {
@@ -676,10 +681,12 @@ function dropdowns(funs, wrapper, i) {
 
         function setCheckboxValues(ul, isSearchResult) {
 
+          console.log("dropdowns.setRenderMenu.setCheckboxValues.setCheckboxClick(): Called.");
+
           let input = $(acData.element[0]);
           if ($("input.select-all").prop('checked') && !isSearchResult) {
             console.log("dropdowns.setRenderMenu.setCheckboxClick(): Select all is checked. Setting value to ''.");
-            input.val("");
+            input.val('');
             input.attr("value", "");
             return;
           }

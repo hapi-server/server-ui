@@ -534,7 +534,7 @@ function parameters(cb) {
     if (cadence) {
       cadence = `Cadence: ${util.ISODuration2Words(cadence)} (<code>${cadence}</code>)`;
     } else {
-      cadence = "not specified"
+      cadence = "Cadence: not specified";
     }
     $('#datasetinfo ul').append(`<li>${cadence}</li>`);
 

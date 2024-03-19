@@ -32,6 +32,7 @@ function plot(selectedParameter, cb) {
   }
 
   let parentElementId = `plot-details-${selectedParameter}-${plotserver}`;
+  parentElementId = parentElementId.replace(/ /g,"");
 
   util.log("plot(): plotserver = " + plotserver + ", plotServer = " + plotServer);
 

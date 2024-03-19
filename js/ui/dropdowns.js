@@ -6,7 +6,6 @@ function dropdowns(funs, wrapper, i) {
     // Destroy all dropdowns.
     $('.dropdown').destroy();
     $('.ui-autocomplete').remove();
-    handleHTMLInSearch();
     bindCloseEvents()
   }
 
@@ -23,7 +22,7 @@ function dropdowns(funs, wrapper, i) {
     $("#dropdowns" + (i)).text("Fetching content ...").show()
   }, 300);
 
-  funs[i](cb)
+  funs[i](cb);
 
   function bindCloseEvents() {
 
@@ -34,18 +33,8 @@ function dropdowns(funs, wrapper, i) {
       }
       if (input.length > 0) {
         input.first().data("autocomplete")._close();
-          //input.first().data("autocomplete")._trigger("select", undefined, {item: input.val()});
       } else {
         util.log("dropdowns.bindCloseEvents(): No open open dropdowns found.");
-      }
-
-      let einput = $('input[value=""].dropdown-input');
-      if (einput.length > 1) {
-        console.error("dropdowns.bindCloseEvents(): More than one input with empty value found. This should not happen. Closing first only.");
-      }
-      if (einput.length > 0) {
-        console.error("dropdowns.bindCloseEvents(): Input with empty value found. Closing it so label is reset.");
-        einput.first().data("autocomplete")._trigger("close");
       }
     }
 
@@ -54,6 +43,14 @@ function dropdowns(funs, wrapper, i) {
       util.log("dropdowns.bindCloseEvents(): Document click event.");
       if ($(event.target).parents(".ui-widget").length > 0) {
         util.log("dropdowns.bindCloseEvents(): Clicked element has ancestor with class 'ui-input'. Not closing dropdowns.");
+        if ($(event.target).attr('id')) {
+          let id = $(event.target).attr('id').replace("-list", "");
+          let toClose = $(`input[lastevent='open']:not([id='${id}']`);
+          if (toClose.length > 0) {
+            util.log("dropdowns.bindCloseEvents(): ${toClose.length} other open dropdowns found. Closing them.");
+            toClose.data("autocomplete")._close();
+          }
+        }
         return;
       }
       util.log("dropdowns.bindCloseEvents(): Clicked element does not have ancestor with class 'ui-input'. Closing dropdowns.");
@@ -83,59 +80,6 @@ function dropdowns(funs, wrapper, i) {
           });
       }
       })( jQuery );
-  }
-
-  function handleHTMLInSearch() {
-    // To fix the issue of html showing up in search, use source and Scott
-    // González's extension at https://api.jqueryui.com/autocomplete/#option-source
-
-    /*
-    * jQuery UI Autocomplete HTML Extension
-    *
-    * Copyright 2010, Scott González (http://scottgonzalez.com)
-    * Dual licensed under the MIT or GPL Version 2 licenses.
-    *
-    * http://github.com/scottgonzalez/jquery-ui-extensions
-    */
-    (function( $ ) {
-
-      var proto = $.ui.autocomplete.prototype,
-        initSource = proto._initSource;
-
-      function filter( array, term ) {
-        var matcher = new RegExp( $.ui.autocomplete.escapeRegex(term), "i" );
-        return $.grep( array, function (value) {
-          let match = false;
-          if (value.label) {
-            match = matcher.test( $( "<div>" ).html(value.label).text() );
-          }
-          if (value.value) {
-            match = match || matcher.test( $( "<div>" ).html(value.value).text() );
-          }
-          return match;
-        });
-      }
-
-      $.extend( proto, {
-        _initSource: function() {
-          if ( this.options.html && $.isArray(this.options.source) ) {
-            this.source = function( request, response ) {
-              response( filter( this.options.source, request.term ) );
-            };
-          } else {
-            initSource.call( this );
-          }
-        },
-
-        _renderItem: function( ul, item) {
-          return $( "<li></li>" )
-            .data( "item.autocomplete", item )
-            .append( $( "<a></a>" )[ this.options.html ? "html" : "text" ]( item.label ) )
-            .appendTo( ul );
-        }
-        });
-
-    })( jQuery );
   }
 
 	function cb(list, autoOpen) {
@@ -242,7 +186,7 @@ function dropdowns(funs, wrapper, i) {
       } else {
         util.log(`dropdowns.cb(): '${id}' dropdown has no items with selected = true.`) ;
       }
-  }
+    }
 
     if (autoOpen) {
 			util.log(`dropdowns.cb(): '${id}' dropdown called with open = true. Opening it.`);
@@ -279,6 +223,10 @@ function dropdowns(funs, wrapper, i) {
 
     function setAutocomplete(i, list) {
 
+      if (i === 0) {
+        handleHTMLInSearch();
+      }
+
       let opts = {
         source: list,
         scroll: true,
@@ -298,7 +246,7 @@ function dropdowns(funs, wrapper, i) {
       setRenderMenu(acData, list);
 
       // Remove the default blur event. jQuery UI's autocomplete triggers a
-      // close event on blur, but when clicking on a list open button is a 
+      // close event on blur, but when clicking on a list open button is a
       // blur event, and we don't want to close the list in that case.
       $(acData.element[0]).unbind('blur');
 
@@ -702,6 +650,60 @@ function dropdowns(funs, wrapper, i) {
           input.attr("value", parameters);
         }
       }
+
+      function handleHTMLInSearch() {
+        // To fix the issue of html showing up in search, use source and Scott
+        // González's extension at https://api.jqueryui.com/autocomplete/#option-source
+
+        /*
+        * jQuery UI Autocomplete HTML Extension
+        *
+        * Copyright 2010, Scott González (http://scottgonzalez.com)
+        * Dual licensed under the MIT or GPL Version 2 licenses.
+        *
+        * http://github.com/scottgonzalez/jquery-ui-extensions
+        */
+        (function( $ ) {
+
+          var proto = $.ui.autocomplete.prototype,
+            initSource = proto._initSource;
+
+          function filter( array, term ) {
+            var matcher = new RegExp( $.ui.autocomplete.escapeRegex(term), "i" );
+            return $.grep( array, function (value) {
+              let match = false;
+              if (value.label) {
+                match = matcher.test( $( "<div>" ).html(value.label).text() );
+              }
+              if (value.value) {
+                match = match || matcher.test( $( "<div>" ).html(value.value).text() );
+              }
+              return match;
+            });
+          }
+
+          $.extend( proto, {
+            _initSource: function() {
+              if ( this.options.html && $.isArray(this.options.source) ) {
+                this.source = function( request, response ) {
+                  response( filter( this.options.source, request.term ) );
+                };
+              } else {
+                initSource.call( this );
+              }
+            },
+
+            _renderItem: function( ul, item) {
+              return $( "<li></li>" )
+                .data( "item.autocomplete", item )
+                .append( $( "<a></a>" )[ this.options.html ? "html" : "text" ]( item.label ) )
+                .appendTo( ul );
+            }
+            });
+
+        })( jQuery );
+      }
+
     }
   }
 }

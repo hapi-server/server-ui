@@ -34,7 +34,7 @@ let util = {
   },
 
   hapiVersion: function () {
-    version = datasets.json.HAPI || null;
+    let version = datasets.json.HAPI || null;
     return version.split(".");
   },
 
@@ -129,7 +129,7 @@ let util = {
   postHashChange: function(hash) {
     util.log("util.postHashChange(): Posting /hashchange?hash=" + hash);
     let url = `hashchange?hash=${encodeURIComponent(hash)}`;
-    fetch(url).then((resp) => resp.text()).then(() => {}).catch((e) => {});
+    fetch(url).then((resp) => resp.text()).then(() => {}).catch(() => {});
   },
 
   postError: function(hash, fileName, lineNumber, message) {

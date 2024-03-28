@@ -1,6 +1,6 @@
 {
   "name": "hapi-server-ui",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "type": "commonjs",
   "people": {
     "name": "Bob Weigel",

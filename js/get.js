@@ -97,6 +97,11 @@ function get(options, cb) {
               return;
             }
           }
+          if (!data) {
+            let msg = `Error: ${url} returned no data.`;
+            errorHandler(msg);
+            return;
+          }
           if (data["status"] && parseInt(data["status"]["code"]) !== 1200) {
             let msg = `Error: ${url} returned HAPI status code != 1200`;
             errorHandler(msg);

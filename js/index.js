@@ -339,6 +339,13 @@ function datasets(cb) {
     }
   };
 
+  util.log('datasets.onselect(): Hiding info blocks after #datasetinfo.');
+  $('#datasetinfo').nextAll().hide();
+  util.log('datasets.onselect(): Emptying #datasetinfo <ul>.');
+  $('#datasetinfo ul').empty();
+  util.log('datasets.onselect(): Showing #datasetinfo.');
+  $('#datasetinfo').show();
+
   $("#datasetsRequestError").empty().hide();
   get(getOptions, function (err, res) {
     if (!err) {
@@ -349,7 +356,6 @@ function datasets(cb) {
   });
 
   function process(res) {
-
     about(servers.info[selected('server')]['url'], res["HAPI"]);
 
     $('#server-example-details').attr('open',false);
@@ -365,16 +371,16 @@ function datasets(cb) {
       "url": "https://hapi-server.org/urlwatcher/log/tests.json",
       "dataType": "json",
       "timeout": window["HAPIUI"]["options"]["metadataTimeout"],
-      "requestURLElement": "#urlwatcherRequestURL",
+      //"requestURLElement": "#urlwatcherRequestURL",
       "timer": {
-        "element": "#urlwatcherRequestTiming"
+        //"element": "#urlwatcherRequestTiming"
       }
     };
 
-    $("#urlwatcherRequestError").empty().hide();
+    //$("#urlwatcherRequestError").empty().hide();
     get(getOptions, function (err, json) {
       if (err) {
-        $("#urlwatcherRequestError").html(err).show();
+        //$("#urlwatcherRequestError").html(err).show();
         return;
       }
       if (json && json[selected('server')]) {
@@ -413,7 +419,6 @@ function datasets(cb) {
 
 // Parameters dropdown
 function parameters(cb) {
-
   util.log('parameters(): Called.');
 
   let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
@@ -429,6 +434,7 @@ function parameters(cb) {
     }
   };
 
+  $('#parameterinfo').show();
   $("#parametersRequestError").empty().hide();
   get(getOptions, function (err, res) {
     if (err) {
@@ -492,21 +498,11 @@ function parameters(cb) {
       }
 
       html.showJSONOnClick("parameter", url, "#parameterinfo");
-      $('#parameterinfo').show();
     }
 
   }
 
   function process(res, url) {
-
-    util.log('datasets.onselect(): Hiding info blocks after #datasetinfo.');
-    $('#datasetinfo').nextAll().hide();
-
-    util.log('datasets.onselect(): Emptying #datasetinfo <ul>.');
-    $('#datasetinfo ul').empty();
-
-    util.log('datasets.onselect(): Showing #datasetinfo.');
-    $('#datasetinfo').show();
 
     $('#datasetinfo ul').append(`<li>id: <code>${selected('dataset')}</code></li>`);
 

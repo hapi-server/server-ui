@@ -422,7 +422,9 @@ function parameters(cb) {
   util.log('parameters(): Called.');
 
   let url = servers.info[selected('server')]['url'] + "/info?id=" + selected('dataset');
-  url = util.hapi2to3(url);
+  if (selected('server')  !== "CSA") {
+    url = util.hapi2to3(url);
+  }
 
   let getOptions = {
     "url": url,
@@ -487,7 +489,10 @@ function parameters(cb) {
     let url = servers.info[selected('server')]['url'] 
             + "/info?id=" + selected('dataset') 
             + "&parameters=" + selected('parameters');
-    url = util.hapi2to3(url);
+
+    if (selected('server')['id'] !== "CSA") {
+      url = util.hapi2to3(url);
+    }
 
     if (meta) {
       $('#parameterinfo ul').append(`<li>id: <code>${selected('parameters')}</code></li>`);
@@ -549,7 +554,9 @@ function parameters(cb) {
              + '?url=' + surl
              + '&id=' + datasets.info[selected('dataset')]['id'];
 
-    vurl = util.hapi2to3(vurl);
+    if (selected('server')['id'] !== "CSA") {
+      vurl = util.hapi2to3(vurl);
+    }
 
     let link = `<a target="_blank" href="${vurl}">Check this dataset using the HAPI Verifier</a>`;
     let warning = "";

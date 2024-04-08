@@ -93,6 +93,7 @@ function file(req, res, next, appLogDir) {
             }
             log.debug(`Read ${scriptFile}`);
             setHeaders(res);
+            res.header('Content-Type', 'text/plain; charset=utf-8');
             let script = createScript(scriptTemplate, opts);
             res.send(script);
         });
@@ -103,7 +104,7 @@ function file(req, res, next, appLogDir) {
 
 function options(req, res, next, appLogDir) {
   setHeaders(res);
-  res.header('Content-Type', 'application/json; charset=utf-8');
+  res.header('Content-Type', 'application/json');
   res.send(JSON.stringify(_scriptList(),null,2));
 }
 

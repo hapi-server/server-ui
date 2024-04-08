@@ -17,19 +17,12 @@
     "http-server": "^0.12.3",
     "log": "git+https://github.com/rweigel/log.git#main",
     "node-fetch-native": "^1.6.1",
-    "serve-index": "^1.9.1",
+    "serve-index": "git+https://github.com/rweigel/serve-index.git#master",
     "superagent": "^5.1.2",
     "yargs": "^8.0.2"
   },
   "scripts": {
     "start": "node_modules/http-server/bin/http-server",
     "proxy-server": "node server/server.js"
-  },
-  "devDependencies": {
-    "eslint": "^8.56.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-promise": "^6.1.1"
   }
 }

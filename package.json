@@ -1,7 +1,11 @@
 {
   "name": "hapi-server-ui",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "type": "commonjs",
+  "engine-strict": true,
+  "engines": {
+    "node": ">=16"
+  },
   "people": {
     "name": "Bob Weigel",
     "email": "rweigel@gmu.edu",

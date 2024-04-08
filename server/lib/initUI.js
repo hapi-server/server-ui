@@ -1,19 +1,18 @@
-const fs = require('fs');
-const path = require('path');
-const express = require('express');
-const serveIndex = require('serve-index');
+const path = require('path')
+const express = require('express')
+const serveIndex = require('serve-index')
 
-const log = require('log');
+const log = require('log')
 
-const init404       = require("./init404.js");
-const handleError   = require("./handleError.js");
-const setHeaders    = require("./setHeaders.js");
+const init404 = require('./init404.js')
+const setHeaders = require('./setHeaders.js')
+const handleError = require('./handleError.js')
 
-const sendAll    = require("./sendAll.js");
-const sendScript    = require("./sendScript.js");
-const sendIndexHTML = require("./sendIndexHTML.js");
+const sendAll = require('./sendAll.js')
+const sendScript = require('./sendScript.js')
+const sendIndexHTML = require('./sendIndexHTML.js')
 
-module.exports = initUI;
+module.exports = initUI
 
 /*
  * Initialize the UI.
@@ -27,117 +26,116 @@ module.exports = initUI;
  * @param {Object} opts.log - Log object.
  * @param {string} opts.logDir - Path to the log directory.
  */
-function initUI(app, opts) {
-
-  log.debug(`Log directory: '${log.logDir}'`);
-  let appLogDir = path.join(log.logDir, "ui-app");
-  let serverLogDir = path.join(log.logDir, "ui-server");
-  log.debug(`App log directory: '${appLogDir}'`);
-  log.debug(`Server log directory: '${serverLogDir}'`);
+function initUI (app, opts) {
+  log.debug(`Log directory: '${log.logDir}'`)
+  const appLogDir = path.join(log.logDir, 'ui-app')
+  const serverLogDir = path.join(log.logDir, 'ui-server')
+  log.debug(`App log directory: '${appLogDir}'`)
+  log.debug(`Server log directory: '${serverLogDir}'`)
 
   // Work-around of https://github.com/expressjs/serve-index/issues/90
   app.use(function (req, res, next) {
-    if (req['headers'].referer) {
-      let pathNameReferer = new URL(req.headers.referer).pathname;
-      if (pathNameReferer.endsWith("/")) {
-        pathNameReferer = pathNameReferer.slice(0, -1);
+    if (req.headers.referer) {
+      let pathNameReferer = new URL(req.headers.referer).pathname
+      if (pathNameReferer.endsWith('/')) {
+        pathNameReferer = pathNameReferer.slice(0, -1)
       }
-      req.originalUrl = pathNameReferer + req.url;
+      req.originalUrl = pathNameReferer + req.url
     }
     // If no referer in header, links will be wrong in dir listings if reverse
     // proxy is used to this app and root in reverse proxy is not / because
     // absolute are used in the hrefs.
-    next();
+    next()
   })
 
   // Serve static files staticFileDirs.
-  let staticFileDirs = ["css", "js", "scripts", "examples", "log/ui-app"];
-  let baseDir = path.normalize(path.join(__dirname, "..", ".."));
-  log.info(`Setting static directory endpoints:`);
-  for (let dir of staticFileDirs) {
-    let dirFull = path.join(baseDir, dir);
-    log.info(` /${dir} => ${dirFull}`);
-    app.use("/" + dir, 
-      express.static(dirFull, {"setHeaders": setHeaders}),
-      serveIndex(dirFull, {'icons': true})
-    );
+  const staticFileDirs = ['css', 'js', 'scripts', 'examples', 'log/ui-app']
+  const baseDir = path.normalize(path.join(__dirname, '..', '..'))
+  log.info('Setting static directory endpoints:')
+  for (const dir of staticFileDirs) {
+    const dirFull = path.join(baseDir, dir)
+    log.info(` /${dir} => ${dirFull}`)
+    app.use('/' + dir,
+      express.static(dirFull, { setHeaders }),
+      serveIndex(dirFull, { icons: true })
+    )
   }
 
-  if (opts["allFile"]) {
-    log.info(`Setting /all.txt endpoint to serve ${opts["allFile"]}`);
+  if (opts.allFile) {
+    log.info(`Setting /all.txt endpoint to serve ${opts.allFile}`)
     app.get('/all.txt', function (req, res, next) {
-      res.on('finish', () => log.request(req, 'requests', serverLogDir));
-      log.debug(`Request for /all.txt`);
-      sendAll(req, res, next, appLogDir, opts["allFile"])
-    });
+      res.on('finish', () => log.request(req, 'requests', serverLogDir))
+      log.debug('Request for /all.txt')
+      sendAll(req, res, next, appLogDir, opts.allFile)
+    })
   }
 
-  log.info(`Setting /hashchange endpoint`);
+  log.info('Setting /hashchange endpoint')
   app.get('/hashchange', function (req, res) {
-    res.on('finish', () => log.request(req, 'requests', serverLogDir));
-    let msg = `${req.query["hash"]}`;
-    log.debug(`Request for /hashchange: ${msg}`);
-    log.write(msg, 'hashchange',  appLogDir);
-    res.end();
-  });
+    res.on('finish', () => log.request(req, 'requests', serverLogDir))
+    const msg = `${req.query.hash}`
+    log.debug(`Request for /hashchange: ${msg}`)
+    log.write(msg, 'hashchange', appLogDir)
+    res.end()
+  })
 
-  log.info(`Setting /error endpoint`);
+  log.info('Setting /error endpoint')
   app.get('/error', function (req, res) {
-    res.on('finish', () => log.request(req, 'requests', serverLogDir));
-    let msg = `${req.query["hash"]} `
-            + `| ${req.query["fileName"]}L#${req.query["lineNumber"]} `
-            + `| '${req.query["message"]}'`;
-    log.debug(`Request for /error: ${msg}`);
-    log.write(msg, 'errors', appLogDir);
-    res.end();
-  });
+    res.on('finish', () => log.request(req, 'requests', serverLogDir))
+    const msg = `${req.query.hash} ` +
+            `| ${req.query.fileName}L#${req.query.lineNumber} ` +
+            `| '${req.query.message}'`
+    log.debug(`Request for /error: ${msg}`)
+    log.write(msg, 'errors', appLogDir)
+    res.end()
+  })
 
-  app.get("/api", function (req, res) {
-    let apiMsg = "<pre>\n";
-    apiMsg += `?server=...&dataset=...&return=script-options\n`;
-    apiMsg += `?server=...&dataset=...&return=script&format=SCRIPT_OPTION\n`;
-    apiMsg += `where <code>SCRIPT_OPTION</code> is a value in the array returned by first request.`
-    res.send(apiMsg);
-  });
+  app.get('/api', function (req, res) {
+    let apiMsg = '<pre>\n'
+    apiMsg += '?server=...&dataset=...&return=script-options\n'
+    apiMsg += '?server=...&dataset=...&return=script&format=SCRIPT_OPTION\n'
+    apiMsg += 'where <code>SCRIPT_OPTION</code> is a value in the array returned by first request.'
+    res.send(apiMsg)
+  })
 
-  log.info(`Setting / endpoint to serve ${path.normalize(opts["indexHTMLFile"])}`);
+  log.info(`Setting / endpoint to serve ${path.normalize(opts.indexHTMLFile)}`)
 
   app.get('/$', function (req, res, next) {
-    res.on('finish', () => log.request(req, 'requests', serverLogDir));
-    log.debug(`Request for /`);
+    res.on('finish', () => log.request(req, 'requests', serverLogDir))
+    log.debug('Request for /')
 
     if (Object.keys(req.query).length !== 0) {
+      const badMsg = 'Bad request. See <a href="/api">API documentation</a>.'
 
-      let badMsg = `Bad request. See <a href="/api">API documentation</a>.`
-
-      if (req.query['server'] && req.query['dataset']) {
-        if (req.query['return'] === "script-options" && req.query['format'] === undefined) {
-          sendScript.options(req, res, next, appLogDir);
-        } else if (req.query['return'] === "script" && req.query['format'] !== undefined) {
-          sendScript.file(req, res, next, appLogDir, req.query['return']);
+      if (req.query.return && req.query.return === 'script-options') {
+        sendScript.options(req, res, next, appLogDir)
+        return
+      }
+      if (req.query.server && req.query.dataset) {
+        if (req.query.return === 'script' && req.query.format !== undefined) {
+          sendScript.file(req, res, next, appLogDir, req.query.return)
         } else {
-          res.status(400).send(badMsg);
-          return;
+          res.status(400).send(badMsg)
+          return
         }
       } else {
-        res.status(400).send(badMsg);
-        return;
+        res.status(400).send(badMsg)
+        return
       }
     }
 
     if (Object.keys(req.query).length === 0) {
-      sendIndexHTML(req, res, next, appLogDir, opts);
-      return;
+      sendIndexHTML(req, res, next, appLogDir, opts)
     }
-  });
+  })
 
-  if (opts["handleNotFound"] === undefined || opts["handleNotFound"] === true) {
-    init404(app, setHeaders);
+  if (opts.handleNotFound === undefined || opts.handleNotFound === true) {
+    init404(app, setHeaders)
   }
 
   // Must be last: https://stackoverflow.com/a/72680240
   app.use((err, req, res, next) => {
-    handleError(err, req, res, next);
-    log.error(err, false, 'errors', appLogDir);
-  });
+    handleError(err, req, res, next)
+    log.error(err, false, 'errors', appLogDir)
+  })
 }

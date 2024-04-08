@@ -99,8 +99,8 @@ function examples (serversObj, cb) {
     let linkHTML = ''
     for (const option of options) {
       const linkText = option.label
-      postText = ` for parameter <code>${linkObj.parameters}</code> `
-      postText += `of <code>${linkObj.dataset}</code> dataset`
+      const postText = ` for parameter <code>${linkObj.parameters}</code> ` +
+                       `of <code>${linkObj.dataset}</code> dataset`
       const href = hrefo + '&' + option.args
       linkHTML = linkHTML + `\n  <li><a href="${href}">${linkText}</a>${postText}</li>`
     }

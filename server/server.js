@@ -1,3 +1,4 @@
+checkNodeJSVersion();
 const path = require('path');
 
 const app = require('express')();
@@ -120,3 +121,17 @@ process.on('uncaughtException', function(err) {
   console.error("Exiting with signal 1.");
   process.exit(1);
 });
+
+function checkNodeJSVersion() {
+  // https://stackoverflow.com/questions/29349684/how-can-i-specify-the-required-node-js-version-in-package-json
+  const semver = require('semver');
+  const versionConstraint = require("../package.json").engines.node;
+  if (!semver.satisfies(process.version, versionConstraint)) {
+    let msg = `Error: Node.js semantic version constraint '${versionConstraint}' `
+            + `not satisfied. node.js -v returns ${process.version}. `
+            + "Consider installing https://github.com/creationix/nvm"
+            + ` and then 'nvm install VERSION', where VERSION satisfies constraint.\n`;
+    console.log(msg);
+    process.exit(1);
+  }
+}

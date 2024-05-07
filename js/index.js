@@ -315,7 +315,6 @@ function servers(cb) {
 
 // Datasets dropdown
 function datasets(cb) {
-
   util.log('datasets(): Called.');
 
   datasets.id = "dataset";
@@ -343,8 +342,6 @@ function datasets(cb) {
   $('#datasetinfo').nextAll().hide();
   util.log('datasets.onselect(): Emptying #datasetinfo <ul>.');
   $('#datasetinfo ul').empty();
-  util.log('datasets.onselect(): Showing #datasetinfo.');
-  $('#datasetinfo').show();
 
   $("#datasetsRequestError").empty().hide();
   get(getOptions, function (err, res) {
@@ -380,6 +377,7 @@ function datasets(cb) {
     //$("#urlwatcherRequestError").empty().hide();
     get(getOptions, function (err, json) {
       if (err) {
+        util.log(`datasets.process(): Failed to read ${getOptions.url}.`)
         //$("#urlwatcherRequestError").html(err).show();
         return;
       }
@@ -436,13 +434,13 @@ function parameters(cb) {
     }
   };
 
-  $('#parameterinfo').show();
   $("#parametersRequestError").empty().hide();
   get(getOptions, function (err, res) {
     if (err) {
       $("#parametersRequestError").html(err).show();
       return;
     }
+    $('#datasetinfo').show();
     process(res, url);
   });
 
@@ -463,6 +461,7 @@ function parameters(cb) {
   parameters.onselect = function () {
 
     util.log('parameters.onselect(): Called.');
+    $('#parameterinfo').show();
 
     if (selected('format')) {
       util.log("parameters.onselect(): 'format' is selected. Updating #output.");

@@ -315,6 +315,9 @@ function datasets (cb) {
   datasets.onselect = function () {
     util.log('datasets.onselect(): Called.')
 
+    util.log('datasets.onselect(): Emptying #datasetinfo <ul>.')
+    $('#datasetinfo ul').empty()
+
     util.log('datasets.onselect(): Hiding output.')
     $('#output').hide()
   }
@@ -334,8 +337,6 @@ function datasets (cb) {
   $('#datasetinfo').nextAll().hide()
   util.log('datasets.onselect(): Emptying #datasetinfo <ul>.')
   $('#datasetinfo ul').empty()
-  util.log('datasets.onselect(): Showing #datasetinfo.')
-  $('#datasetinfo').show()
 
   $('#datasetsRequestError').empty().hide()
   get(getOptions, function (err, res) {

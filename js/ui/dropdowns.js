@@ -40,18 +40,18 @@ function dropdowns (funs, wrapper, i) {
     $(document).click(function (event) {
       util.log('dropdowns.bindCloseEvents(): Document click event.')
       if ($(event.target).parents('.ui-widget').length > 0) {
-        util.log("dropdowns.bindCloseEvents(): Clicked element has ancestor with class 'ui-input'. Not closing dropdowns.")
-        if ($(event.target).attr('id')) {
+        util.log("dropdowns.bindCloseEvents(): Clicked element has ancestor with class 'ui-widget'. Not closing all dropdowns.")
+        if ($(event.target).attr('id') && $(event.target).attr('id').match(/-list$/)) {
           const id = $(event.target).attr('id').replace('-list', '')
           const toClose = $(`input[lastevent='open']:not([id='${id}']`)
           if (toClose.length > 0) {
-            util.log('dropdowns.bindCloseEvents(): ${toClose.length} other open dropdowns found. Closing them.')
+            util.log(`dropdowns.bindCloseEvents(): ${toClose.length} other open dropdowns found. Closing them.`)
             toClose.data('autocomplete')._close()
           }
         }
         return
       }
-      util.log("dropdowns.bindCloseEvents(): Clicked element does not have ancestor with class 'ui-input'. Closing dropdowns.")
+      util.log("dropdowns.bindCloseEvents(): Clicked element does not have ancestor with class 'ui-widget'. Closing all dropdowns.")
       closeAll()
     })
 
@@ -575,17 +575,17 @@ function dropdowns (funs, wrapper, i) {
 
         function setCheckboxClick (el, ul, isSearchResult) {
           $(el).click(function (event) {
-            console.log('dropdowns.setRenderMenu.setCheckboxClick.click(): Click event.')
+            util.log('dropdowns.setRenderMenu.setCheckboxClick.click(): Click event.')
 
             const target = event.target
             if (target.tagName !== 'INPUT') {
               // Click event set on label element, which has INPUT and SPAN.
               // so two events alway fired. This prevents the second event.
-              console.log('dropdowns.setRenderMenu.setCheckboxClick.click(): Click event not on INPUT element.')
+              util.log('dropdowns.setRenderMenu.setCheckboxClick.click(): Click event not on INPUT element.')
               return
             }
 
-            console.log('dropdowns.setRenderMenu.setCheckboxClick.click(): Click event on INPUT element.')
+            util.log('dropdowns.setRenderMenu.setCheckboxClick.click(): Click event on INPUT element.')
 
             if ($(target).hasClass('select-all')) {
               if ($(target).prop('checked')) {
@@ -610,7 +610,7 @@ function dropdowns (funs, wrapper, i) {
         }
 
         function setCheckboxValues (ul, isSearchResult) {
-          console.log('dropdowns.setRenderMenu.setCheckboxValues.setCheckboxClick(): Called.')
+          util.log('dropdowns.setRenderMenu.setCheckboxValues.setCheckboxClick(): Called.')
 
           const input = $(acData.element[0])
           if ($('input.select-all').prop('checked') && !isSearchResult) {

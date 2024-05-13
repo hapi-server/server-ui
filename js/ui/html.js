@@ -21,6 +21,9 @@ html.mailtoLink = function (name, addr, subj) {
   if (name.trim() !== '') {
     name = name + ' '
   }
+  if (addr.trim().startsWith('http')) {
+    return `<a target="_blank" title="${addr}" href="${addr}">${addr}</a>`
+  }
   return name + '&lt;' + html.aLink('mailto:' + addr + '?subject=' + subj, addr) + '&gt;'
 }
 

@@ -169,8 +169,8 @@ function get (options, cb) {
         errorHandler(err)
         return
       }
-      reader = response.body.getReader()
-      decoder = new TextDecoder()
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
 
       let nRecords = 0
       let dataLength = 0

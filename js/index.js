@@ -1,6 +1,6 @@
 function main () {
   window.HAPIUI.qsInitial = query.qsInitial()
-
+  console.log(query.qsInitial())
   // Unbind all event listeners.
   $('*').unbind()
 
@@ -630,9 +630,7 @@ function starttime (cb) {
 
   const qs = query.parseQueryString()
   const list = [{}]
-  if (window.HAPIUI.qsInitial.server == qs.server &&
-      window.HAPIUI.qsInitial.dataset == qs.dataset &&
-      window.HAPIUI.qsInitial.start !== undefined) {
+  if (window.HAPIUI.qsInitial.start !== undefined) {
     list[0].label = window.HAPIUI.qsInitial.start
     list[0].value = window.HAPIUI.qsInitial.start
   } else {
@@ -666,9 +664,7 @@ function stoptime (cb) {
 
   const qs = query.parseQueryString()
   const list = [{}]
-  if (window.HAPIUI.qsInitial.server === qs.server &&
-      window.HAPIUI.qsInitial.dataset == qs.dataset &&
-      window.HAPIUI.qsInitial.stop !== undefined) {
+  if (window.HAPIUI.qsInitial.stop !== undefined) {
     list[0].label = window.HAPIUI.qsInitial.stop
     list[0].value = window.HAPIUI.qsInitial.stop
   } else {

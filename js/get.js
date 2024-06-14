@@ -157,10 +157,10 @@ function get (options, cb) {
         timer(timerID, 'stop')
       })
       .catch((e) => {
-        util.log('get(): Fetch catch() error:')
+        util.log('get(): Fetch catch() error for ' + url)
         util.log(e)
         errorHandler(e)
-        timer(timerID)
+        timer(timerID, 'stop')
       })
 
     function processChunkedResponse (response) {

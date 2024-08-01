@@ -88,10 +88,17 @@ function plot (selectedParameter, cb) {
           timer(timerId, 'stop')
           const msg = $(xml).find('Error').text()
           if (msg) {
+            prepDOM()
             finalizeDOM(msg, xurl)
+	    return;
           }
           util.log('plot(): Received ' + xurl)
           url = $(xml).find('Name').text()
+          if (!url) {
+	    prepDOM()
+            finalizeDOM('No image URL in returned XML', xurl)
+	    return  
+          }
           util.log('plot(): Referenced URL: ' + url)
           if (format === 'pdf') {
             // Proxy is required b/c of iframe restrictions in headers.
@@ -260,8 +267,7 @@ function plot (selectedParameter, cb) {
   function finalizeDOM (err, url) {
     $('#output details').attr('open', false)
     $(`#${parentElementId}`).show().attr('open', true)
-
-    if (err) {
+      if (err) {
       const msg = `Error when requesting ${html.aLink(url, 'image')}: ${err}`
       $(`#${parentElementId} #plotRequestError`).html(msg).show()
       return

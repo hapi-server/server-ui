@@ -53,8 +53,8 @@ function get (options, cb) {
   }
   const timerID = timer(url, options.timer)
   if (timerID === null) {
-    console.error(`get(): Returning because active request for url = ${url}`)
-    console.error('get(): Check for redundant requests.')
+    console.log(`get(): Returning because active request for url = ${url}`)
+    console.log('get(): Check for redundant requests. Placing request in callback queue for active request.')
     get.callBackQueue = get.callBackQueue || {}
     get.callBackQueue[url] = get.callBackQueue[url] || []
     get.callBackQueue[url].push(cb)
@@ -129,7 +129,7 @@ function get (options, cb) {
 
         if (get.callBackQueue && get.callBackQueue[url]) {
           while (get.callBackQueue[url].length > 0) {
-            console.error('get(): Calling back from queue for ' + url)
+            console.log('get(): Calling back from queue for ' + url)
             const cbq = get.callBackQueue[url].shift()
             cbq(null, get.cache[urlo], dataLength, nRecords)
           }

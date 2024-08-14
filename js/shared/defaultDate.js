@@ -22,8 +22,8 @@ function stop (meta, end) {
 
   const cadenceString = meta.cadence || 'PT1M'
   const cadenceMillis = dayjs.duration(cadenceString).$ms
-  console.log(cadenceString)
-  console.log(cadenceMillis)
+  //console.log(cadenceString)
+  //console.log(cadenceMillis)
   let startDate = meta.startDate
   if (startDate.length === 11 && startDate.endsWith('Z')) {
     // Safari date parsing workaround. 1999-01-01Z -> 1999-01-01

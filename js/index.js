@@ -223,10 +223,7 @@ function servers (cb) {
       return
     }
 
-    // if (serverIsURL() === "") {
-    if (serverIsURL() === '' && $('#showexamplequeries').prop('checked')) {
-      // This can cause a request to be made to the a URL that is already in
-      // flight, which get() throws and error for.
+    if ($('#showexamplequeries').prop('checked')) {
       $('#all-example-details-body').empty()
       examples(info, function (html) {
         if (!html) return

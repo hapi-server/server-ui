@@ -104,6 +104,7 @@ initProxy(app, whiteListFiles, initProxyOpts, (err) => {
     console.log(`Server running at http://localhost:${argv.port}`);
     console.log("  Endpoints:");
     console.log("    / => " + indexHTMLFile);
+    console.log("    /api");
     console.log("    /proxy?url=URL");
     console.log("    /hashchange?hash=HASH");
     console.log("    /error?hash=HASH&message=MESSAGE");

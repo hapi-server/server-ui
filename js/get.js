@@ -164,13 +164,12 @@ function get (options, cb) {
       })
 
     function processChunkedResponse (response) {
+
       if (response.status !== 200) {
         const err = new Error(`get(): Fetch of chunks failed with HTTP status code = ${response.status}`)
         errorHandler(err)
         return
       }
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
 
       let nRecords = 0
       let dataLength = 0
@@ -239,6 +238,9 @@ function get (options, cb) {
       } else {
         // xhr will be AJAX xhr or fetch Error.
         const emsg = xhr.statusText || xhr.responseText || xhr.message
+        console.log(xhr.statusText)
+        console.log(xhr.responseText)
+        console.log(xhr.message)
         const msg =
                   'Error encountered when attempting to retrieve ' +
                   html.aLink(url) +

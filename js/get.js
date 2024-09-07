@@ -171,6 +171,9 @@ function get (options, cb) {
         return
       }
 
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
       let nRecords = 0
       let dataLength = 0
 

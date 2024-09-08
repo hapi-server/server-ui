@@ -164,7 +164,6 @@ function get (options, cb) {
       })
 
     function processChunkedResponse (response) {
-
       if (response.status !== 200) {
         const err = new Error(`get(): Fetch of chunks failed with HTTP status code = ${response.status}`)
         errorHandler(err)
@@ -222,7 +221,9 @@ function get (options, cb) {
           success: (head, textStatus, jqXHR) => {
             const msgo = `<br>Direct request of ${html.aLink(urlo)} failed.`
             let msg = msgo + `<br><br>Proxy request of ${html.aLink(url)} failed.`
-            msg = msg + `<br><br>Another proxy <code>HEAD</code> request for the first URL found a HTTP status code = <code>${head.status}<code>`
+            msg += '<br><br>Another proxy <code>HEAD</code> request for the '
+            msg += `first URL found a HTTP status code = <code>${head.status}<code>`
+            console.log(head.status)
             if (head.status !== 200) {
               cb(msg, null)
               return

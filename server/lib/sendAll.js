@@ -12,7 +12,7 @@ function sendAll (req, res, next, appLogDir, allFile) {
   fs.readFile(allFile, 'utf8', (err, data) => {
     if (err) {
       log.error(err, false, 'errors', appLogDir)
-      const err = new Error('Error reading all.txt')
+      err = new Error('Error reading all.txt')
       handleError(err, req, res, next)
       return
     }

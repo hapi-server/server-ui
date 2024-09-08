@@ -5,9 +5,9 @@ const log = require('log')
 const setHeaders = require('./setHeaders.js')
 const handleError = require('./handleError.js')
 
-module.exports = sendHTML
+module.exports = sendIndexHTML
 
-function sendHTML (req, res, next, appLogDir, opts) {
+function sendIndexHTML (req, res, next, appLogDir, opts) {
   log.debug(` Reading ${opts.indexHTMLFile}`)
   fs.readFile(opts.indexHTMLFile, 'utf8', (err, html) => {
     if (err) {
@@ -23,7 +23,7 @@ function sendHTML (req, res, next, appLogDir, opts) {
       return
     }
     if (!html.trim().startsWith('<')) {
-      const err = new Error(`${indexFile}.trim() does not start with '<'. File is not HTML.`)
+      const err = new Error(`${opts.indexHTMLFile}.trim() does not start with '<'. File is not HTML.`)
       log.error(err, false, 'errors', appLogDir)
       handleError(err, req, res, next)
       return

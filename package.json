@@ -1,6 +1,6 @@
 {
   "name": "hapi-server-ui",
-  "version": "0.10.14",
+  "version": "0.10.15",
   "type": "commonjs",
   "engine-strict": true,
   "engines": {

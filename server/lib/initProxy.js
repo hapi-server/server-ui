@@ -114,12 +114,19 @@ function initProxy (app, whiteListFiles, opts, cb) {
         .get(url)
         .buffer()
         .parse((pres, cb) => {
+          console.log(pres.headers)
           if (pres.statusCode !== 200) {
             res.status(pres.statusCode).end()
             return
           }
-          res.set(pres.headers)
+
+          // Keep only content-type. If there was content-encoding = gzip,
+          // it was already decompressed by superagent and content-encoding and
+          // content-length will be wrong.
+          res.set({ 'content-type': pres.headers['content-type'] })
+
           pres.on('data', chunk => {
+            console.log('chunk', chunk.toString())
             res.write(chunk)
           })
           pres.on('end', () => {

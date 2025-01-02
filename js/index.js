@@ -253,6 +253,7 @@ function servers(cb) {
     // Move TestData servers to end of list and possibly remove based on checkbox.
     list = modifyServerList(list, found);
     $('#nServers').text(list.length);
+    $('#serversInfo').show()
     util.log("servers.process(): Server list:");
     util.log(list);
 
@@ -652,6 +653,12 @@ function starttime(cb) {
   } else {
     let meta = datasets.info[selected('dataset')]['info'];
     let start = defaultDate.start(meta);
+    if (false && starttime.lastStart) {
+      if (start <= starttime.lastStart) {
+        util.log('starttime(): Dataset start <= last selected start. Using last selected start');
+        start = starttime.lastStart;
+      }
+    }
     list[0].label = start;
     list[0].value = start;
   }

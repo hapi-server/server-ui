@@ -1,213 +1,216 @@
-const superagent = require('superagent');
-const path = require("path");
+const superagent = require('superagent')
+const path = require('path')
 
-let log = require('log');
+const log = require('log')
 
-const init404   = require("./init404.js");
-const handleError = require("./handleError.js");
-const setHeaders  = require("./setHeaders.js");
+const init404 = require('./init404.js')
+const handleError = require('./handleError.js')
+const setHeaders = require('./setHeaders.js')
 
-const getFiles    = require('./getFiles.js');
-const parseAllTxt = require('../../js/shared/parseAllTxt.js');
+const getFiles = require('./getFiles.js')
+const parseAllTxt = require('../../js/shared/parseAllTxt.js')
 
-module.exports = initProxy;
-function initProxy(app, whiteListFiles, opts, cb) {
+module.exports = initProxy
+function initProxy (app, whiteListFiles, opts, cb) {
+  log.debug('whiteListFiles: ' + whiteListFiles)
+  const allowOpenProxy = opts.allowOpenProxy || false
 
-  log.debug("whiteListFiles: " + whiteListFiles);
-  let allowOpenProxy = opts["allowOpenProxy"] || false;
-
-  log.debug("Log directory: " + log.logDir);
-  let appLogDir = path.join(log.logDir, "ui-app");
-  let uiProxyLogDir = path.join(log.logDir, "ui-proxy");
-  log.debug(`App log directory: '${appLogDir}'`);
-  log.debug(`Server log directory: '${uiProxyLogDir}'`);
+  log.debug('Log directory: ' + log.logDir)
+  const appLogDir = path.join(log.logDir, 'ui-app')
+  const uiProxyLogDir = path.join(log.logDir, 'ui-proxy')
+  log.debug(`App log directory: '${appLogDir}'`)
+  log.debug(`Server log directory: '${uiProxyLogDir}'`)
 
   if (!whiteListFiles) {
-    whiteListFiles = [];
+    whiteListFiles = []
   }
-  if (typeof(whiteListFiles) === 'string') {
-    whiteListFiles = [whiteListFiles];
+  if (typeof (whiteListFiles) === 'string') {
+    whiteListFiles = [whiteListFiles]
   }
   if (!Array.isArray(whiteListFiles)) {
-    log.error("whiteListFiles must be an array of strings.", false, 'errors', appLogDir);
-    cb("whiteListFiles must be an array of strings.", null);
-    return;
+    log.error('whiteListFiles must be an array of strings.', false, 'errors', appLogDir)
+    cb('whiteListFiles must be an array of strings.', null)
+    return
   }
   if (whiteListFiles.length === 0) {
     if (allowOpenProxy === true) {
-      log.warn("whiteList = []. Running open proxy at endpoint /proxy.");
+      log.warn('whiteList = []. Running open proxy at endpoint /proxy.')
     } else {
-      cb(new TypeError("whiteList = []. Exiting because allowOpenProxy is false."), null);
-      return;
+      cb(new TypeError('whiteList = []. Exiting because allowOpenProxy is false.'), null)
+      return
     }
   }
 
   prepWhiteList(whiteListFiles, (err, whiteListArray) => {
-
     if (err) {
-      cb(err, null);
-      return;
+      cb(err, null)
+      return
     }
 
-    log.info("Allowing proxy of URLs that start with");
-    for (let url of whiteListArray) {
-      log.info("  " + url);
+    log.info('Allowing proxy of URLs that start with')
+    for (const url of whiteListArray) {
+      log.info('  ' + url)
     }
 
     app.get('/proxy', function (req, res) {
-      res.on('finish', () => log.request(req, 'requests', uiProxyLogDir));
+      res.on('finish', () => log.request(req, 'requests', uiProxyLogDir))
 
       if (!req.query.url) {
-        log.debug("No proxy URL given. Rejecting with HTTP 400.");
-        res.status(400).end("url=... required.");
-        return;
+        log.debug('No proxy URL given. Rejecting with HTTP 400.')
+        res.status(400).end('url=... required.')
+        return
       }
 
-      const url = decodeURI(req.query.url);
-      const head = req.query.head === "true" ? true : false;
+      const url = decodeURI(req.query.url)
+      const head = req.query.head === 'true'
 
-      log.info(`Request for /proxy: ${url}`);
+      log.info(`Request for /proxy: ${url}`)
 
-      let allowProxy = false;
+      let allowProxy = false
       if (whiteListArray.length > 0) {
-        for (let i in whiteListArray) {
+        for (const i in whiteListArray) {
           if (url.length >= whiteListArray[i].length && url.startsWith(whiteListArray[i])) {
-            log.info("Allowing proxy of " + url + " because it starts with " + whiteListArray[i] + ".")
-            allowProxy = true;
-            break;
+            log.info('Allowing proxy of ' + url + ' because it starts with ' + whiteListArray[i] + '.')
+            allowProxy = true
+            break
           }
         }
       } else {
-        allowProxy = true;
+        allowProxy = true
       }
 
-      res.removeHeader('X-Powered-By');
+      res.removeHeader('X-Powered-By')
 
       if (isValidUrl === false) {
-        log.debug("Rejecting proxy of " + url + " with HTTP 400.");
-        res.status(400).end();
-        return;
+        log.debug('Rejecting proxy of ' + url + ' with HTTP 400.')
+        res.status(400).end()
+        return
       }
 
       if (allowProxy === false) {
-        log.debug("Rejecting proxy of " + url + " with HTTP 407.");
-        res.status(407).end();
-        return;
+        log.debug('Rejecting proxy of ' + url + ' with HTTP 407.')
+        res.status(407).end()
+        return
       }
 
-      setHeaders(res, true);
+      setHeaders(res, true)
 
       if (head === true) {
         superagent
           .get(url) // Would prefer to do HEAD, but see https://github.com/ladjs/superagent/issues/669
           .ok(res => true) // https://stackoverflow.com/a/47367531
           .then((pres) => {
-            pres.headers.status = pres.statusCode;
-            res.send(JSON.stringify(pres.headers,null,2));
+            pres.headers.status = pres.statusCode
+            res.send(JSON.stringify(pres.headers, null, 2))
           })
           .catch(err => {
-            log.error(err.message, false, 'errors', appLogDir);
-            res.status(501).send("");
-          });
-        return;
+            log.error(err.message, false, 'errors', appLogDir)
+            res.status(501).send('')
+          })
+        return
       }
 
       superagent
         .get(url)
         .buffer()
         .parse((pres, cb) => {
+          console.log(pres.headers)
           if (pres.statusCode !== 200) {
-            res.status(pres.statusCode).end();
-            return;
+            res.status(pres.statusCode).end()
+            return
           }
-          res.set(pres.headers);
+
+          // Keep only content-type. If there was content-encoding = gzip,
+          // it was already decompressed by superagent and content-encoding and
+          // content-length will be wrong.
+          res.set({ 'content-type': pres.headers['content-type'] })
+
           pres.on('data', chunk => {
-            res.write(chunk);
+            console.log('chunk', chunk.toString())
+            res.write(chunk)
           })
           pres.on('end', () => {
-            res.end();
+            res.end()
           })
           pres.on('error', (err) => {
-            log.error(err.message, false, 'errors', appLogDir);
-            res.status(501).send("");
+            log.error(err.message, false, 'errors', appLogDir)
+            res.status(501).send('')
           })
         })
-        .end(function() {}); // end is required otherwise hangs.
-    });
+        .end(function () {}) // end is required otherwise hangs.
+    })
 
-    if (opts["handleNotFound"] === undefined || opts["handleNotFound"] === true) {
-      init404(app, setHeaders);
+    if (opts.handleNotFound === undefined || opts.handleNotFound === true) {
+      init404(app, setHeaders)
     }
 
     // Must be last: https://stackoverflow.com/a/72680240
     app.use((err, req, res, next) => {
-      handleError(err, req, res, next);
-      log.error(err, false, 'errors', appLogDir);
-    });
+      handleError(err, req, res, next)
+      log.error(err, false, 'errors', appLogDir)
+    })
 
-    cb(null);
-  });
+    cb(null)
+  })
 
-  function prepWhiteList(whiteListFiles, cb) {
-
+  function prepWhiteList (whiteListFiles, cb) {
     getFiles(whiteListFiles, (err, results) => {
-
       if (err) {
-        log.error(err.message, false, 'errors', uiProxyLogDir);
-        cb(err, null);
+        log.error(err.message, false, 'errors', uiProxyLogDir)
+        cb(err, null)
       }
-      let whiteLists = [];
-      for (let [file, result] of Object.entries(results)) {
+      const whiteLists = []
+      for (const [file, result] of Object.entries(results)) {
         if (result.error !== null) {
-          log.warn(`Warning: Error reading ${file}\n  ${result.error}`);
+          log.warn(`Warning: Error reading ${file}\n  ${result.error}`)
         }
-        whiteLists.push(processFile(result));
+        whiteLists.push(processFile(result))
       }
       // Flatten array of arrays and remove duplicates
-      let whiteListUnique = [... new Set(whiteLists.flat())];
+      const whiteListUnique = [...new Set(whiteLists.flat())]
       if (whiteListUnique.length === 0) {
-        let msg = `Error when building whitelist from\n  ${whiteListFiles.join("\n  ")}\nNo valid files or URLs found.`;
-        log.error(msg, false, 'errors', uiProxyLogDir);
-        cb(msg, null);
-        return;
+        const msg = `Error when building whitelist from\n  ${whiteListFiles.join('\n  ')}\nNo valid files or URLs found.`
+        log.error(msg, false, 'errors', uiProxyLogDir)
+        cb(msg, null)
+        return
       }
-      cb(null, whiteListUnique);
-    });
+      cb(null, whiteListUnique)
+    })
 
-    function processFile(result) {
+    function processFile (result) {
       if (result.error !== null) {
-        return [];
+        return []
       }
       try {
-        let whiteList = [];
-        let allObject = parseAllTxt(result.data.toString());
-        for (let [serverID, serverAbout] of Object.entries(allObject)) {
-          let url = serverAbout.url;
+        const whiteList = []
+        const allObject = parseAllTxt(result.data.toString())
+        for (const [serverID, serverAbout] of Object.entries(allObject)) {
+          const url = serverAbout.url
           if (!url || !isValidUrl(url)) {
-            continue;
+            continue
           }
-          if (!url.endsWith("/hapi") ||!url.endsWith("/hapi")) {
+          if (!url.endsWith('/hapi') || !url.endsWith('/hapi')) {
             // This will cause cdaweb.gsfc.nasa.gov/tmp to be dropped.
-            //continue;
+            // continue;
           }
-          whiteList.push(url);
+          whiteList.push(url)
         }
-        return whiteList;
+        return whiteList
       } catch (e) {
-        console.error(e);
-        return [];
+        console.error(e)
+        return []
       }
     }
   }
 }
 
-function isValidUrl(s) {
+function isValidUrl (s) {
   // https://stackoverflow.com/a/55585593
-  const URL = require("url").URL;
+  const URL = require('url').URL
   try {
-    new URL(s);
-    return true;
+    new URL(s)
+    return true
   } catch (err) {
-    return false;
+    return false
   }
 }

@@ -1,8 +1,8 @@
-module.exports = handleError;
+module.exports = handleError
 
-function handleError(err, req, res, next) {
+function handleError (err, req, res, next) {
   if (res.headersSent) {
     return next(err)
   }
-  res.status(500).send('');
+  res.status(500).send('')
 }

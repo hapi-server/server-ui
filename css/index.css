@@ -287,12 +287,6 @@ span.id {
   color: #002e5b !important;
 }
 
-.tooltipster-sidetip.tooltipster-noir .tooltipster-box {
-	border-radius: 0px; 
-	border: 1px solid black;
-	background: #fff;
-}
-
 .hljs {
 	background-color: white;
 }
@@ -330,15 +324,16 @@ span.id {
 }
 
 #developer-details {
-  font-size: 70%;
+	margin-top: 1em;
 }
 
 #footer {
-  font-size: 80%;
-	margin-left: 0em;
+  font-size: 90%;
+	margin-left: 1em;
 	background-color: white;
 	position: fixed;
-	margin: 0.5em;
+	margin: 1em;
+	width: 15em;
 	bottom: 0;
 	left: 0;
 	right: 0;

@@ -11,8 +11,8 @@ if exist('hapi','file') ~= 2
 end
 % Download hapiplot.m if not found in path.
 if exist('hapiplot','file') ~= 2
-    u = sprintf('%s/hapi_plot.m',u);
-    urlwrite(u,'hapi_plot.m');
+    u = sprintf('%s/hapiplot.m',u);
+    urlwrite(u,'hapiplot.m');
 end
 
 %% Get data and metadata

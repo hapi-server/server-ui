@@ -15,12 +15,12 @@ function dropdowns (funs, wrapper, i) {
 
   util.log(`dropdowns(): Calling ${funs[i].name}() to get dropdown list entries.`)
 
-  // Call dropdown function, which generates list then calls cb() with a menu list.
   // setTimeout(() => funs[i](cb), 1000); // To simulate slow response.
   const timeoutId = setTimeout(() => {
     $('#dropdowns' + (i)).text('Fetching content ...').show()
   }, 300)
 
+  // Call dropdown function, which generates menu list then calls cb() with it.
   funs[i](cb)
 
   function bindCloseEvents () {
@@ -91,7 +91,7 @@ function dropdowns (funs, wrapper, i) {
       return
     }
 
-    if (!list || list.length == 0) {
+    if (!list || list.length === 0) {
       util.log('dropdowns(): Dropdown has no values. Setting next dropdown.')
       dropdowns(funs, wrapper, i + 1)
       return
@@ -104,7 +104,7 @@ function dropdowns (funs, wrapper, i) {
 
     let title1 = ''
     let title2 = ''
-    if (i == 0) {
+    if (i === 0) {
       title1 = 'Show/hide list'
       title2 = 'Enter text to search'
     }
@@ -165,12 +165,12 @@ function dropdowns (funs, wrapper, i) {
       // Select first item with attribute selected=true.
       const selected = []
       for (let k = 0; k < list.length; k++) {
-        if (list[k].selected == true) {
+        if (list[k].selected === true) {
           selected.push(list[k].value)
         }
       }
       if (selected.length > 0) {
-        if (selected.length == 1) {
+        if (selected.length === 1) {
           util.log(`dropdowns.cb(): '${id}' dropdown has an item with selected = true. Triggering select on it.`)
         } else {
           util.log(`dropdowns.cb(): '${id}' dropdown has ${selected.length} items with selected = true. Triggering select on them.`)
@@ -241,7 +241,7 @@ function dropdowns (funs, wrapper, i) {
 
       // Remove the default blur event. jQuery UI's autocomplete triggers a
       // close event on blur, but when clicking on a list open button is a
-      // blur event, and we don't want to close the list in that case.
+      // blur event, and we don't want to close the list.
       $(acData.element[0]).unbind('blur')
 
       if (!setAutocomplete[id]) {

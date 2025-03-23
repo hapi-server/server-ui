@@ -53,45 +53,37 @@ function stop (meta, end) {
   return stopDate
 }
 
-function start (meta, end) {
-  let startDate = meta.sampleStartDate
-  if (startDate) {
-    return startDate
+function normalizeTime (dateTime) {
+  dateTime = dateTime.trim()
+  if (dateTime.endsWith('Z')) {
+    return dateTime.slice(0, -1)
+  }
+  return dateTime
+}
+
+function start (meta, requestedStart) {
+  if (!requestedStart) {
+    if (meta.sampleStartDate) {
+      return meta.sampleStartDate
+    } else {
+      return meta.startDate
+    }
   }
 
-  startDate = meta.startDate
-  if (!end) {
-    return startDate
+  const _start = normalizeTime(meta.startDate)
+  const _requestedStart = normalizeTime(requestedStart)
+
+  let _stop
+  if (meta.sampleStopDate) {
+    _stop = normalizeTime(meta.sampleStopDate)
+  } else {
+    _stop = normalizeTime(meta.stopDate)
   }
 
-  const cadenceString = meta.cadence || 'PT1M'
-  const cadenceMillis = dayjs.duration(cadenceString).$ms
-
-  let stopDate = meta.stopDate
-  if (stopDate.length == 11 && stopDate.endsWith('Z')) {
-    // Safari date parsing workaround. 1999-01-01Z -> 1999-01-01
-    stopDate = stopDate.slice(0, 1)
+  const a = dayjs(_requestedStart).valueOf() >= dayjs(_start).valueOf()
+  const b = dayjs(_requestedStart).valueOf() <= dayjs(_stop).valueOf()
+  if (a && b) {
+    return requestedStart
   }
-
-  if (cadenceMillis <= 100) { // 0.1 s or less
-    startDate = dayjs(stopDate).add(1, 'minute').toISOString()
-  } else if (cadenceMillis <= 1000 * 10) { // 10 s or less
-    startDate = dayjs(stopDate).add(1, 'hour').toISOString()
-  } else if (cadenceMillis <= 1000 * 60) { // 1 min or less
-    startDate = dayjs(stopDate).add(2, 'day').toISOString()
-  } else if (cadenceMillis <= 1000 * 60 * 10) { // 10 min or less
-    startDate = dayjs(stopDate).add(4, 'day').toISOString()
-  } else if (cadenceMillis <= 1000 * 60 * 60) { // 1 hr or less
-    startDate = dayjs(stopDate).add(10, 'day').toISOString()
-  } else if (cadenceMillis <= 1000 * 60 * 60 * 24) { // 1 day or less
-    startDate = dayjs(stopDate).add(31, 'day').toISOString()
-  } else if (cadenceMillis <= 1000 * 60 * 60 * 24 * 10) { // 10 days or less
-    startDate = dayjs(stastopDatert).add(1, 'year').toISOString()
-  } else { // > 10 days
-    startDate = dayjs(stopDate).add(10, 'year').toISOString()
-  }
-  if (startDate < meta.startDate) {
-    startDate = meta.startDate
-  }
-  return startDate
+  return meta.startDate
 }

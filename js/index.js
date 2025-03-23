@@ -217,7 +217,7 @@ function servers (cb) {
       })
     }
 
-    if (selectedServer && found == false) {
+    if (selectedServer && found === false) {
       // Will occur if user typed a server name in dropdown and it is not in list
       serverNotFound(selectedServer)
       return
@@ -609,35 +609,51 @@ function parameters (cb) {
 
 // Start time dropdown
 function starttime (cb) {
+  timeDropdown('start', cb)
+}
+
+function timeDropdown (which, cb) {
+  const whichUpperCase = which.charAt(0).toUpperCase() + which.slice(1)
   // Because only one value is set in dropdown, it is automatically selected
   // and the next dropdown is called.
-  util.log('starttime(): Called.')
+  util.log(`${which}(): Called.`)
 
-  starttime.id = 'start'
-  starttime.label = 'Start'
-  starttime.clearFollowing = false
+  timeDropdown.id = which
+  timeDropdown.label = whichUpperCase
+  timeDropdown.clearFollowing = false
 
-  starttime.onselect = function () {
-    util.log('starttime.onselect(): Called.')
+  timeDropdown.onselect = function () {
+    util.log(`${which}.onselect(): Called.`)
+    if (!timeDropdown.lasts) {
+      timeDropdown.lasts = []
+    }
+    timeDropdown.lasts.push(selected(which))
     if (selected('format')) {
-      if (util.checkTimes('start', selected('start'), selected('stop'))) {
+      if (util.checkTimes(which, selected('start'), selected('stop'))) {
         output() // Update output
       }
     }
   }
 
-  const qs = query.parseQueryString()
-  const list = [{}]
-  if (window.HAPIUI.qsInitial.start !== undefined) {
-    list[0].label = window.HAPIUI.qsInitial.start
-    list[0].value = window.HAPIUI.qsInitial.start
-  } else {
-    let meta = datasets.info[selected('dataset')]['info'];
-    let start = defaultDate.start(meta);
-    list[0].label = start;
-    list[0].value = start;
+  const info = datasets.info[selected('dataset')].info
+
+  let uniques = [
+    info[which + 'Date'],
+    info['sample' + whichUpperCase + 'Date'],
+    window.HAPIUI.qsInitial[which],
+    ...timeDropdown.lasts || []
+  ]
+  uniques = [...new Set(uniques.filter(Boolean))]
+
+  const list = [{ label: info[which + 'Date'], value: info[which + 'Date'] }]
+  for (let i = 1; i < uniques.length; i++) {
+    if (uniques[0] !== defaultDate[which](info, uniques[i])) {
+      // Only add if different from default and acceptable.
+      list.push({ label: uniques[i], value: uniques[i] })
+    }
   }
-  delete window.HAPIUI.qsInitial.start
+  list[list.length - 1].selected = true
+  delete window.HAPIUI.qsInitial[which]
   cb(list)
 }
 

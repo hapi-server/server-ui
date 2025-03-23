@@ -81,17 +81,18 @@ const util = {
       util.log('util.checkTimes(): starttime = ' + start)
       util.log('util.checkTimes(): stoptime = ' + stop)
       const t = dayjs(util.doy2ymd(start.replace('Z', ''))) <
-            dayjs(util.doy2ymd(stop.replace('Z', '')))
+                dayjs(util.doy2ymd(stop.replace('Z', '')))
       util.log('util.checkTimes(): start < stop ? ' + t)
+      const msgo = which + ' changed; '
       if (t === false) {
-        util.log('util.checkTimes(): ' + which + ' changed; start >= stop. Setting color of ' + which + ' to red.')
-        $('#' + which + 'list').css('color', 'red').attr('title', 'start ≥ stop')
+        util.log(msgo + 'start ≥ stop. Setting colors to red.')
+        $('#' + which + '-list').css('color', 'red').attr('title', 'start ≥ stop')
         $('#' + which).mouseover()
         return false
       } else {
-        util.log(which + ' changed; start < stop. Setting colors to black.')
-        $('#startlist').css('color', 'black').attr('title', '')
-        $('#stoplist').css('color', 'black').attr('title', '')
+        util.log(msgo + 'start < stop. Setting colors to black.')
+        $('#start-list').css('color', 'black').attr('title', '')
+        $('#stop-list').css('color', 'black').attr('title', '')
         return true
       }
     }

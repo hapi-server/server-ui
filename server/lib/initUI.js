@@ -89,9 +89,14 @@ function initUI (app, opts) {
     res.end()
   })
 
-  app.get('/api', function (req, res, next) {
+  app.use('/api$', function (req, res, next) {
+    res.redirect('/api/')
+    next()
+  })
+
+  app.get('/api/', function (req, res, next) {
     res.on('finish', () => log.request(req, 'requests', serverLogDir))
-    log.debug('Request for /api')
+    log.debug('Request for /api/')
     sendHTML(req, res, next, path.join(__dirname, '..', 'api.html'), appLogDir)
   })
 

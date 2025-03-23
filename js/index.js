@@ -416,26 +416,6 @@ function parameters (cb) {
     url = util.hapi2to3(url)
   }
 
-  const getOptions = {
-    url,
-    dataType: 'json',
-    timeout: window.HAPIUI.options.metadataTimeout,
-    requestURLElement: '#parametersRequestURL',
-    timer: {
-      element: '#parametersRequestTiming'
-    }
-  }
-
-  $('#parametersRequestError').empty().hide()
-  get(getOptions, function (err, res) {
-    if (err) {
-      $('#parametersRequestError').html(err).show()
-      return
-    }
-    $('#datasetinfo').show()
-    process(res, url)
-  })
-
   parameters.id = 'parameters'
   parameters.label = 'Parameters'
   parameters.allowEmptyValue = true
@@ -494,6 +474,27 @@ function parameters (cb) {
       html.showJSONOnClick('parameter', url, '#parameterinfo')
     }
   }
+
+  const getOptions = {
+    url,
+    dataType: 'json',
+    timeout: window.HAPIUI.options.metadataTimeout,
+    requestURLElement: '#parametersRequestURL',
+    timer: {
+      element: '#parametersRequestTiming'
+    }
+  }
+
+  // N.B. Call to get() must go last because cb() function requires above to be set.
+  $('#parametersRequestError').empty().hide()
+  get(getOptions, function (err, res) {
+    if (err) {
+      $('#parametersRequestError').html(err).show()
+      return
+    }
+    $('#datasetinfo').show()
+    process(res, url)
+  })
 
   function process (res, url) {
     $('#datasetinfo ul').append(`<li>id: <code>${selected('dataset')}</code></li>`)

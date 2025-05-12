@@ -26,6 +26,10 @@ li.ui-menu-item {
 	white-space: nowrap;
 }
 
+.email {
+	font-style: monospace;
+}
+
 a, .pseudoLink {
 	text-decoration: underline;
 	text-decoration-color: black;
@@ -137,6 +141,12 @@ pre {
 	}
 
 	#all-example-details {
+		display: none;
+		margin-top: 0.7em;
+		margin-bottom: 0.7em;
+	}
+
+	#time-range-details {
 		display: none;
 		margin-top: 0.7em;
 		margin-bottom: 0.7em;

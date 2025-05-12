@@ -87,16 +87,10 @@
     let VERIFIER    = '__VERIFIER__';
     let PLOTSERVER  = '__PLOTSERVER__';
     let PROXYSERVER = '__PROXYSERVER__';
+    let METASERVER  = '__METASERVER__';
 
     function serverList(url) {
       return url.startsWith('__') ? "all.txt" : url;
-    }
-
-    function proxyServerURL(url) {
-      if (url.startsWith('__')) {
-        return "https://hapi-server.org/servers/proxy?url=";
-      }
-      return url;
     }
 
     function verifierURL(url) {
@@ -105,6 +99,13 @@
         if (location.href.match("//localhost")) {
           url = "http://localhost:9999";
         }
+      }
+      return url;
+    }
+
+    function proxyServerURL(url) {
+      if (url.startsWith('__')) {
+        return "https://hapi-server.org/servers/proxy?url=";
       }
       return url;
     }
@@ -118,6 +119,16 @@
       }
     }
 
+    function metaServerURL(url) {
+      if (url.startsWith('__')) {
+        url = "https://hapi-server.org/meta";
+        if (location.href.match("//localhost")) {
+          url = "http://localhost:6001";
+        }
+      }
+      return url;
+    }
+
     window["HAPIUI"] = 
       {
         "options": {
@@ -127,7 +138,7 @@
           "plotserver": plotServerURL(PLOTSERVER),
           "verifier": verifierURL(VERIFIER),
           "proxy": proxyServerURL(PROXYSERVER), // false => no proxy
-
+          "meta": metaServerURL(METASERVER),   // false => no meta
           "metadataTimeout": 10000,
           "allTimeout": 5000,
 
@@ -250,8 +261,9 @@
 
     <div id="logo">
       <a href="https://hapi-server.org">
-        <img src="https://hapi-server.github.io/logos/HAPI-bw.svg" alt="HAPI Logo"/></a>
-    </div>
+        <!--img src="https://hapi-server.github.io/logos/HAPI-bw.svg" alt="HAPI Logo"/></a-->
+        <img src="css/HAPI-DE-bw.svg" alt="HAPI Logo" width="100%"/></a>
+      </div>
 
     <div id="footer">
       <a href="https://github.com/hapi-server/server-ui" style="text-decoration:none">
@@ -313,12 +325,36 @@
     <div id="overviewinfo">
       <b>Overview</b>
       <p>
-        The Heliophysics Data Application Programmer's Interface 
+        HAPI Data Explorer is an interface to HAPI servers. The Heliophysics Data Application Programmer's Interface 
         (<a href="https://hapi-server.org/">HAPI</a>) 
         specification is a time series download and streaming format specification.
       </p>
       <p>
-        When data are available from a HAPI server, there is no need to download data files and write custom file reader programs. Using a HAPI client library, data can be loaded into an array using a single command in IDL, Javascript, MATLAB, and Python.
+        When data are available from a HAPI server, there is no need to download data files and write custom file reader programs or to install custom software packages to access data for each data provider. Using a HAPI client library, data can be loaded into an array using a single command in 
+        <code>cURL</code> / 
+
+        <a title="https://github.com/hapi-server/client-idl"
+           href="https://github.com/hapi-server/client-idl">IDL</a> / 
+
+        <a title="https://github.com/hapi-server/client-idl"
+           href="https://github.com/hapi-server/client-idl">IDL SPEDAS</a> / 
+
+        <a title="https://github.com/hapi-server/client-javascript"
+           href="https://github.com/hapi-server/client-javascript">Javascript</a> /
+
+        <a title="https://github.com/hapi-server/client-matlab"
+           href="https://github.com/hapi-server/client-matlab">MATLAB</a> /
+
+        <a title="https://github.com/hapi-server/client-python"
+           href="https://github.com/hapi-server/client-python">Python</a> / 
+
+        <a title="https://github.com/spedas/pyspedas"
+           href="https://github.com/spedas/pyspedas">Python SPEDAS</a> / 
+
+        <a title="https://nasa.github.io/Kamodo"
+           href="https://nasa.github.io/Kamodo/">Python Kamodo</a> / 
+
+        <code>Wget</code>.
       </p>
       <p>
         Space Weather-related data are available through this interface and HAPI software from
@@ -339,11 +375,13 @@
           CDAWeb</a>, 
         <a  href="https://das2.org/"
             title="University of Iowa's Data Access System, v2">
-          DAS2</a>, 
+          DAS2</a>,
         <a  href="https://intermagnet.org/"
             title="International Real-time Magnetic Observatory Network">
           INTERMAGNET</a>,
-	KNMI,
+          <a  href="https://www.knmi.nl/home"
+          title="Royal Netherlands Meteorological Institute">
+           KNMI</a>,
         <a  href="https://intermagnet.org/"
             title="UC Boulder's LASP Interactive Solar Irradiance Data Center">
           LISIRD</a>, 
@@ -358,7 +396,7 @@
       <p>
         <span id="serversInfo" style="display:none">
           <span id="nServers"></span>
-          <span id="nServersText">HAPI servers are available from this interface.</span>
+          <span id="nServersText">HAPI servers are available from the HAPI Data Explorer.</span>
         </span>
         <span id="allRequestInfo" class="requestInfo">
           <span id="allRequestURL" class="requestURL"></span>
@@ -423,6 +461,11 @@
       </summary>
       <br>
       <div id="all-example-details-body"></div>
+    </details>
+
+    <details id="time-range-details">
+      <summary><b>Time range coverage</b>&nbsp;<a title="Open in new tab" target="_blank"><font size="-1">↗</font></a></summary>
+      <iframe id="iframe" name="iframe" width="100%" height="100%" style="border:none"></iframe>
     </details>
 
     <div id="output">
@@ -490,9 +533,6 @@
     <div id="serverinfo">
       <b>Server information</b>
       <p>
-        <span>
-          <span id="nDatasets"></span>
-        </span>
         <div class="requestInfo">
           <div>
             <span id="catalogRequestURL" class="requestURL"></span>

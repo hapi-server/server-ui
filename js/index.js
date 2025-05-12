@@ -135,6 +135,14 @@ function servers (cb) {
     util.log('servers.onselect(): Called.')
 
     const selectedServer = selected('server')
+
+    let metaURL = window.HAPIUI.options.meta
+    metaURL = `${metaURL}/data/availability/${selectedServer}/svg/${selectedServer}.html`
+    $('#time-range-details').show()
+    $('#time-range-details summary a').attr("href", metaURL)
+    $('#iframe').attr('src', metaURL)
+    $('#iframe').css('height', '50vh')
+
     if (!servers.info[selectedServer]) {
       // This will occur if HAPI URL is entered into server dropdown.
       servers.info[selectedServer] = { url: selectedServer }
@@ -354,8 +362,8 @@ function datasets (cb) {
     res = res.catalog
 
     // Show number of datasets
-    const nDatasets = res.length + ' dataset' + util.plural(res) + '. '
-    $('#nDatasets').text(nDatasets)
+    const nDatasets = res.length + ' dataset' + util.plural(res)
+    $('#serverinfo ul').prepend('<li>' + nDatasets + '</li>')
 
     const getOptions = {
       url: 'https://hapi-server.org/urlwatcher/log/tests.json',

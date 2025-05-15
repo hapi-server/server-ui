@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-  <meta name="keywords" content="HAPI Heliophysics Data UI">
+  <meta name="keywords" content="HAPI Heliophysics Data Explorer">
   <meta name="description"
     content="HAPI Server UI; https://github.com/hapi-server/server-ui">
   <meta name="keywords"
-    content="AMDA, CDAWeb, Cluster Active Archive, INTERMAGNET, LISIRD, SSCWeb, SWARM, Space Weather, ViRES">
+    content="time series, space weather, space physics, NASA, ESA, AMDA, CDAWeb, Cluster Active Archive, INTERMAGNET, LISIRD, SuperMAG, SSCWeb, SWARM, Space Weather, ViRES">
 
-  <title>HAPI Server Browser</title>
+  <title>HAPI Data Explorer</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
 
   <link rel="apple-touch-icon" sizes="180x180"
         href="//hapi-server.org/apple-touch-icon.png">
@@ -261,8 +265,8 @@
 
     <div id="logo">
       <a href="https://hapi-server.org">
-        <!--img src="https://hapi-server.github.io/logos/HAPI-bw.svg" alt="HAPI Logo"/></a-->
-        <img src="css/HAPI-DE-bw.svg" alt="HAPI Logo" width="100%"/></a>
+        <img src="https://hapi-server.github.io/logos/HAPI-bw.svg" alt="HAPI Logo"/></a>
+        <span class="hapi" style="display: block; text-align: center;">Data Explorer</span>
       </div>
 
     <div id="footer">
@@ -325,9 +329,10 @@
     <div id="overviewinfo">
       <b>Overview</b>
       <p>
-        HAPI Data Explorer is an interface to HAPI servers. The Heliophysics Data Application Programmer's Interface 
-        (<a href="https://hapi-server.org/">HAPI</a>) 
-        specification is a time series download and streaming format specification.
+        <span class="hapi">HAPI Data Explorer</span> is an interface to 
+        <a href="https://hapi-server.org/">HAPI</a> 
+        (Heliophysics Data Application Programmer's Interface) servers. 
+        HAPI is a specification for time series download and streaming.
       </p>
       <p>
         When data are available from a HAPI server, there is no need to download data files and write custom file reader programs or to install custom software packages to access data for each data provider. Using a HAPI client library, data can be loaded into an array using a single command in 
@@ -409,14 +414,10 @@
           Use this interface to 
           <ul>
             <li>
-              generate a 
-              <a title="Heliphysics Data Application Interface: https://hapi-server.org/"
-                 href="https://hapi-server.org/">HAPI
-              </a>
-              URL to download data,
+              generate a HAPI URL to download data,
             </li>
             <li>
-              plot data from a HAPI server, and
+              plot data, and
             </li>
             <li>generate scripts (with install instructions) that read and plot the selected parameter using HAPI clients for
 
@@ -445,12 +446,14 @@
 
               <code>Wget</code>.
 
-              Example scripts can be created using links in "Example Queries".
+              Example scripts can be created using links in "Example Queries" or
+              by selecting <code>Return: script</code> in the drop-down menu after
+              selecting a server, dataset, parameters, and time range.
             </li>
           </ul>
         </li>
         <li>
-          Begin by selecting a HAPI-enabled data server on the left or selecting an example query below.
+          Begin by selecting a HAPI-enabled data server in the drop-down menu or selecting an example query below.
         </li>
       </ul>
     </div>

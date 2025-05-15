@@ -26,6 +26,12 @@ li.ui-menu-item {
 	white-space: nowrap;
 }
 
+.hapi {
+  font-family: "Lobster", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .email {
 	font-style: monospace;
 }

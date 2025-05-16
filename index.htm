@@ -143,6 +143,7 @@
           "verifier": verifierURL(VERIFIER),
           "proxy": proxyServerURL(PROXYSERVER), // false => no proxy
           "meta": metaServerURL(METASERVER),   // false => no meta
+          "availabilities": `${metaServerURL(METASERVER)}/data/availabilities`,
           "metadataTimeout": 10000,
           "allTimeout": 5000,
 
@@ -308,7 +309,7 @@
 
     <div id="getStatus">
       <div id="allRequestError" class="requestError"></div>
-      <div id="allRequestWarning" class="requestWarning"></div>
+      <div id="allRequestWarning" class="requestWarning" style="position:absolute"></div>
       <div id="datasetsRequestError" class="requestError"></div>
       <div id="dataRequestError" class="requestError"></div>
     </div>
@@ -468,7 +469,7 @@
       <div id="all-example-details-body"></div>
     </details>
 
-    <details id="time-range-details" class="force-show-scroll">
+    <details id="time-range-details" display="none">
       <summary><b>Time range coverage</b>&nbsp;<a title="Open in new tab" target="_blank"><font size="-1">↗</font></a></summary>
       <iframe id="iframe" name="iframe" width="100%" height="100%" style="border:none"></iframe>
     </details>

@@ -135,10 +135,11 @@ pre {
 
  .requestWarning {
 		border: 2px solid black;
-		background-color: yellow;
+		background-color: rgba(255,255,0,0.9);
 		padding: 0.5em;
 		margin-bottom: 0.5em;
 		display: none;
+		left: 40%; /* Ideally would be 50%-14em, which is width of left column */
 	}
 
 	.requestError {

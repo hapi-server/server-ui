@@ -136,12 +136,14 @@ function servers (cb) {
 
     const selectedServer = selected('server')
 
-    let metaURL = window.HAPIUI.options.meta
-    metaURL = `${metaURL}/data/availability/${selectedServer}/svg/${selectedServer}.html`
-    $('#time-range-details').show()
-    $('#time-range-details summary a').attr("href", metaURL)
-    $('#iframe').attr('src', metaURL)
-    $('#iframe').css('height', '50vh')
+    let metaURL = window.HAPIUI.options.availabilities
+    if (metaURL !== false) {
+      metaURL = `${metaURL}/${selectedServer}/svg/${selectedServer}.html`
+      $('#time-range-details').show()
+      $('#time-range-details summary a').attr("href", metaURL)
+      $('#iframe').attr('src', metaURL)
+      $('#iframe').css('height', '50vh')
+    }
 
     if (!servers.info[selectedServer]) {
       // This will occur if HAPI URL is entered into server dropdown.

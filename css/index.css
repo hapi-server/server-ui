@@ -26,10 +26,12 @@ li.ui-menu-item {
 	white-space: nowrap;
 }
 
-.hapi {
-  font-family: "Lobster", sans-serif;
-  font-weight: 400;
+.hapi  {
+  font-family: "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
   font-style: normal;
+  font-variation-settings: "wdth" 100;
 }
 
 .email {
@@ -273,10 +275,11 @@ span.id {
 	padding-bottom: 2px;
 }
 
+/* Force scrollbar to show on OS-X (so user knows it is scrollable */
 /* https://simurai.com/blog/2011/07/26/webkit-scrollbar */
 .ui-autocomplete::-webkit-scrollbar {
-    -webkit-appearance: none;
-    width: 7px;
+	-webkit-appearance: none;
+	width: 7px;
 }
 .ui-autocomplete::-webkit-scrollbar-thumb {
     border-radius: 4px;

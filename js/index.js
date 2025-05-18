@@ -543,7 +543,7 @@ function parameters (cb) {
     }
     if (res.contact) {
       $('#datasetinfo ul')
-        .append('<li>Dataset contact: ' + res.contact + '</li>')
+        .append('<li>Dataset contact: ' + html.mailtoLink(null, res.contact, url) + '</li>')
     }
 
     html.showJSONOnClick('dataset', url, '#datasetinfo')

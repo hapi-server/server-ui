@@ -144,6 +144,7 @@ function servers (cb) {
     if (metaURL !== false) {
       metaURL = `${metaURL}/${selectedServer}/svg/${selectedServer}.html`
       $('#time-range-details').show()
+      $('#time-range-details  summary .selected-server').html(selected('server') + '&nbsp;')
       $('#time-range-details summary a').attr("href", metaURL)
       $('#iframe').attr('src', metaURL)
       $('#iframe').css('height', '50vh')
@@ -185,6 +186,7 @@ function servers (cb) {
 
   function showSingleServerExamples () {
     $('#all-example-details-body > div').hide()
+    $('#all-example-details summary .selected-server').html(selected('server') + '&nbsp;')
     $(`#${util.validHTMLID(selected('server'))}-examples`).show()
   }
 
@@ -789,11 +791,15 @@ function format (cb) {
     values =
         [
           {
-            label: 'hapiplot',
+            label: 'Plot pager',
+            value: 'hapiplot-plotpager'
+          },
+          {
+            label: 'HAPI plot perver',
             value: 'hapiplot'
           },
           {
-            label: 'Autoplot',
+            label: 'Autoplot plot perver',
             value: 'autoplot'
           }
         ]

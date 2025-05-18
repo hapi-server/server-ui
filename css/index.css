@@ -146,7 +146,34 @@ div[data-tooltip]:after {
 		margin-bottom: 0.5em;
 	}
 
- .help {
+	/* data-tooltip idea from https://stackoverflow.com/a/71250946/1491619 */
+  [data-tooltip] {
+    position: relative;
+  }
+
+  [data-tooltip]:before {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 0em;
+    bottom: 100%; /* put it on the top */
+    background-color: white;
+    width: max-content;
+    opacity: 0;
+		border: 1px solid black;
+  	border-radius: 4px;
+		padding: 0.25em;
+    -webkit-transition: opacity 0.1s ease-in-out;
+  }
+
+  [data-tooltip]:hover:before {
+    opacity: 1;
+  }
+
+  div[data-tooltip]:before {
+    left: 0px!important;
+  }
+
+	.help {
 		border: 2px solid black;
 		border-radius: 8px;
 		background-color: white;
@@ -181,6 +208,9 @@ div[data-tooltip]:after {
 		display: none;
 	}
 
+	.selected-server {
+		color: var(--hapi-dark-blue-bold)
+	}
 	#all-example-details {
 		display: none;
 		margin-top: 0.7em;

@@ -92,6 +92,9 @@ pre {
 		border: 1px solid rgb(0,0,0);
 	}
 
+div[data-tooltip]:after {
+	left: 5px!important;
+}
 #options-details {
   margin-bottom: 5px;
 }
@@ -125,18 +128,34 @@ pre {
 		margin-bottom: 0.5em;
 	}
 
-	#appWarning {
+ .help {
 		border: 2px solid black;
-		background-color: yellow;
+		border-radius: 8px;
+		background-color: white;
 		padding: 0.5em;
+		position: absolute;
 		margin-bottom: 0.5em;
 		display: none;
+		z-index: 101;
+		left: 14em; /* Ideally would be 50%-14em, which is width of left column */
 	}
 
- .requestWarning {
+	.help ul {
+		margin: 0px;
+		margin-left: 0.75em;
+		padding: 0px;
+	}
+
+	a[id="time-range-link"]::after {
+		content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+		margin: 0 0px 0 0px;
+	}
+
+	.warning {
 		border: 2px solid black;
-		background-color: rgba(255,255,0,0.9);
+		background-color: rgba(255, 255, 0, 0.8);
 		padding: 0.5em;
+		position: absolute;
 		margin-bottom: 0.5em;
 		display: none;
 		left: 40%; /* Ideally would be 50%-14em, which is width of left column */
@@ -216,7 +235,7 @@ pre {
 			float: left;
 			position: absolute;
 			opacity: 0.9;
-			z-index: 100;
+			z-index: 1;
 		}
 
 		#scripttext {
@@ -244,8 +263,14 @@ pre {
 button.simple {
 	background-color: white;
 	color: black;
-	border:1px solid black;
-	margin-top:5px;
+	border: 1px solid black;
+	margin-top: 5px;
+}
+
+.divider {
+	margin: 1em 0px;
+	border: 0px;
+	border-top: 1px solid black
 }
 
 .ui-widget {
@@ -349,11 +374,10 @@ span.id {
 
 #footer {
   font-size: 90%;
-	margin-left: 1em;
 	background-color: white;
 	position: fixed;
-	margin: 1em;
-	width: 15em;
+	padding: 1em;
+	width: 12em;
 	bottom: 0;
 	left: 0;
 	right: 0;

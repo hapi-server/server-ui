@@ -242,9 +242,9 @@ function get (options, cb) {
       } else {
         // xhr will be AJAX xhr or fetch Error.
         const emsg = xhr.statusText || xhr.responseText || xhr.message
-        console.log(xhr.statusText)
-        console.log(xhr.responseText)
-        console.log(xhr.message)
+        console.log(`xhr.statusText: ${xhr.statusText}`)
+        console.log(`xhr.responseText: ${xhr.responseText}`)
+        console.log(`xhr.message: ${xhr.message}`)
         const msg =
                   'Error encountered when attempting to retrieve ' +
                   html.aLink(url) +

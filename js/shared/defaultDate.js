@@ -10,14 +10,30 @@ if (typeof dayjs === 'undefined') {
   dayjs.extend(duration)
 }
 
-function stop (meta, end) {
-  let stopDate = meta.sampleStopDate
-  if (stopDate) {
-    return stopDate
+function normalizeTime (dateTime) {
+  //alert(`'${dateTime}'`)
+  dateTime = dateTime.trim()
+  if (dateTime.endsWith('Z')) {
+    return dateTime.slice(0, -1)
+  }
+  return dateTime
+}
+
+function stop (meta, requestedStop) {
+  if (requestedStop) {
+    const _stop = normalizeTime(meta.stopDate)
+    const _start = normalizeTime(meta.startDate)
+    const _requestedStop = normalizeTime(requestedStop)
+    const a = dayjs(_requestedStop).valueOf() >= dayjs(_start).valueOf()
+    const b = dayjs(_requestedStop).valueOf() <= dayjs(_stop).valueOf()
+    if (a && b) {
+      return requestedStop
+    }
+    return stop(meta)
   }
 
-  if (end === true) {
-    return meta.stopDate
+  if (!requestedStop && meta.sampleStopDate) {
+    return meta.sampleStopDate
   }
 
   const cadenceString = meta.cadence || 'PT1M'
@@ -49,14 +65,6 @@ function stop (meta, end) {
     stopDate = meta.stopDate
   }
   return stopDate
-}
-
-function normalizeTime (dateTime) {
-  dateTime = dateTime.trim()
-  if (dateTime.endsWith('Z')) {
-    return dateTime.slice(0, -1)
-  }
-  return dateTime
 }
 
 function start (meta, requestedStart) {

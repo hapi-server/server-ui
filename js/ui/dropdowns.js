@@ -15,9 +15,15 @@ function dropdowns (funs, wrapper, i) {
 
   util.log(`dropdowns(): Calling ${funs[i].name}() to get dropdown list entries.`)
 
-  // setTimeout(() => funs[i](cb), 1000); // To simulate slow response.
-  const timeoutId = setTimeout(() => {
-    $('#dropdowns' + (i)).text('Fetching content ...').show()
+  if (dropdowns.timeoutId) {
+    clearTimeout(dropdowns.timeoutId)
+    dropdowns.timeoutId = null
+    $('#dropdowns' + (i)).empty()
+  }
+  dropdowns.timeoutId = setTimeout(() => {
+    if (!$('#dropdowns' + (i)).length) {
+      $('#dropdowns' + (i)).text('Fetching content ...').show()
+    }
   }, 300)
 
   // Call dropdown function, which generates menu list then calls cb() with it.
@@ -81,7 +87,7 @@ function dropdowns (funs, wrapper, i) {
   }
 
   function cb (list, autoOpen) {
-    clearTimeout(timeoutId)
+    clearTimeout(dropdowns.timeoutId)
 
     util.log('dropdowns.cb(): Called with list')
     util.log(list)
@@ -119,13 +125,11 @@ function dropdowns (funs, wrapper, i) {
       .append('<span' +
           ' class="dropdown-list"' +
           ' id="' + id + '-list"' +
-          ' title="' + title1 + '"' +
           ' style="cursor:pointer">▶</span>')
       .append('<input' +
             ' class="dropdown-input"' +
             ' id="' + id + '"' +
             ' label="' + label + '"' +
-            ' title="' + title2 + '"' +
             ' value="' + label + '"/>')
 
     const input = 'input[id=' + id + ']'
@@ -201,10 +205,11 @@ function dropdowns (funs, wrapper, i) {
       $(input).keypress(function (e) {
         util.log('dropdowns.cb.keypress(): Event handler for .keypress() called.')
         const value = $(e.target).attr('value')
-        if (e.keyCode == 13) {
+        if (e.keyCode === 13) {
           // Return key
           const msg = 'dropdowns.cb.keypress(): Enter key pressed. select event. '
           util.log(msg + `Triggering select with item value = ${value}`)
+          // Note that event is undefined, so next line not doing anything.
           $(input)
             .val(value).data('autocomplete')
             ._trigger('select', event, { item: value })

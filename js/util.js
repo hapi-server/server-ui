@@ -76,6 +76,21 @@ const util = {
     return `${number} ${' KMGTP'.charAt(e) + 'B'}`
   },
 
+  checkTime: function (which, time) {
+    if (time === undefined || time === null) return false
+
+    const isValid = dayjs(util.doy2ymd(time.replace('Z', ''))).isValid()
+    if (isValid) {
+      util.log('util.checkTime(): ' + which + ' = ' + time)
+      $('#' + which + '-list').css('color', 'black').attr('title', '')
+      return true
+    } else {
+      util.log('util.checkTime(): ' + which + ' is not a string of form YYYY-MM-DDTHH:MM:SS.mmmμμμnnnZ (or truncated versions). Setting color to red.')
+      $('#' + which + '-list').css('color', 'red').attr('title', 'start ≥ stop')
+      return false
+    }
+  },
+
   checkTimes: function (which, start, stop) {
     if (start && stop) {
       util.log('util.checkTimes(): starttime = ' + start)
@@ -112,6 +127,20 @@ const util = {
     return id
   },
 
+  uniqueElements: function (arr) {
+    // Unique elements in array without sorting.
+    // If sorting is desired, use [...new Set(possibles.filter(Boolean))]
+
+    const seen = new Set()
+    return arr.filter(item => {
+      if (!seen.has(item)) {
+        seen.add(item)
+        return true
+      }
+      return false
+    })
+  },
+
   validHTMLID: function (s) {
     // Convert id to a hash if it contains disallowed characters for an HTML id.
     // Based on following link, "TestData2.0" should not need hashing, I find problems if "." is in id.
@@ -144,7 +173,7 @@ const util = {
     $('#appError').empty().hide()
     // Catch and report uncaught errors.
     window.onerror = function (message, fileName, lineNumber) {
-      console.trace()
+      //console.trace()
       fileName = fileName.replace(window.location, '')
       let msg = ''
       // msg = "Error. Please post URL to the ";

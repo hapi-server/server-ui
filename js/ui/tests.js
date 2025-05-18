@@ -31,28 +31,29 @@ tests.runTest = function (testNumber) {
   const testFunction = testObject.testFunction
 
   if (testObject.beforeTest) {
+    console.log('tests.runTest(): Calling beforeTest().')
     testObject.beforeTest()
   } else {
-    util.log('tests.runTest(): Setting window.location.hash=\'\'.')
+    console.log('tests.runTest(): Setting window.location.hash=\'\'.')
     window.location.hash = ''
   }
 
   $('#test-' + testNumber).text('… ')
   console.log(`tests.runTest(): Setting window.location.hash='${testObject.url}' in ${beforeTestWait} ms.`)
   setTimeout(() => {
-    util.log(`tests.runTest(): Setting window.location.hash='${testObject.url}'.`)
+    console.log(`tests.runTest(): Setting window.location.hash='${testObject.url}'.`)
     window.location.hash = testObject.url
     setTimeout(() => {
       console.log(`tests.runTest(): Calling testFunction for '${testObject.label}' in ${testObject.wait} ms.`)
       testFunction(testObject.url, (err, result) => {
         testObject.passed = result
         testObject.error = err
-        finished(err, testObject)
+        finished(testObject)
       })
     }, testObject.wait)
   }, beforeTestWait)
 
-  function finished (err, testObject) {
+  function finished (testObject) {
     const resultString = testObject.passed ? 'PASS' : 'FAIL'
     const msg = `tests.finished(): %c${resultString}%c for '${testObject.label}'`
     if (testObject.passed) {
@@ -266,30 +267,56 @@ tests.testArray = [
     }
   },
   {
+    url: '#server=TestData2.0&dataset=dataset3&parameters=&start=]',
+    label: 'Trigger alert for invalid start',
+    onclick: '',
+    wait: 1000,
+    testFunction: function (url, cb) {
+      cb(null, $('#start').val() === '1970-01-01Z')
+    }
+  },
+  {
+    url: '#server=TestData2.0&dataset=dataset3&parameters=&start=1970-01-01Z&stop=]',
+    label: 'Trigger alert for invalid stop',
+    onclick: '',
+    wait: 1000,
+    testFunction: function (url, cb) {
+      cb(null, $('#stop').val() === '1970-01-03Z')
+    }
+  },
+  {
     url: '',
     label: 'Enter URL in server dropdown',
-    wait: 0,
+    wait: 1000,
     onclick: '',
     testFunction: function (url, cb) {
-      main()
       url = 'https://hapi-server.org/servers/TestData3.1/hapi'
-      $('input[id=server]')
-        .val(url)
-        .data('autocomplete')
-        ._trigger('select', null, { item: url })
-      cb(null, true)
+      $('input[id=server]').val(url).data('autocomplete')
+      setTimeout(() => {
+        const e = $.Event('keypress', { key: 'Enter', keyCode: 13, which: 13 })
+        $('input[id=server]').trigger(e)
+        setTimeout(() => {
+          const result = $('#dataset').is(':visible')
+          const hash = window.location.hash
+          console.log(result)
+          console.log(hash, `#server=${url}`)
+          console.log(hash === `#server=${url}`)
+          cb(null, result && hash === `#server=${url}`)
+        }, 1000)
+      }, 100)
     }
   },
   {
     url: '#server=X',
     label: 'Trigger invalid server selection',
-    beforeTestWait: '1000',
+    // Not working with beforeTest and beforeTestWait.
+    //beforeTestWait: '1000',
     beforeTest: function () {
-      window.location.hash = '#server=TestData2.0'
+      //window.location.hash = '#server=TestData2.0'
     },
     wait: 1000,
     testFunction: function (url, cb) {
-      const result = location.hash === ''
+      const result = window.location.hash === ''
       return cb(null, result)
     }
   },

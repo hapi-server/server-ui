@@ -90,14 +90,14 @@ function plot (selectedParameter, cb) {
           if (msg) {
             prepDOM()
             finalizeDOM(msg, xurl)
-	    return;
+            return;
           }
           util.log('plot(): Received ' + xurl)
           url = $(xml).find('Name').text()
           if (!url) {
-	    prepDOM()
+            prepDOM()
             finalizeDOM('No image URL in returned XML', xurl)
-	    return  
+            return
           }
           util.log('plot(): Referenced URL: ' + url)
           if (format === 'pdf') {
@@ -217,7 +217,7 @@ function plot (selectedParameter, cb) {
         .attr('src', url)
         .load(() => {
           finished()
-        }).error((err) => {
+        }).error(() => {
           $(`#${parentElementId} img`).remove()
           // https://stackoverflow.com/questions/41958664/catch-an-image-specific-error-in-javascript
           // Would need to use an AJAX call get the actual error. The error
@@ -267,7 +267,7 @@ function plot (selectedParameter, cb) {
   function finalizeDOM (err, url) {
     $('#output details').attr('open', false)
     $(`#${parentElementId}`).show().attr('open', true)
-      if (err) {
+    if (err) {
       const msg = `Error when requesting ${html.aLink(url, 'image')}: ${err}`
       $(`#${parentElementId} #plotRequestError`).html(msg).show()
       return

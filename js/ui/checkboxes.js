@@ -15,6 +15,7 @@ function checkboxes (useDefaults) {
   } else {
     defaults = {
       showdata: true,
+      showhelp: true,
       showrequests: true,
       showverifierlink: false,
       showexamplequeries: true,
@@ -34,9 +35,22 @@ function checkboxes (useDefaults) {
 
   // TODO: Similar code.
 
+  $('#delete-history').unbind('click')
+  $('#delete-history').click(function () {
+    localStorage.removeItem('server-ui-last-starts')
+    localStorage.removeItem('server-ui-last-stops')
+    alert('History cleared.')
+    main()
+  })
+
   $('#reset-options').unbind('click')
   $('#reset-options').click(function () {
     checkboxes(false)
+  })
+
+  $('#showhelp').attr('checked', defaults.showhelp)
+  $('#showhelp').change(function () {
+    savedefaults()
   })
 
   $('#showdata').attr('checked', defaults.showdata)
@@ -147,9 +161,9 @@ function checkboxes (useDefaults) {
   $('#showuitests').attr('checked', defaults.showuitests)
   $('#showuitests').change(function () {
     if (this.checked) {
-      $('#uitests').show()
+      $('#uitests-details').show()
     } else {
-      $('#uitests').hide()
+      $('#uitests-details').hide()
     }
     savedefaults()
   }).trigger('change')

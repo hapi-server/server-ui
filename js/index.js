@@ -1,6 +1,7 @@
 function main () {
   window.HAPIUI.qsInitial = query.qsInitial()
-  console.log(query.qsInitial())
+  util.log(`main(): Initial query string: ${window.HAPIUI.qsInitial}`)
+
   // Unbind all event listeners.
   $('*').unbind()
 
@@ -12,6 +13,9 @@ function main () {
 
   // Bind events to changes in checkbox state.
   checkboxes()
+
+  // Must come after checkboxes() because it uses the state of the checkboxes.
+  help()
 
   // Bind events to changes in the hash part of the URL
   hash.hashchange()
@@ -42,7 +46,7 @@ function selected (name) {
 }
 
 function about (url, HAPI) {
-  $('#aboutRequestWarning').empty().hide()
+  $('#appWarning').empty().hide()
   $('#aboutRequestURL').empty().hide()
   $('#aboutRequestTiming').empty().hide()
 
@@ -66,8 +70,8 @@ function about (url, HAPI) {
       process(json)
       return
     }
-    $('#aboutRequestWarning').html(err).show()
-    setTimeout(() => $('#aboutRequestWarning').empty().hide(), 5000)
+    $('#appWarning').html(err).show()
+    setTimeout(() => $('#appWarning').empty().hide(), 5000)
     util.log('about(): Problem with /about response from ' + url)
   })
 
@@ -105,7 +109,7 @@ function servers (cb) {
   const serverList = window.HAPIUI.options.serverList
   const serverListFallback = window.HAPIUI.options.serverListFallback
   $('#allRequestError').empty().hide()
-  $('#allRequestWarning').empty().hide()
+  $('#appWarning').empty().hide()
 
   const getOptions = { url: serverList, ...defaultOptions }
   get(getOptions, function (err, text) {
@@ -115,10 +119,10 @@ function servers (cb) {
     }
     util.log(serverList + ' not found.\n' + 'Trying fall-back of ' + serverListFallback)
     const warning = serverList + ' not found. Will try ' + serverListFallback
-    $('#allRequestWarning').html(warning).show()
+    $('#appWarning').html(warning).show()
+    setTimeout(() => $('#appWarning').empty().hide(), 2000)
     get({ url: serverListFallback, ...defaultOptions }, function (err, alltxt) {
       if (!err) {
-        setTimeout(() => $('#allRequestWarning').empty().hide(), 2000)
         process(alltxt, serverList)
         return
       }
@@ -620,85 +624,108 @@ function parameters (cb) {
 
 // Start time dropdown
 function starttime (cb) {
-  timeDropdown('start', cb)
+  timeDropdown(starttime, cb)
+}
+function stoptime (cb) {
+  timeDropdown(stoptime, cb)
 }
 
-function timeDropdown (which, cb) {
-  const whichUpperCase = which.charAt(0).toUpperCase() + which.slice(1)
-  // Because only one value is set in dropdown, it is automatically selected
-  // and the next dropdown is called.
-  util.log(`${which}(): Called.`)
+function timeDropdown (fn, cb) {
+  let nameUpperCase
+  let name = fn.name
+  if (name === 'starttime') {
+    name = 'start'
+    nameUpperCase = 'Start'
+  }
+  if (name === 'stoptime') {
+    name = 'stop'
+    nameUpperCase = 'Stop'
+  }
 
-  timeDropdown.id = which
-  timeDropdown.label = whichUpperCase
-  timeDropdown.clearFollowing = false
+  util.log(`${name}time(): Called.`)
 
-  timeDropdown.onselect = function () {
-    util.log(`${which}.onselect(): Called.`)
-    if (!timeDropdown.lasts) {
-      timeDropdown.lasts = []
+  fn.id = name
+  fn.label = nameUpperCase
+  fn.clearFollowing = false
+
+  const storage = `server-ui-last-${name}s`
+
+  fn.onselect = function () {
+    util.log(`${name}time.onselect(): Called.`)
+    util.log(`${name}time.onselect(): Reading server-ui-last-${name}s in localStorage.`)
+    let lasts = localStorage.getItem(storage)
+    lasts = JSON.parse(lasts)
+    util.log(`${name}time.onselect(): ${storage} = ${JSON.stringify(lasts)}.`)
+    if (!lasts) {
+      util.log(`${name}time.onselect(): No ${storage} in localStorage. Setting = [].`)
+      lasts = []
     }
-    timeDropdown.lasts.push(selected(which))
+    if (util.checkTime(name, selected(name)) === true) {
+      if (selected(name) in lasts) {
+        util.log(`${name}time.onselect(): ${selected(name)} is already in ${storage}. Not appending.`)
+      } else {
+        util.log(`${name}time.onselect(): Appending ${selected(name)} to ${name}.lasts = ${JSON.stringify(name.lasts)}.`)
+        lasts.push(selected(name))
+        util.log(`${name}time.onselect(): Writing ${storage} in localStorage.`)
+        localStorage.setItem(storage, JSON.stringify(lasts))
+      }
+    } else {
+      util.log(`${name}time(): ${selected(name)} is not a valid time. Not appending to ${storage}.`)
+    }
+
     if (selected('format')) {
-      if (util.checkTimes(which, selected('start'), selected('stop'))) {
+      if (util.checkTimes(name, selected('start'), selected('stop'))) {
+        util.log(`${name}time.onselect(): start and stop times are valid. Updating #output.`)
         output() // Update output
       }
     }
   }
-
   const info = datasets.info[selected('dataset')].info
 
-  let uniques = [
-    info[which + 'Date'],
-    info['sample' + whichUpperCase + 'Date'],
-    window.HAPIUI.qsInitial[which],
-    ...timeDropdown.lasts || []
+  let defaultDate_ = defaultDate[name](info)
+  util.log(`${name}time(): defaultDate['${name}'](info) = ${defaultDate_}`)
+
+  util.log(`${name}time(): Reading ${storage} in localStorage.`)
+  let lasts = localStorage.getItem(storage)
+  lasts = JSON.parse(lasts)
+  util.log(`${name}time(): Found ${storage} = ${lasts}.`)
+
+  if (window.HAPIUI.qsInitial[name]) {
+    if (!dayjs(util.doy2ymd(window.HAPIUI.qsInitial[name].replace('Z', ''))).isValid()) {
+      const amsg = `Invalid ${name} time in URL: '${window.HAPIUI.qsInitial[name]}'. Using default instead.`
+      util.log(`Showing alert ${amsg}`)
+      alert(amsg)
+      window.HAPIUI.qsInitial[name] = null
+    }
+  }
+
+  let possibles = [
+    name === 'stop' ? info.stopDate : '',
+    info['sample' + nameUpperCase + 'Date'] || '',
+    ...lasts || [],
+    defaultDate_,
+    window.HAPIUI.qsInitial[name] || ''
   ]
-  uniques = [...new Set(uniques.filter(Boolean))]
 
-  const list = [{ label: info[which + 'Date'], value: info[which + 'Date'] }]
+  util.log(`${name}time(): possible times to put in drop-down = ${JSON.stringify(possibles)}`)
+  let uniques = util.uniqueElements(possibles).filter(item => item !== '')
+  util.log(`${name}time(): uniques = ${JSON.stringify(uniques)}`)
+
+  const list = [{ label: defaultDate_, value: defaultDate_ }]
   for (let i = 1; i < uniques.length; i++) {
-    if (uniques[0] !== defaultDate[which](info, uniques[i])) {
-      // Only add if different from default and acceptable.
+    if (defaultDate_ !== defaultDate[name](info, uniques[i])) {
+      // Only add to list if different from default and acceptable.
+      // defaultDate() returns different value if both conditions true.
+      util.log(`${name}time(): adding ${uniques[i]} to list of times`)
       list.push({ label: uniques[i], value: uniques[i] })
+    } else {
+      util.log(`${name}time(): not adding ${uniques[i]} to list of times`)
     }
   }
+
+  util.log(`${name}time(): Setting selected time to ${list[list.length - 1].value}`)
   list[list.length - 1].selected = true
-  delete window.HAPIUI.qsInitial[which]
-  cb(list)
-}
-
-// Stop time dropdown
-function stoptime (cb) {
-  // Because only one value is set in dropdown, it is automatically selected
-  // and the next dropdown is called.
-  util.log('stoptime(): Called.')
-
-  stoptime.id = 'stop'
-  stoptime.label = 'Stop'
-  stoptime.clearFollowing = false
-
-  stoptime.onselect = function () {
-    util.log('stoptime.onselect(): Called.')
-    if (selected('format')) {
-      if (util.checkTimes('stop', selected('start'), selected('stop'))) {
-        output() // Update output
-      }
-    }
-  }
-
-  const qs = query.parseQueryString()
-  const list = [{}]
-  if (window.HAPIUI.qsInitial.stop !== undefined) {
-    list[0].label = window.HAPIUI.qsInitial.stop
-    list[0].value = window.HAPIUI.qsInitial.stop
-  } else {
-    const meta = datasets.info[selected('dataset')].info
-    const stop = defaultDate.stop(meta)
-    list[0].label = stop
-    list[0].value = stop
-  }
-  delete window.HAPIUI.qsInitial.stop
+  delete window.HAPIUI.qsInitial[name]
   cb(list)
 }
 
@@ -709,6 +736,9 @@ function returntype (cb) {
   returntype.clearFollowing = true
 
   returntype.onselect = function () {
+    $('#output').prevAll('details').each(function () {
+      $(this).attr('open', false)
+    })
     $(window).scrollTop(0)
   }
 

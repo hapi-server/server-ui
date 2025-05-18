@@ -67,6 +67,7 @@
   <script type="text/javascript" src="js/shared/createScript.js"></script>
   <script type="text/javascript" src="js/shared/defaultDate.js"></script>
 
+  <script type="text/javascript" src="js/ui/help.js"></script>
   <script type="text/javascript" src="js/ui/checkboxes.js"></script>
   <script type="text/javascript" src="js/ui/dropdowns.js"></script>
   <script type="text/javascript" src="js/ui/examples.js"></script>
@@ -186,11 +187,19 @@
         <span>Options</span>
       </summary>
       <div id="optionscheckboxes">
+
         <div title="When requesting data, show data in browser instead of only providing a download link.">
           <div style="margin-top: 0.5em; font-weight: bold;">Show</div>
           <label>
             <input id="showdata" type="checkbox" value="">
               &nbsp;data
+          </label>
+        </div>
+
+        <div title="Show help messages.">
+          <label>
+            <input id="showhelp" type="checkbox" value="">
+            &nbsp;show help pop-ups
           </label>
         </div>
 
@@ -262,6 +271,10 @@
       <button id="reset-options" class="simple" type="button" title="Select defaults">
         Reset options
       </button>
+      <button id="delete-history" class="simple" type="button" title="Delete cache of previously selected start and stop times.">
+        Delete history
+      </button>
+      <hr class="divider">
     </details>
 
     <div id="logo">
@@ -301,20 +314,21 @@
   <!-- Main column -->
   <div id="infodiv">
 
-    <div id="appError">
+    <div id="appHelp" class="help">
     </div>
 
-    <div id="appWarning">
+    <div id="appError" class="error">
+    </div>
+
+    <div id="appWarning" class="warning">
     </div>
 
     <div id="getStatus">
       <div id="allRequestError" class="requestError"></div>
-      <div id="allRequestWarning" class="requestWarning" style="position:absolute"></div>
       <div id="datasetsRequestError" class="requestError"></div>
       <div id="dataRequestError" class="requestError"></div>
     </div>
 
-    <div id="uitests">
       <details id="uitests-details" open>
         <summary>
           <b>UI Test Queries</b>
@@ -325,7 +339,6 @@
         </button-->
       </details>
       <pre id="uitests-output"></pre>
-    </div>
 
     <div id="overviewinfo">
       <b>Overview</b>
@@ -470,7 +483,7 @@
     </details>
 
     <details id="time-range-details" display="none">
-      <summary><b>Time range coverage</b>&nbsp;<a title="Open in new tab" target="_blank"><font size="-1">↗</font></a></summary>
+      <summary><b>Time range coverage</b>&nbsp;<a title="Open in new tab" id="time-range-link" target="_blank"></a></summary>
       <iframe id="iframe" name="iframe" width="100%" height="100%" style="border:none"></iframe>
     </details>
 
@@ -545,7 +558,6 @@
             <span id="catalogRequestTiming" class="requestTime"></span>
           </div>
           <div>
-            <div id="aboutRequestWarning" class="requestWarning"></div>
             <span id="aboutRequestURL" class="requestURL"></span>
             <span id="aboutRequestTiming" class="requestTime"></span>
           </div>

@@ -145,7 +145,7 @@ function servers (cb) {
       metaURL = `${metaURL}/${selectedServer}/svg/${selectedServer}.html`
       $('#time-range-details').show()
       $('#time-range-details  summary .selected-server').html(selected('server') + '&nbsp;')
-      $('#time-range-details summary a').attr("href", metaURL)
+      $('#time-range-details summary a').attr('href', metaURL)
       $('#iframe').attr('src', metaURL)
       $('#iframe').css('height', '50vh')
     }
@@ -791,12 +791,12 @@ function format (cb) {
     values =
         [
           {
-            label: 'Plot pager',
-            value: 'hapiplot-plotpager'
-          },
-          {
             label: 'HAPI plot perver',
             value: 'hapiplot'
+          },
+          {
+            label: 'Plot pager',
+            value: 'hapiplot-plotpager'
           },
           {
             label: 'Autoplot plot perver',

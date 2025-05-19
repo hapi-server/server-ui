@@ -211,15 +211,14 @@ div[data-tooltip]:after {
 	.selected-server {
 		color: var(--hapi-dark-blue-bold)
 	}
+
 	#all-example-details {
 		display: none;
 		margin-top: 0.7em;
-		margin-bottom: 0.7em;
 	}
 
 	#time-range-details {
 		display: none;
-		margin-top: 0.7em;
 		margin-bottom: 0.7em;
 	}
 
@@ -234,6 +233,10 @@ div[data-tooltip]:after {
 		margin-bottom: 0.7em;
 		display: none;
 	}
+
+#overviewinfo	{
+	margin-top: 0.7em;
+}
 
 #output {
 	margin-bottom: 1em;

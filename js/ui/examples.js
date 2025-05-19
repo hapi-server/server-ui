@@ -83,16 +83,20 @@ function examples (serversObj, cb) {
 
     const options = [
       {
-        label: 'Show plot',
-        args: 'return=image&format=svg'
+        label: 'Show single plot',
+        href: hrefo + '&return=image&format=svg'
+      },
+      {
+        label: 'Show plot pager',
+        href: hrefo + '&return=image&format=gallery'
       },
       {
         label: 'List data',
-        args: 'return=data&format=csv'
+        href: hrefo + '&return=data&format=csv'
       },
       {
         label: 'Show script options',
-        args: 'return=script'
+        href: hrefo + '&return=script'
       }
     ]
 
@@ -101,8 +105,7 @@ function examples (serversObj, cb) {
       const linkText = option.label
       const postText = ` for parameter <code>${linkObj.parameters}</code> ` +
                        `of <code>${linkObj.dataset}</code> dataset`
-      const href = hrefo + '&' + option.args
-      linkHTML = linkHTML + `\n  <li><a href="${href}">${linkText}</a>${postText}</li>`
+      linkHTML = linkHTML + `\n  <li><a href="${option.href}">${linkText}</a>${postText}</li>`
     }
 
     const linkList = '<ul>' + linkHTML + '\n</ul>\n\n'

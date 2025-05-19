@@ -34,18 +34,18 @@ function plot (selectedParameter, cb) {
     }
 
     if (plotserver === 'hapiplot-plotpager') {
-      const height = 'height="512px"'
+      const height = 'height="500px"'
       const width = 'width=100%'
-      const summary = $(`#${parentElementId} #plot-summary`).html()
+      let plotPagerURL = url.replace(`format=${format}`, 'format=gallery')
       const html = `
         <details open>
           <summary>
             Plot pager of <code>${selectedParameter}</code> using <code>${plotserver}</code> plot server. 
-            <a href="${url}" target="_blank" data-tooltip="Open in new tab">
+            <a href="${plotPagerURL}" target="_blank" data-tooltip="Open plot pager in new tab">
               <img src="css/new-tab.svg" style="height: 0.75em">
             </a>
           </summary>
-          <iframe src="${_plotPagerURL(url)}" ${width} ${height}></iframe>
+          <iframe src="${plotPagerURL}" ${width} ${height}></iframe>
         </details>`
       $('#output details').attr('open', false)
       $('#plot-details').after(html)

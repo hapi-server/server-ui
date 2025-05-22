@@ -128,21 +128,22 @@ pre {
 }
 
 [data-tooltip]:after {
-	content: attr(data-tooltip);
-	position: absolute;
-	margin-left: 0.5em;
-	background-color: white;
-	width: max-content;
 	opacity: 0;
-	border: 1px solid var(--hapi-dark-blue);
-	border-radius: 4px;
-	padding: 0.25em;
-	-webkit-transition: opacity 0.1s ease-in-out;
+	width: 0px;
 }
 
 [data-tooltip]:hover:after {
-	transition-delay: var(--data-tooltip-delay);
 	opacity: var(--data-tooltip-hover-opacity);
+	width: max-content;
+	position: absolute;
+	content: attr(data-tooltip);
+	margin-left: 0.5em;
+	background-color: white;
+	border: 1px solid var(--hapi-dark-blue);
+	border-radius: 4px;
+	padding: 0.25em;
+	z-index: 102;
+	transition-delay: var(--data-tooltip-delay);
 }
 
 #options-details {
@@ -197,7 +198,7 @@ pre {
 	}
 
 	.warning {
-		border: 2px solid black;
+		border: 2px solid var(--hapi-dark-blue);
 		background-color: rgba(255, 255, 0, 0.8);
 		padding: 0.5em;
 		position: absolute;
@@ -217,25 +218,18 @@ pre {
 		color: var(--hapi-dark-blue-bold)
 	}
 
+	#uitests-details {
+		display: none;
+	}
+	#server-example-details {
+		display: none;
+	}
+
 	#all-example-details {
 		display: none;
-		margin-top: 0.7em;
 	}
 
 	#time-range-details {
-		display: none;
-		margin-bottom: 0.7em;
-	}
-
-	#server-example-details {
-		display: none;
-		margin-top: 0.7em;
-		margin-bottom: 0.7em;
-	}
-
-	#tests {
-		margin-top: 0.7em;
-		margin-bottom: 0.7em;
 		display: none;
 	}
 
@@ -290,7 +284,7 @@ pre {
 		}
 
 		#scripttext {
-			border: 1px solid black;
+			border: 1px solid var(--hapi-dark-blue)
 			max-height: 50vh;
 			overflow-y: auto;
 		}
@@ -301,7 +295,7 @@ pre {
 	}
 
 		#jsontext {
-			border: 1px solid black;
+			border: 1px solid var(--hapi-dark-blue);
 			max-height: 50vh;
 			overflow-y: auto;
 		}
@@ -321,7 +315,7 @@ button.simple {
 .divider {
 	margin: 1em 0px;
 	border: 0px;
-	border-top: 1px solid black
+	border-top: 1px solid var(--hapi-dark-blue);
 }
 
 .ui-widget {
@@ -446,5 +440,5 @@ span.id {
 	margin-right: 14px;
 	margin-top: 0em;
 	padding-right: 1em;
-	border-right: 1px solid black;
+	border-right: 1px solid var(--hapi-dark-blue);
 }

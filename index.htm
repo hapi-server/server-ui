@@ -173,7 +173,6 @@
 
 <body>
 
-
   <div id="selections">
 
     <!-- Left column -->
@@ -202,7 +201,7 @@
           </label>
         </div>
 
-        <div data-tooltip="Show help messages.">
+        <div data-tooltip="Show help messages when hovering over elements.">
           <label>
             <input id="showhelp" type="checkbox" value="">
             &nbsp;show help pop-ups
@@ -254,7 +253,7 @@
         <div data-tooltip="Show UI test links.">
           <label>
             <input id="showuitests" type="checkbox" value="">
-            &nbsp;UI test links
+            &nbsp;UI test query links
           </label>
         </div>
 
@@ -380,16 +379,16 @@
       <div id="dataRequestError" class="requestError"></div>
     </div>
 
-      <details id="uitests-details" open>
-        <summary>
-          <b>UI Test Queries</b>
-        </summary>
-        <div id="uitests-details-body"></div>
-        <!--button id="tests-run" class="simple" type="button" title="run tests">
-          Execute all tests
-        </button-->
-      </details>
+    <details id="uitests-details" open>
+      <summary>
+        <b>UI Test Queries</b>
+      </summary>
+      <div id="uitests-details-body"></div>
+      <!--button id="tests-run" class="simple" type="button" title="run tests">
+        Execute all tests
+      </button-->
       <pre id="uitests-output"></pre>
+    </details>
 
     <details id="all-example-details">
       <summary>
@@ -567,8 +566,9 @@
 
     <details id="time-range-details" display="none">
       <summary>
-        <b><span class="selected-server"></span>Time range coverage</b>&nbsp;
+        <b><span class="selected-server"></span>Time Range Coverage</b>&nbsp;
         <a target="_blank" data-tooltip="Open time range plots in new tab">
+          <img style="height:0.8em" src="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA/4QAAA0ODwAASP8Ab/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIiIgAAAAAAAAAAAAAAAAAAAAAAAAAAADMzMzMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARERERAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREREREREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAAP/AAD//wAA//8AAAAPAAD//wAA//8AAP//AAAA/wAA//8AAP//AAAAAAAA//8AAP//AAD//wAA"/>
           <img style="margin-bottom: -3px; margin-left: -3px; height: 1em" src="css/images/open_in_new_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"/>
         </a>
       </summary>

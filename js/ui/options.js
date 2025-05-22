@@ -45,7 +45,7 @@ function options (useDefaults) {
 
   $('#reset-options').unbind('click')
   $('#reset-options').click(function () {
-    checkboxes(false)
+    options(false)
   })
 
   $('#showhelp').attr('checked', defaults.showhelp)

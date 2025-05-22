@@ -11,11 +11,8 @@ function main () {
   // Create <details> element for UI test links.
   tests()
 
-  // Bind events to changes in checkbox state.
-  checkboxes()
-
-  // Must come after checkboxes() because it uses the state of the checkboxes.
-  help()
+  // Bind events to changes in options.
+  options()
 
   // Bind events to changes in the hash part of the URL
   hash.hashchange()

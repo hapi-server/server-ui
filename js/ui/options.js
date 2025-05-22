@@ -1,4 +1,4 @@
-function checkboxes (useDefaults) {
+function options (useDefaults) {
   function savedefaults () {
     const state = {}
     $('input[type="checkbox"]').map(function () {
@@ -49,8 +49,44 @@ function checkboxes (useDefaults) {
   })
 
   $('#showhelp').attr('checked', defaults.showhelp)
-  $('#showhelp').change(function () {
-    savedefaults()
+  $('#showhelp')
+    .change(function () {
+      savedefaults()
+      // Help strings for static elements
+      if (this.checked) {
+        document.documentElement.style.setProperty('--data-tooltip-hover-opacity', 1);
+      } else {
+        document.documentElement.style.setProperty('--data-tooltip-hover-opacity', 0);
+      }
+    })
+    .trigger('change')
+
+  // Help for dynamically created elements. Strings are stored in hidden
+  // divs in #appHelp div.
+  $(document)
+    .on('mouseenter', '.dropdown-list, .dropdown-input', (evt) => {
+      if ($('#showhelp').is(':checked')) {
+        let id = $(evt.target).attr('id')
+        // Get help text in hidden div.
+        let helpText = $("#" + id + "-help").html()
+        let root = document.documentElement;
+        let delay = getComputedStyle(root).getPropertyValue('--data-tooltip-delay');
+        if (delay) {
+          if (delay.endsWith('ms')) {
+          delay = parseInt(delay.replace('ms', ''), 10) || 0;
+          } else {
+            delay = parseFloat(delay.replace('s', '')) * 1000;
+          }
+        } else {
+          delay = 0;
+        }
+        $('#appHelp').html(helpText).delay(delay).show(0)
+      }
+  })
+  $(document)
+    .on('mouseleave', '.dropdown-list, .dropdown-input', () => {
+      $('#appHelp').stop(true, true)
+      $('#appHelp').hide()
   })
 
   $('#showdata').attr('checked', defaults.showdata)

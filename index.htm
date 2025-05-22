@@ -71,8 +71,7 @@
   <script type="text/javascript" src="js/shared/createScript.js"></script>
   <script type="text/javascript" src="js/shared/defaultDate.js"></script>
 
-  <script type="text/javascript" src="js/ui/help.js"></script>
-  <script type="text/javascript" src="js/ui/checkboxes.js"></script>
+  <script type="text/javascript" src="js/ui/options.js"></script>
   <script type="text/javascript" src="js/ui/dropdowns.js"></script>
   <script type="text/javascript" src="js/ui/examples.js"></script>
   <script type="text/javascript" src="js/ui/html.js"></script>
@@ -195,7 +194,7 @@
       </summary>
       <div id="optionscheckboxes">
 
-        <div title="When requesting data, show data in browser instead of only providing a download link.">
+        <div data-tooltip="When requesting data, show data in browser (instead of only providing a download link).">
           <div style="margin-top: 0.5em; font-weight: bold;">Show</div>
           <label>
             <input id="showdata" type="checkbox" value="">
@@ -203,56 +202,56 @@
           </label>
         </div>
 
-        <div title="Show help messages.">
+        <div data-tooltip="Show help messages.">
           <label>
             <input id="showhelp" type="checkbox" value="">
             &nbsp;show help pop-ups
           </label>
         </div>
 
-        <div title="Generate and show example queries">
+        <div data-tooltip="Generate and show example queries">
           <label>
             <input id="showexamplequeries" type="checkbox" value="">
             &nbsp;example queries
           </label>
         </div>
 
-        <div title="Keep requested URLs in view after request has succeeded.">
+        <div data-tooltip="Keep requested URLs in view after request has succeeded.">
           <label>
             <input id="showrequests" type="checkbox" value="">
             &nbsp;requested URLs
           </label>
         </div>
 
-        <div title="Show link to server status monitoring results (for debugging server responses)">
+        <div data-tooltip="Show link to server status monitoring results (for debugging server responses)">
             <label>
                 <input id="showstatuslink" type="checkbox" value="">
                 &nbsp;server status link
             </label>
         </div>
 
-        <div title="Show verifier links (for debugging server responses)">
+        <div data-tooltip="Show verifier links (for debugging server responses)">
             <label>
                 <input id="showverifierlink" type="checkbox" value="">
                 &nbsp;verifier links
             </label>
         </div>
 
-        <div title="Show TestData servers (for testing clients)">
+        <div data-tooltip="Show TestData servers (for testing clients)">
             <label>
                 <input id="showtestdatalink" type="checkbox" value="">
                 &nbsp;test servers
             </label>
         </div>
 
-        <div title="Show debug statements in console.">
+        <div data-tooltip="Show debug statements in console.">
           <label>
             <input id="showconsolemessages" type="checkbox" value="">
             &nbsp;logging in console
           </label>
         </div>
 
-        <div title="Show UI test links.">
+        <div data-tooltip="Show UI test links.">
           <label>
             <input id="showuitests" type="checkbox" value="">
             &nbsp;UI test links
@@ -260,18 +259,19 @@
         </div>
 
         <br>
+        <div style="margin-top: 0.5em; font-weight: bold;">Use</div>
 
-        <div title="Use cached images from plot server if available.">
+        <div data-tooltip="Request cached images from plot server, if available.">
           <label>
             <input id="useimagecache" type="checkbox" value="">
-              &nbsp;Use cached images
+              &nbsp;cached images
           </label>
         </div>
 
-        <div title="Use cached data from plot server if available.">
+        <div data-tooltip="Requst plot server to use data from its cache, if available.">
           <label>
             <input id="usedatacache" type="checkbox" value="">
-            &nbsp;Use cached data for images
+            &nbsp;cached data for images
           </label>
         </div>
       </div>
@@ -325,7 +325,47 @@
   <!-- Main column -->
   <div id="infodiv">
 
-    <div id="appHelp" class="help">
+    <div>
+      <div id="appHelp">
+      </div>
+      <div id="server-help" style="display:none">
+        <ul>
+          <li>Enter partial text to search or click ▶ to see full list.</li>
+          <li>Close list using <code>ESC</code> or by clicking triangle.</li>
+          <li>Instructions apply to all drop-downs.</li>
+        </ul>
+      </div>
+      <div id="server-list-help" style="display:none">
+        <ul>
+          <li>Constrain list by entering text in input area to right.</li>
+          <li>Close list using <code>ESC</code> or by clicking triangle.</li>
+          <li>Instructions apply to all lists.</li>
+        </ul>
+      </div>
+      <div id="start-help" style="display:none">
+        Press ⏎ after entering or modifying text to trigger update.
+        <br>
+        Start and stop date/time in format (or reduced version):
+        <ul>
+          <li>&nbsp;YYYY-MM-DDTHH:MM:SS.mmmμμμnnnZ</li>
+          <li>&nbsp;YYYY-DOY...</li>
+        </ul>
+        Stop date/times are <b>inclusive</b>.
+      </div>
+      <div id="start-list-help" style="display:none">
+        Default start date/time is <code>startDate</code> in 
+        <code>/info</code> response.
+      </div>
+      <div id="stop-help" style="display:none">
+        <ul>
+          <li>Press ⏎ after entering or modifying text to trigger update.</li>
+          <li>Stop date/time in same format as start.</li>
+          <li>Stop date/times are <b>exclusive</b>.</li>
+        </ul>
+      </div>
+      <div id="stop-list-help" style="display:none">
+        Press ⏎ after entering or modifying text to trigger update.
+      </div>
     </div>
 
     <div id="appError" class="error">

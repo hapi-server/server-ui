@@ -1,3 +1,10 @@
+:root{
+  --hapi-dark-blue: rgb(34, 67, 113);
+  --hapi-light-blue: rgb(86, 121, 198);
+	--data-tooltip-hover-opacity: 1;
+	--data-tooltip-delay: 0.5s;
+}
+
 body {
 	font-size: 1em;
   height: 100vh;
@@ -31,20 +38,13 @@ li.ui-menu-item {
 	white-space: nowrap;
 }
 
-:root{
-  --hapi-dark-blue-bold: rgb(34, 67, 113);
-}
-
-:root{
-  --hapi-light-blue: rgb(86, 121, 198)
-}
 
 .hapi-light-blue {
 	color: var(--hapi-light-blue)
 }
 
 .hapi-dark-blue-bold {
-	color: var(--hapi-dark-blue-bold);
+	color: var(--hapi-dark-blue);
 	font-weight: bold;
 	font-size: 1.3em;
 }
@@ -121,6 +121,30 @@ pre {
 		border: 1px solid rgb(0,0,0);
 	}
 
+/* data-tooltip idea from https://stackoverflow.com/a/71250946/1491619 */
+
+[data-tooltip] {
+	position: relative;
+}
+
+[data-tooltip]:after {
+	content: attr(data-tooltip);
+	position: absolute;
+	margin-left: 0.5em;
+	background-color: white;
+	width: max-content;
+	opacity: 0;
+	border: 1px solid var(--hapi-dark-blue);
+	border-radius: 4px;
+	padding: 0.25em;
+	-webkit-transition: opacity 0.1s ease-in-out;
+}
+
+[data-tooltip]:hover:after {
+	transition-delay: var(--data-tooltip-delay);
+	opacity: var(--data-tooltip-hover-opacity);
+}
+
 #options-details {
   margin-bottom: 5px;
 }
@@ -154,30 +178,8 @@ pre {
 		margin-bottom: 0.5em;
 	}
 
-	/* data-tooltip idea from https://stackoverflow.com/a/71250946/1491619 */
-  [data-tooltip] {
-    position: relative;
-  }
-
-  [data-tooltip]:after {
-    content: attr(data-tooltip);
-    position: absolute;
-		margin-left: 0.5em;
-		background-color: white;
-    width: max-content;
-    opacity: 0;
-		border: 1px solid black;
-  	border-radius: 4px;
-		padding: 0.25em;
-		-webkit-transition: opacity 0.1s ease-in-out;
-  }
-
-  [data-tooltip]:hover:after {
-    opacity: 1;
-  }
-
-	.help {
-		border: 2px solid black;
+	#appHelp {
+		border: 2px solid var(--hapi-dark-blue);
 		border-radius: 8px;
 		background-color: white;
 		padding: 0.5em;
@@ -185,10 +187,10 @@ pre {
 		margin-bottom: 0.5em;
 		display: none;
 		z-index: 101;
-		left: 14em; /* Ideally would be 50%-14em, which is width of left column */
+		left: 14em;
 	}
 
-	.help ul {
+	#appHelp ul {
 		margin: 0px;
 		margin-left: 0.75em;
 		padding: 0px;

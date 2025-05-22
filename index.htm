@@ -12,6 +12,10 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
   <link rel="apple-touch-icon" sizes="180x180"
@@ -170,12 +174,13 @@
 
 <body>
 
+
   <div id="selections">
 
     <!-- Left column -->
     <div id="dropdowns">
     </div>
-    <button id="clear" class="simple" type="button" title="Clear all selections">
+    <button id="clear" class="simple" type="button" data-tooltip="Clear all selections">
       Clear
     </button>
 
@@ -352,10 +357,17 @@
       <span class="hapi-dark-blue-bold">Overview</span>
       <p>
         <img src="https://hapi-server.github.io/logos/HAPI.svg" style="height: 1.2em; margin-bottom: -2.5px;margin-right:-1px"/> 
-        <span class="hapi">Data Explorer</span> is an interface to 
+        <span class="hapi">Data Explorer</span> is an web application for 
         <a href="https://hapi-server.org/" target="_blank">HAPI</a> 
         (Heliophysics Data Application Programmer's Interface) servers. 
         HAPI is a specification for time series download and streaming.
+      </p>
+      <p>
+        (Another web application for HAPI servers is the
+        <img src="css/images/knmi.png" class="linkicon"/>
+        <a href="https://spaceweather.knmi.nl/viewer/">
+          KNMI Space Weather Timeline Viewer</a>, which allows
+          one to build interactive stack plots of data from HAPI servers.)
       </p>
       <p>
         When data are available from a HAPI server, there is no need to download data files and write custom file reader programs or to install custom software packages to access data for each data provider. Using a HAPI client library, data can be loaded into an array using a single command in 
@@ -494,14 +506,15 @@
 
               <code>Wget</code>.
 
-              Example scripts can be created using links in "Example Queries" or
+              Example scripts can be created using links in <b>Example Queries</b> or
               by selecting <code>Return: script</code> in the drop-down menu after
               selecting a server, dataset, parameters, and time range.
             </li>
           </ul>
         </li>
         <li>
-          Begin by selecting a HAPI-enabled data server in the drop-down menu or selecting an example query.
+          Begin by selecting a HAPI-enabled data server in the drop-down menu or
+          selecting <b>Example Queries</b> above.
         </li>
       </ul>
     </div>
@@ -510,7 +523,7 @@
       <summary>
         <b><span class="selected-server"></span>Time range coverage</b>&nbsp;
         <a target="_blank" data-tooltip="Open time range plots in new tab">
-          <img src="css/new-tab.svg" style="height: 0.75em">
+          <img style="margin-bottom: -3px; margin-left: -3px; height: 1em" src="css/images/open_in_new_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"/>
         </a>
       </summary>
       <iframe id="iframe" name="iframe" width="100%" height="100%" style="border:none">

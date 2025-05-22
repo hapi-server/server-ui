@@ -2,6 +2,12 @@ body {
 	font-family: Veranda, Arial, sans-serif;
 	font-size: 1em;
   height: 100vh;
+
+  font-family: "Open Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
 }
 
 ul {
@@ -73,6 +79,12 @@ a {
 	color: black;
 	cursor: pointer;
 	text-decoration-thickness: 2.5px;
+}
+
+img.linkicon {
+	width: 0.8em;
+	height: 0.8em;
+	margin-bottom: -2px;
 }
 
 a.invalid {
@@ -151,11 +163,10 @@ div[data-tooltip]:after {
     position: relative;
   }
 
-  [data-tooltip]:before {
+  [data-tooltip]:after {
     content: attr(data-tooltip);
     position: absolute;
-    left: 0em;
-    bottom: 100%; /* put it on the top */
+    left: 1em;
     background-color: white;
     width: max-content;
     opacity: 0;
@@ -165,12 +176,8 @@ div[data-tooltip]:after {
     -webkit-transition: opacity 0.1s ease-in-out;
   }
 
-  [data-tooltip]:hover:before {
+  [data-tooltip]:hover:after {
     opacity: 1;
-  }
-
-  div[data-tooltip]:before {
-    left: 0px!important;
   }
 
 	.help {
@@ -355,8 +362,8 @@ span.id {
 }
 .ui-autocomplete::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color: rgba(0,0,0,.5);
-    box-shadow: 0 0 1px rgba(255,255,255,.5);
+    background-color: rgba(0,0,0,0.8);
+    box-shadow: 0 0 1px rgba(255,255,255,0.5);
 }
 
 .ui-autocomplete {

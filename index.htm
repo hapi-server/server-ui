@@ -180,9 +180,11 @@
     <!-- Left column -->
     <div id="dropdowns">
     </div>
-    <button id="clear" class="simple" type="button" data-tooltip="Clear all selections">
-      Clear
-    </button>
+    <div style="display: inline-block" data-tooltip="Clear all selections">
+      <button id="clear" class="simple" type="button">
+        Clear
+      </button>
+    </div>
 
     <br>
     <br>
@@ -273,12 +275,16 @@
           </label>
         </div>
       </div>
-      <button id="reset-options" class="simple" type="button" title="Select defaults">
-        Reset options
-      </button>
-      <button id="delete-history" class="simple" type="button" title="Delete cache of previously selected start and stop times.">
-        Delete history
-      </button>
+      <div data-tooltip="Select defaults">
+        <button id="reset-options" class="simple" type="button">
+          Reset options
+        </button>
+      </div>
+      <div data-tooltip="Delete cache of previously selected start and stop times.">
+        <button id="delete-history" class="simple" type="button">
+          Delete history
+        </button>
+      </div>
       <hr class="divider">
     </details>
 
@@ -290,12 +296,12 @@
 
     <div id="footer">
       <a href="https://github.com/hapi-server/server-ui" style="text-decoration:none">
-        <img src="css/images/github-mark-hapi-dark-blue.svg" alt="GitHub logo" height="24px"/>
+        <img src="css/images/github-mark-hapi-dark-blue-background.svg" alt="GitHub logo" height="24px"/>
       </a>
       <details id="developer-details" closed>
-        <summary><span class="hapi-dark-blue-bold" style="font-size:1em">API</span></summary>
+        <summary><span class="hapi-dark-blue-bold" style="font-size:1em">API and Notes</span></summary>
         <p>
-          The <code>parameters</code> argument may be omitted in the hash fragment
+          Omit the <code>parameters</code> value in the hash fragment to request all parameters 
           (<a href="#server=TestData2.0&dataset=dataset1&parameters=&start=1970-01-01Z&stop=1970-01-01T00:00:11Z&return=data&format=csv&style=noheader">example</a>).
         </p>
         <p>
@@ -365,7 +371,7 @@
       <p>
         (Another web application for HAPI servers is the
         <img src="css/images/knmi.png" class="linkicon"/>
-        <a href="https://spaceweather.knmi.nl/viewer/">
+        <a href="https://spaceweather.knmi.nl/viewer/" target="_blank">
           KNMI Space Weather Timeline Viewer</a>, which allows
           one to build interactive stack plots of data from HAPI servers.)
       </p>

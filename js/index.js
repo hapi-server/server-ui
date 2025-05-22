@@ -191,6 +191,7 @@ function servers (cb) {
   }
 
   function process (alltxt, serverListURL) {
+
     const SERVER_URL_HASH = serverIsURL()
     if (SERVER_URL_HASH !== '') {
       alltxt = alltxt + '\n' + `${SERVER_URL_HASH},${SERVER_URL_HASH},${SERVER_URL_HASH}`

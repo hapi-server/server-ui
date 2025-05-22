@@ -8,14 +8,18 @@
 <body>
   <h1>API for generated scripts</h1>
   <p>
-    <li><code>server=...&dataset=...&return=script-options</code></li>
-    <li><code>?server=...&dataset=...&return=script&format=SCRIPT_OPTION</code> where <code>SCRIPT_OPTION</code> is a value in the array returned by first request.</li>
+    <ul>
+      <li><code>server=...&dataset=...&return=script-options</code></li>
+      <li><code>?server=...&dataset=...&return=script&format=SCRIPT_OPTION</code> where <code>SCRIPT_OPTION</code> is a value in the array returned by first request.</li>
+    </ul>
   </p>
   <h1>Examples</h1>
   <p>
-    <li><a target="_blank" href="../?return=script-options">Request JSON object with list of script languages</a></li>
-    <li><a target="_blank" href="../?server=INTERMAGNET&dataset=bou/definitive/PT1M/xyzf&return=script&format=python">Request script with no <code>parameters</code>, <code>start</code>, and <code>stop</code></a>. Script will request all parameters over default time range.</li>
-    <li><a target="_blank" href="../?server=INTERMAGNET&dataset=bou/definitive/PT1M/xyzf&parameters=Field_Vector,Field_Magnitude&start=1991-01-01T00:00:00Z&stop=1991-01-03T00:00:00.000Z&return=script&format=python">Request a script for a two parameters over a time range given by start and stop.</a></li>
+    <ul>
+      <li><a target="_blank" href="../?return=script-options">Request JSON object with list of script languages</a></li>
+      <li><a target="_blank" href="../?server=INTERMAGNET&dataset=bou/definitive/PT1M/xyzf&return=script&format=python">Request script with <code>'parameters='</code> (⇒ all parameters) and not <code>start</code> and <code>stop</code></a>. Script will request all parameters over default time.</li>
+      <li><a target="_blank" href="../?server=INTERMAGNET&dataset=bou/definitive/PT1M/xyzf&parameters=Field_Vector,Field_Magnitude&start=1991-01-01T00:00:00Z&stop=1991-01-03T00:00:00.000Z&return=script&format=python">Request a script for a two parameters over a time range given by start and stop.</a></li>
+    </ul>
   </p>
 </body>
 </html>

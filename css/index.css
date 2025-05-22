@@ -121,9 +121,6 @@ pre {
 		border: 1px solid rgb(0,0,0);
 	}
 
-div[data-tooltip]:after {
-	left: 5px!important;
-}
 #options-details {
   margin-bottom: 5px;
 }
@@ -165,14 +162,14 @@ div[data-tooltip]:after {
   [data-tooltip]:after {
     content: attr(data-tooltip);
     position: absolute;
-    left: 1em;
-    background-color: white;
+		margin-left: 0.5em;
+		background-color: white;
     width: max-content;
     opacity: 0;
 		border: 1px solid black;
   	border-radius: 4px;
 		padding: 0.25em;
-    -webkit-transition: opacity 0.1s ease-in-out;
+		-webkit-transition: opacity 0.1s ease-in-out;
   }
 
   [data-tooltip]:hover:after {

@@ -27,10 +27,28 @@ html.mailtoLink = function (name, addr, subj) {
   return name + '&lt;' + html.aLink('mailto:' + addr + '?subject=' + subj, addr) + '&gt;'
 }
 
-html.downloadLink = function (url, what, element) {
+html.iconLink = function (url, _class, element) {
   // Create a "Download X" link.
-  const a = html.aLink(url, 'Download ' + what)
-  $(element).empty().append(`<span>${a}</span>`).show()
+  let msg = ''
+  if (_class === 'download') {
+    msg = 'Download data'
+  }
+  if (_class === 'open-in-new-tab') {
+    msg = 'Open image in new tab'
+  }
+  let icon = `<span class="${_class}"></span>`
+  let downloadLink = html.aLink(url, icon)
+  downloadLink = $(downloadLink)
+                    .removeAttr('title')
+                    .addClass('icon')
+                    .attr('data-tooltip', msg)
+  // Not working. Only works for same-origin URLs.
+  //downloadLink.attr('download', html.sanitizeFilename(url))
+  $(element).append(downloadLink).show()
+}
+
+html.sanitizeFilename = function (filename) {
+    return filename.replace('https://','').replace('http://','').replace(/[/\\?%*:|"<>]/g, '-');
 }
 
 html.showJSONOnClick = function (id, url, listID) {

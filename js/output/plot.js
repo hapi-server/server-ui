@@ -42,7 +42,7 @@ function plot (selectedParameter, cb) {
           <summary>
             Plot pager of <code>${selectedParameter}</code> using <code>${plotserver}</code> plot server. 
             <a href="${plotPagerURL}" target="_blank" data-tooltip="Open plot pager in new tab">
-              <img src="css/new-tab.svg" style="height: 0.75em">
+              <span class="open-in-new-tab"></span>
             </a>
           </summary>
           <iframe src="${plotPagerURL}" ${width} ${height}></iframe>
@@ -172,14 +172,17 @@ function plot (selectedParameter, cb) {
 
     // html.scrollIntoView(`${parentElementId}`);
 
-    html.downloadLink(url, 'plot', `#${parentElementId} #plot-downloadlink`)
+    // Download of image only works on same domain. Would need to read data
+    // from the image and then create a blob to download.
+    //html.iconLink(url, 'download', `#${parentElementId} #plot-downloadlink`)
+    html.iconLink(url, 'open-in-new-tab', `#${parentElementId} #plot-downloadlink`)
 
     const format = selected('style')
     const plotserver = selected('plotserver')
     if (/png|svg/.test(format) && plotserver !== 'cdaweb') {
-      const galleryLink = html.aLink(_plotGalleryURL(url), '&#9638;&nbsp;Thumbnails', true)
-      const pagerLink = html.aLink(_plotPagerURL(url), '&#9707;&nbsp;Plot pager', true)
-      const galleryHTML = `&nbsp;|&nbsp;<span>View many plots: &nbsp;${pagerLink}&nbsp;|&nbsp;${galleryLink}</span>`
+      const galleryLink = html.aLink(_plotGalleryURL(url), '&#9638;&nbsp;Thumbnails')
+      const pagerLink = html.aLink(_plotPagerURL(url), '&#9707;&nbsp;Plot pager')
+      const galleryHTML = `|&nbsp;<span>View many plots: &nbsp;${pagerLink}&nbsp;|&nbsp;${galleryLink}</span>`
       $(`#${parentElementId} #plot-downloadlink`).append(galleryHTML).show()
     }
   }

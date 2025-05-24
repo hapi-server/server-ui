@@ -23,7 +23,7 @@ function data () {
     url = url + '&include=header'
   }
 
-  html.downloadLink(url, 'data', '#data-downloadlink')
+  html.iconLink(url, 'download', '#data-downloadlink')
 
   if ($('#showdata').prop('checked') === false) {
     return

@@ -172,7 +172,6 @@
 </head>
 
 <body>
-
   <div id="selections">
 
     <!-- Left column -->
@@ -567,9 +566,9 @@
     <details id="time-range-details" display="none">
       <summary>
         <b><span class="selected-server"></span>Time Range Coverage</b>&nbsp;
-        <a target="_blank" data-tooltip="Open time range plots in new tab">
+        <a target="_blank" class="icon" data-tooltip="Open time range plots in new tab">
           <img style="height:0.8em" src="data:image/x-icon;base64,AAABAAEAEBAQAAEABAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA/4QAAA0ODwAASP8Ab/8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACIiIgAAAAAAAAAAAAAAAAAAAAAAAAAAADMzMzMzMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARERERAAAAAAAAAAAAAAAAAAAAAAAAAAAEREREREREREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//wAA//8AAAP/AAD//wAA//8AAAAPAAD//wAA//8AAP//AAAA/wAA//8AAP//AAAAAAAA//8AAP//AAD//wAA"/>
-          <img style="margin-bottom: -3px; margin-left: -3px; height: 1em" src="css/images/open_in_new_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg"/>
+          <span class="open-in-new-tab"></span>
         </a>
       </summary>
       <iframe id="iframe" name="iframe" width="100%" height="100%" style="border:none">
@@ -601,6 +600,14 @@
             <span id="dataRequestTiming" class="requestTime"></span>
           </span>
         </summary>
+        <div>
+          <span id="plot-downloadlink" style="display:none;">
+            <a target="_blank" class="icon">
+              <span class="open-in-new-tab" data-tooltip="Open plot in new tab">
+              </span>
+            </a>
+        </div>
+
         <div>
           <span id="data-downloadlink" style="display:none;"></span>
           <code id="data-records-and-size">&nbsp;</code>

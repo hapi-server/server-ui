@@ -1,14 +1,39 @@
-:root{
+:root {
   --hapi-dark-blue: rgb(34, 67, 113);
   --hapi-light-blue: rgb(86, 121, 198);
 	--data-tooltip-hover-opacity: 1;
-	--data-tooltip-delay: 0.5s;
+	--data-tooltip-delay: 0.75s;
+	--data-new-tab-url: url(images/open_in_new_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg);
+	--data-download-url: url(images/download_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg);
+}
+
+.download {
+	background-image: var(--data-download-url);
+	background-repeat: no-repeat;
+	background-size: 1em;
+	background-position: center;
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	margin-bottom: -3px;
+	margin-left: -3px;
+}
+
+.open-in-new-tab {
+	background-image: var(--data-new-tab-url);
+	background-repeat: no-repeat;
+	background-size: 1em;
+	background-position: center;
+	display: inline-block;
+	width: 1em;
+	height: 1em;
+	margin-bottom: -3px;
+	margin-left: -3px;
 }
 
 body {
 	font-size: 1em;
   height: 100vh;
-
   font-family: "Lora";
   font-optical-sizing: auto;
   font-weight: 400;
@@ -72,6 +97,10 @@ a[target="_blank"] {
 	cursor: pointer;
 }
 
+a.icon{
+	text-decoration: none;
+}
+
 a {
 	text-decoration: underline;
 	text-decoration-color: var(--hapi-light-blue);
@@ -130,19 +159,22 @@ pre {
 [data-tooltip]:after {
 	opacity: 0;
 	width: 0px;
-}
-
-[data-tooltip]:hover:after {
-	opacity: var(--data-tooltip-hover-opacity);
-	width: max-content;
+	margin-left: 0px;
 	position: absolute;
-	content: attr(data-tooltip);
-	margin-left: 0.5em;
+	content: '';
 	background-color: white;
 	border: 1px solid var(--hapi-dark-blue);
 	border-radius: 4px;
-	padding: 0.25em;
 	z-index: 102;
+	transition: 0s;
+}
+
+[data-tooltip]:hover:after {
+	opacity: 1;
+	content: attr(data-tooltip);
+	width: max-content;
+	padding: 0.25em;
+	transition: opacity 0s ease-in;
 	transition-delay: var(--data-tooltip-delay);
 }
 

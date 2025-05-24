@@ -69,11 +69,14 @@ function options (useDefaults) {
         let id = $(evt.target).attr('id')
         // Get help text in hidden div.
         let helpText = $("#" + id + "-help").html()
+        if (!helpText) {
+          return
+        }
         let root = document.documentElement;
         let delay = getComputedStyle(root).getPropertyValue('--data-tooltip-delay');
         if (delay) {
           if (delay.endsWith('ms')) {
-          delay = parseInt(delay.replace('ms', ''), 10) || 0;
+            delay = parseInt(delay.replace('ms', ''), 10) || 0;
           } else {
             delay = parseFloat(delay.replace('s', '')) * 1000;
           }

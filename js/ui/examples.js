@@ -51,7 +51,6 @@ function examples (serversObj, cb) {
               return
             }
             util.log(`examples(): Got ${url}`)
-
             if (!infoObj.parameters || infoObj.parameters.length === 0) {
               util.log(`examples(): Problem with response from ${url}`)
               return

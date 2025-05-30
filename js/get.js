@@ -40,8 +40,10 @@ function get (options, cb) {
     util.log(`get(): Client-side cache hit for ${urlo}`)
     if (typeof get.cache[urlo] === 'object') {
       // Deep copy to avoid modifying cache.
+      util.log(`get(): Returning deep copy of cached object for ${urlo}`)
       cb(false, JSON.parse(JSON.stringify(get.cache[urlo])))
     } else {
+      util.log(`get(): Not returning deep copy of cached object for ${urlo}`)
       cb(false, get.cache[urlo])
     }
     return

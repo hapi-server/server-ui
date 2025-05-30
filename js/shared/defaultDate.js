@@ -1,4 +1,4 @@
-const defaultDate = { stop, start }
+const defaultDate = { stop, startOK, stopOK, validTimeString }
 
 if (typeof module !== 'undefined') {
   module.exports = defaultDate
@@ -19,20 +19,47 @@ function normalizeTime (dateTime) {
   return dateTime
 }
 
-function stop (meta, requestedStop) {
-  if (requestedStop) {
-    const _stop = normalizeTime(meta.stopDate)
-    const _start = normalizeTime(meta.startDate)
-    const _requestedStop = normalizeTime(requestedStop)
-    const a = dayjs(_requestedStop).valueOf() >= dayjs(_start).valueOf()
-    const b = dayjs(_requestedStop).valueOf() <= dayjs(_stop).valueOf()
-    if (a && b) {
-      return requestedStop
-    }
-    return stop(meta)
+function validTimeString (dateTime) {
+  if (typeof dateTime !== 'string') {
+    return false
   }
+  const tmp = dateTime.replace('Z', '')
+  return dayjs(util.doy2ymd(tmp)).isValid()
+}
 
-  if (!requestedStop && meta.sampleStopDate) {
+function startOK (meta, requestedStart) {
+  if (!validTimeString(requestedStart)) {
+    return false
+  }
+  const _stop = normalizeTime(meta.stopDate)
+  const _start = normalizeTime(meta.startDate)
+  const _requestedStart = normalizeTime(requestedStart)
+  const a = dayjs(_requestedStart).valueOf() >= dayjs(_start).valueOf()
+  const b = dayjs(_requestedStart).valueOf() <= dayjs(_stop).valueOf()
+  if (a && b) {
+    return requestedStart
+  }
+  return false
+}
+
+function stopOK (meta, requestedStop) {
+  if (!validTimeString(requestedStop)) {
+    return false
+  }
+  const _stop = normalizeTime(meta.stopDate)
+  const _start = normalizeTime(meta.startDate)
+  const _requestedStop = normalizeTime(requestedStop)
+  const a = dayjs(_requestedStop).valueOf() >= dayjs(_start).valueOf()
+  const b = dayjs(_requestedStop).valueOf() <= dayjs(_stop).valueOf()
+  if (a && b) {
+    return requestedStop
+  }
+  return false
+}
+
+function stop (meta) {
+
+  if (meta.sampleStopDate) {
     return meta.sampleStopDate
   }
 
@@ -65,31 +92,4 @@ function stop (meta, requestedStop) {
     stopDate = meta.stopDate
   }
   return stopDate
-}
-
-function start (meta, requestedStart) {
-  if (!requestedStart) {
-    if (meta.sampleStartDate) {
-      return meta.sampleStartDate
-    } else {
-      return meta.startDate
-    }
-  }
-
-  const _start = normalizeTime(meta.startDate)
-  const _requestedStart = normalizeTime(requestedStart)
-
-  let _stop
-  if (meta.sampleStopDate) {
-    _stop = normalizeTime(meta.sampleStopDate)
-  } else {
-    _stop = normalizeTime(meta.stopDate)
-  }
-
-  const a = dayjs(_requestedStart).valueOf() >= dayjs(_start).valueOf()
-  const b = dayjs(_requestedStart).valueOf() <= dayjs(_stop).valueOf()
-  if (a && b) {
-    return requestedStart
-  }
-  return meta.startDate
 }

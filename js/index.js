@@ -43,6 +43,9 @@ function selected (name) {
 }
 
 function about (url, HAPI) {
+  if (about[url] === undefined) {
+    about[url] = false // Flag to indicate if /about has been requested for this URL.
+  }
   $('#appWarning').empty().hide()
   $('#aboutRequestURL').empty().hide()
   $('#aboutRequestTiming').empty().hide()
@@ -67,9 +70,13 @@ function about (url, HAPI) {
       process(json)
       return
     }
-    $('#appWarning').html(err).show()
-    setTimeout(() => $('#appWarning').empty().hide(), 5000)
     util.log('about(): Problem with /about response from ' + url)
+    if (!about[url]) {
+      //$('#appWarning').html(err).show()
+      //setTimeout(() => $('#appWarning').empty().hide(), 2000)
+    } else {
+      util.log('about(): Not displaying warning again. /about already requested for this URL.')
+    }
   })
 
   function process (json) {
@@ -682,16 +689,13 @@ function timeDropdown (fn, cb) {
   }
   const info = datasets.info[selected('dataset')].info
 
-  let defaultDate_ = defaultDate[name](info)
-  util.log(`${name}time(): defaultDate['${name}'](info) = ${defaultDate_}`)
-
   util.log(`${name}time(): Reading ${storage} in localStorage.`)
   let lasts = localStorage.getItem(storage)
   lasts = JSON.parse(lasts)
   util.log(`${name}time(): Found ${storage} = ${lasts}.`)
 
   if (window.HAPIUI.qsInitial[name]) {
-    if (!dayjs(util.doy2ymd(window.HAPIUI.qsInitial[name].replace('Z', ''))).isValid()) {
+    if (!defaultDate.validTimeString(window.HAPIUI.qsInitial[name])) {
       const amsg = `Invalid ${name} time in URL: '${window.HAPIUI.qsInitial[name]}'. Using default instead.`
       util.log(`Showing alert ${amsg}`)
       alert(amsg)
@@ -699,23 +703,29 @@ function timeDropdown (fn, cb) {
     }
   }
 
+  let defaultStop = null
+  if (name === 'stop') {
+    // Want second choice to be the default stop data, which is 
+    // computed if sampleStopDate is not given.
+    defaultStop = defaultDate.stop(info)
+  }
+
   let possibles = [
-    name === 'stop' ? info.stopDate : '',
-    info['sample' + nameUpperCase + 'Date'] || '',
-    ...lasts || [],
-    defaultDate_,
-    window.HAPIUI.qsInitial[name] || ''
+    window.HAPIUI.qsInitial[name] || [],
+    defaultStop || [],
+    info[`sample${nameUpperCase}Date`] || [],
+    info[`${name}Date`] || [],
+    ...lasts || []
   ]
 
   util.log(`${name}time(): possible times to put in drop-down = ${JSON.stringify(possibles)}`)
   let uniques = util.uniqueElements(possibles).filter(item => item !== '')
   util.log(`${name}time(): uniques = ${JSON.stringify(uniques)}`)
 
-  const list = [{ label: defaultDate_, value: defaultDate_ }]
-  for (let i = 1; i < uniques.length; i++) {
-    if (defaultDate_ !== defaultDate[name](info, uniques[i])) {
+  const list = []
+  for (let i = 0; i < uniques.length; i++) {
+    if (defaultDate[name+"OK"](info, uniques[i])) {
       // Only add to list if different from default and acceptable.
-      // defaultDate() returns different value if both conditions true.
       util.log(`${name}time(): adding ${uniques[i]} to list of times`)
       list.push({ label: uniques[i], value: uniques[i] })
     } else {
@@ -723,8 +733,8 @@ function timeDropdown (fn, cb) {
     }
   }
 
-  util.log(`${name}time(): Setting selected time to ${list[list.length - 1].value}`)
-  list[list.length - 1].selected = true
+  util.log(`${name}time(): Setting selected time to ${list[0].value}`)
+  list[0].selected = true
   delete window.HAPIUI.qsInitial[name]
   cb(list)
 }

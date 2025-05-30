@@ -236,7 +236,7 @@ pre {
 		position: absolute;
 		margin-bottom: 0.5em;
 		display: none;
-		left: 40%; /* Ideally would be 50%-14em, which is width of left column */
+		left: 14em;
 	}
 
 	.requestError {

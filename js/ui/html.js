@@ -44,7 +44,7 @@ html.iconLink = function (url, _class, element) {
                     .attr('data-tooltip', msg)
   // Not working. Only works for same-origin URLs.
   //downloadLink.attr('download', html.sanitizeFilename(url))
-  $(element).append(downloadLink).show()
+  $(element).empty().append(downloadLink).show()
 }
 
 html.sanitizeFilename = function (filename) {
@@ -70,7 +70,7 @@ html.showJSONOnClick = function (id, url, listID) {
         $('#output').show()
         $('#json').text(JSON.stringify(data, null, 2))
         hljs.highlightBlock(document.getElementById('json'))
-        html.downloadLink(url, `JSON for dataset <code>${id}</code>`, '#json-downloadlink')
+        html.iconLink(url, `JSON for dataset <code>${id}</code>`, '#json-downloadlink')
       })
     })
   }

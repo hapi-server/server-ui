@@ -552,29 +552,36 @@ function dropdowns (funs, wrapper, i) {
 
         function setCheckboxFinished (ul, isSearchResult) {
           util.log('dropdowns.setRenderMenu.setCheckboxFinished(): Setting finished event on ul list.')
+          const id = $(ul).attr('id')
+
+          $(ul).prepend(`<li><button id="${id}-select-done" class="simple" type="button">Done</button></li>`)
+          $(`#${id}-select-done`).one('click', function (event) {
+            util.log('dropdowns.setRenderMenu.setCheckboxFinished(): Done button click event. Closing list.')
+            done()
+          })
+
           $(ul).one('mouseenter', function () {
             util.log('dropdowns.setRenderMenu.setCheckboxFinished(): mouseenter event on ul list.')
           })
           $(ul).one('mouseleave', function () {
+            // Close list mouse leaves ul
             util.log('dropdowns.setRenderMenu.setCheckboxFinished(): mouseleave event on ul list. Closing list.')
-            setCheckboxValues(ul, isSearchResult)
-            const input = $(acData.element[0])
-            $(input).data('autocomplete')._close()
-            $(input).data('autocomplete')._trigger('select', undefined, { item: input.val() })
+            done()
           })
 
           // bindBlur();
           function bindBlur () {
-            // A more standard way to close the list, but the list is typically
-            // large enough that a user mouseleave is almost always followed by a
-            // click somewhere on the document to close the list. As an alternative,
-            // we could set this blur event to only occur after mouseleave.
+            // Close list when clicking outside of it.
             $(ul).blur(function () {
-              setCheckboxValues(ul, isSearchResult)
-              const input = $(acData.element[0])
-              $(input).data('autocomplete')._close()
-              $(input).data('autocomplete')._trigger('select', undefined, { item: input.val() })
+              done()
             })
+          }
+
+          function done () {
+            setCheckboxValues(ul, isSearchResult)
+            const input = $(acData.element[0])
+            $(input).data('autocomplete')._close()
+            $(input).data('autocomplete')._trigger('select', undefined, { item: input.val() })
           }
         }
 

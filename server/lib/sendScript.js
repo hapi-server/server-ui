@@ -9,7 +9,7 @@ const handleError = require('./handleError.js')
 const getFiles = require('./getFiles.js')
 const createScript = require('../../js/shared/createScript.js')
 const parseAllTxt = require('../../js/shared/parseAllTxt.js')
-const defaultDate = require('../../js/shared/defaultDate.js')
+const time = require('../../js/shared/time.js')
 const _scriptList = require('../../scripts/_scriptList.js')
 
 module.exports = { file, options }
@@ -74,7 +74,7 @@ function file (req, res, next, appLogDir) {
           parametersList,
           parametersSelected: req.query.parameters || '',
           startDate: infoResponse.startDate,
-          stopDate: defaultDate.stop(infoResponse),
+          stopDate: time.stop(infoResponse),
           startDateMin: infoResponse.startDate,
           stopDateMax: infoResponse.stopDate,
           contactEmail: infoResponse.contactEmail

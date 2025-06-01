@@ -265,8 +265,8 @@ function plot (selectedParameter, cb) {
   }
 
   function _cdaweb () {
-    let start = util.doy2ymd(selected('start'))
-    let stop = util.doy2ymd(selected('stop'))
+    let start = time.doy2ymd(selected('start'))
+    let stop = time.doy2ymd(selected('stop'))
     start = dayjs(start).toISOString().replace(/:|-/g, '').replace(/\.[0-9].*Z/, 'Z')
     stop = dayjs(stop).toISOString().replace(/:|-/g, '').replace(/\.[0-9].*Z/, 'Z')
     const xurl = `${plotServer}/${selected('dataset')}/data/${start},${stop}/${selectedParameter}?format=${format}`

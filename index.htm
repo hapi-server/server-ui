@@ -71,7 +71,7 @@
 
   <script type="text/javascript" src="js/shared/parseAllTxt.js"></script>
   <script type="text/javascript" src="js/shared/createScript.js"></script>
-  <script type="text/javascript" src="js/shared/defaultDate.js"></script>
+  <script type="text/javascript" src="js/shared/time.js"></script>
 
   <script type="text/javascript" src="js/ui/options.js"></script>
   <script type="text/javascript" src="js/ui/dropdowns.js"></script>
@@ -133,7 +133,7 @@
       if (url.startsWith('__')) {
         url = "https://hapi-server.org/meta";
         if (location.href.match("//localhost")) {
-          url = "http://localhost:6001";
+          //url = "http://localhost:6001";
         }
       }
       return url;
@@ -340,6 +340,7 @@
           <li>Constrain list by entering text in input area to right.</li>
           <li>Close list using <code>ESC</code> or by clicking triangle.</li>
           <li>Instructions apply to all lists.</li>
+          <li>Disable help messages by deselecting <code>Options</code> &gt; "show help pop-ups".</li>
         </ul>
       </div>
       <div id="parameters-list-help" style="display:none">
@@ -354,7 +355,7 @@
         </ul>
       </div>
       <div id="start-help" style="display:none">
-        Press ⏎ after entering or modifying text to trigger update.
+        Press ⏎ after entering or modifying text to trigger update of output (if output has already been selected)
         <br>
         Start and stop date/time in format (or reduced version):
         <ul>
@@ -406,7 +407,6 @@
       <summary>
         <b><span class="selected-server"></span>Example Queries</b>
       </summary>
-      <br>
       <div id="all-example-details-body"></div>
     </details>
 

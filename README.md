@@ -57,13 +57,10 @@ A server with a proxy can be run on port `8000` using
 
 ```
 npm install
-npm run proxy-server --port 8000
-# or, equivalently,
-npm install
 node server/server.js --port 8000
 ```
 
-See the comments in [`server/server.js`](https://github.com/hapi-server/server-ui/blob/master/proxy/proxy.js) to constrain URLs that can be proxied.
+To constrain URLs that can be proxied, see `node server/server.js --help`
 
 By default, if an request to `URL` fails, an attempt to retrieve it is made via the proxy request `proxy?url=URL`. The URL for the proxy is set in the header of [`index.htm`](https://github.com/hapi-server/server-ui/blob/master/index.htm).
 

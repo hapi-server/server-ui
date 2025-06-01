@@ -64,7 +64,7 @@ function examples (serversObj, cb) {
               linkObj.stop = infoObj.sampleStopDate
             } else {
               linkObj.start = infoObj.startDate
-              linkObj.stop = defaultDate.stop(infoObj)
+              linkObj.stop = time.stop(infoObj)
             }
             cb(createLinkHTML(linkObj, serverID))
           })

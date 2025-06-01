@@ -1,28 +1,5 @@
 const util = {
 
-  doy2ymd: function (dateTime) {
-    if (/^[0-9]{4}-[0-9]{3}/.test(dateTime)) {
-      dateTime = dateTime.split('-')
-      const startUnixMs = new Date(dateTime[0], 0, 1).getTime()
-      let doy = dateTime[1].split('T')[0]
-      let Z = ''
-      if (doy.endsWith('Z')) {
-        doy = doy.replace('Z', '')
-        Z = 'Z'
-      }
-      let time = dateTime[1].split('T')[1]
-      if (time) {
-        time = 'T' + time
-      } else {
-        time = ''
-      }
-      const msOfYear = 86400 * 1000 * parseInt(doy - 1)
-      const dateTimeMod = new Date(startUnixMs + msOfYear).toISOString().slice(0, 10) + time + Z
-      return dateTimeMod
-    }
-    return dateTime
-  },
-
   log: function (msg) {
     if (!$('#showconsolemessages').is(':checked')) return
     console.log(msg)
@@ -50,23 +27,9 @@ const util = {
     return url
   },
 
-  ISODuration2Words: function (cadence) {
-    return cadence
-      .replace('PT', '')
-      .replace('D', ' days, ')
-      .replace('H', ' hours, ')
-      .replace('M', ' minutes, ')
-      .replace('S', ' seconds')
-      .replace(/, $/, '')
-      .replace('1 days', '1 day')
-      .replace('1 hours', '1 hour')
-      .replace('1 minutes', '1 minute')
-      .replace('1 seconds', '1 second')
-  },
-
   bytesWithSIUnits: function (bytes) {
     // https://stackoverflow.com/a/28120564
-    if (bytes == 0) { return '0 B' }
+    if (bytes === 0) { return '0 B' }
     const e = Math.floor(Math.log(bytes) / Math.log(1000))
     let precision = 0
     if (bytes >= 1000 && bytes < 1000000) {
@@ -74,44 +37,6 @@ const util = {
     }
     const number = (bytes / Math.pow(1000, e)).toFixed(precision)
     return `${number} ${' KMGTP'.charAt(e) + 'B'}`
-  },
-
-  checkTime: function (which, time) {
-    if (time === undefined || time === null) return false
-
-    const isValid = dayjs(util.doy2ymd(time.replace('Z', ''))).isValid()
-    if (isValid) {
-      util.log('util.checkTime(): ' + which + ' = ' + time)
-      $('#' + which + '-list').css('color', 'black').attr('title', '')
-      return true
-    } else {
-      util.log('util.checkTime(): ' + which + ' is not a string of form YYYY-MM-DDTHH:MM:SS.mmmμμμnnnZ (or truncated versions). Setting color to red.')
-      $('#' + which + '-list').css('color', 'red').attr('title', 'start ≥ stop')
-      return false
-    }
-  },
-
-  checkTimes: function (which, start, stop) {
-    if (start && stop) {
-      util.log('util.checkTimes(): starttime = ' + start)
-      util.log('util.checkTimes(): stoptime = ' + stop)
-      const t = dayjs(util.doy2ymd(start.replace('Z', ''))) <
-                dayjs(util.doy2ymd(stop.replace('Z', '')))
-      util.log('util.checkTimes(): start < stop ? ' + t)
-      const msgo = which + ' changed; '
-      if (t === false) {
-        util.log(msgo + 'start ≥ stop. Setting colors to red.')
-        $('#' + which + '-list').css('color', 'red').attr('title', 'start ≥ stop')
-        $('#' + which).mouseover()
-        return false
-      } else {
-        util.log(msgo + 'start < stop. Setting colors to black.')
-        $('#start-list').css('color', 'black').attr('title', '')
-        $('#stop-list').css('color', 'black').attr('title', '')
-        return true
-      }
-    }
-    return true
   },
 
   uniqueId: function (len) {

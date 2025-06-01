@@ -90,6 +90,13 @@ li.ui-menu-item {
 	font-style: monospace;
 }
 
+.pseudoLink {
+	text-decoration: underline;
+	text-decoration-color: var(--hapi-light-blue);
+	color: black;
+	cursor: pointer;
+}
+
 a:visited[target="_blank"],
 a[target="_blank"] {
 	text-decoration: underline;
@@ -151,9 +158,16 @@ pre {
 	}
 
 /* data-tooltip idea from https://stackoverflow.com/a/71250946/1491619 */
-
-[data-tooltip] {
-	position: relative;
+[data-tooltip-error]:after {
+	position: absolute;
+	margin-left: 11em;
+	color: red;
+	padding: 0.25em;
+	content: attr(data-tooltip-error);
+	background-color: white;
+	border: 1px solid red;
+	border-radius: 4px;
+	z-index: 103;
 }
 
 [data-tooltip]:after {
@@ -259,6 +273,9 @@ pre {
 
 	#all-example-details {
 		display: none;
+	}
+	#all-example-details-body {
+		margin-top: 0.5em;
 	}
 
 	#time-range-details {
@@ -427,7 +444,7 @@ span.id {
 	color: black;
 	/* font-weight causes width to increase and input to appear on newline if 
 	width is not set */
-	width: 82%; 
+	width: 82%;
 	font-weight: bold;
 	float: right;
 	margin: 1px;

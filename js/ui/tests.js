@@ -101,7 +101,7 @@ tests.throwError = function (msg) {
   // setTimeout so that it doesn't block execution of tests.runTest().
   setTimeout(() => {
     throw new Error(msg)
-  }, 0)
+  }, 50)
 }
 
 tests.testArray = [

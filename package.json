@@ -28,7 +28,6 @@
   "scripts": {
     "start": "node_modules/http-server/bin/http-server",
     "server": "node server/server.js --port 8000",
-    "proxy-server": "node server/server.js",
     "lint": "standard"
   },
   "devDependencies": {

@@ -147,11 +147,18 @@ function servers (cb) {
     let metaURL = window.HAPIUI.options.availabilities
     if (metaURL !== false) {
       metaURL = `${metaURL}/${selectedServer}/svg/${selectedServer}.html`
-      $('#time-range-details').show()
-      $('#time-range-details  summary .selected-server').html(selected('server') + '&nbsp;')
-      $('#time-range-details summary a').attr('href', metaURL)
-      $('#iframe').attr('src', metaURL)
-      $('#iframe').css('height', '50vh')
+      get({ url: metaURL, tryProxy: false }, function (err, res) {
+        if (err) {
+          util.log(`servers.onselect(): Could not fetch ${metaURL}. Not showing availability details.`)
+          $('#time-range-details').hide()
+          return
+        }
+        $('#time-range-details').show()
+        $('#time-range-details  summary .selected-server').html(selected('server') + '&nbsp;')
+        $('#time-range-details summary a').attr('href', metaURL)
+        $('#iframe').attr('src', metaURL)
+        $('#iframe').css('height', '50vh')
+      })
     }
 
     if (!servers.info[selectedServer]) {
@@ -191,11 +198,11 @@ function servers (cb) {
   function showSingleServerExamples () {
     $('#all-example-details-body > div').hide()
     $('#all-example-details summary .selected-server').html(selected('server') + '&nbsp;')
+    $(`#${util.validHTMLID(selected('server'))}-examples b`).hide()
     $(`#${util.validHTMLID(selected('server'))}-examples`).show()
   }
 
   function process (alltxt, serverListURL) {
-
     const SERVER_URL_HASH = serverIsURL()
     if (SERVER_URL_HASH !== '') {
       alltxt = alltxt + '\n' + `${SERVER_URL_HASH},${SERVER_URL_HASH},${SERVER_URL_HASH}`
@@ -536,7 +543,7 @@ function parameters (cb) {
 
     let cadence = res.cadence
     if (cadence) {
-      cadence = `Cadence: ${util.ISODuration2Words(cadence)} (<code>${cadence}</code>)`
+      cadence = `Cadence: ${time.ISODuration2Words(cadence)} (<code>${cadence}</code>)`
     } else {
       cadence = 'Cadence: not specified'
     }
@@ -657,6 +664,9 @@ function timeDropdown (fn, cb) {
 
   const storage = `server-ui-last-${name}s`
 
+  const info = datasets.info[selected('dataset')].info
+  const allowed = `start ≥ ${info.startDate} and stop < ${info.stopDate}`
+
   fn.onselect = function () {
     util.log(`${name}time.onselect(): Called.`)
     util.log(`${name}time.onselect(): Reading server-ui-last-${name}s in localStorage.`)
@@ -667,7 +677,8 @@ function timeDropdown (fn, cb) {
       util.log(`${name}time.onselect(): No ${storage} in localStorage. Setting = [].`)
       lasts = []
     }
-    if (util.checkTime(name, selected(name)) === true) {
+
+    if (time.validTimeString(name, selected(name)) === true) {
       if (selected(name) in lasts) {
         util.log(`${name}time.onselect(): ${selected(name)} is already in ${storage}. Not appending.`)
       } else {
@@ -679,43 +690,93 @@ function timeDropdown (fn, cb) {
     } else {
       util.log(`${name}time(): ${selected(name)} is not a valid time. Not appending to ${storage}.`)
     }
+    checks()
+  }
 
-    if (selected('format')) {
-      if (util.checkTimes(name, selected('start'), selected('stop'))) {
-        util.log(`${name}time.onselect(): start and stop times are valid. Updating #output.`)
-        output() // Update output
+  function checks () {
+    function setError (errorMessage, which) {
+      if (!which) {
+        which = ['start', 'stop']
+      } else {
+        which = [which]
+      }
+      for (const id of which) {
+        $('#' + id + '-list')
+          .css('color', 'red')
+          .attr('data-tooltip-error', errorMessage)
       }
     }
+
+    function unSetError (which) {
+      if (!which) {
+        which = ['start', 'stop']
+      } else {
+        which = [which]
+      }
+      for (const id of which) {
+        $('#' + id + '-list')
+          .css('color', 'black')
+          .removeAttr('data-tooltip-error')
+      }
+    }
+
+    unSetError()
+    const valid = time.validTimeString(selected(name))
+    if (valid) {
+      let msg = `${name}time(): ${selected(name)} is a valid date/time string`
+      util.log(`${msg}. Unsetting any errors on selected ${name}`)
+      unSetError(name)
+      const startStopOK = time.checkStartStop(name, selected('start'), selected('stop'))
+      if (startStopOK === true) {
+        msg = `${msg} and selected start < selected stop`
+        util.log(`${msg}. Unsetting any errors on selected start and selected stop.`)
+        unSetError()
+        if (time[name + 'OK'](info, selected(name))) {
+          msg = `${msg} and selected ${name} is valid for this dataset`
+          util.log(`${msg}. Unsetting any errors on selected ${name}.`)
+          unSetError(name)
+          if (selected('format')) {
+            util.log(`${name}time(): start/stop date/times passed validation. Updating #output.`)
+            output() // Update output
+          }
+        } else {
+          const emsg = `${selected(name)} is not valid for this dataset. Allowed: ${allowed}`
+          util.log(`${name}time(): ${emsg}. Setting error.`)
+          setError(emsg, name)
+          return false
+        }
+      } else {
+        const emsg = 'Selected start ≥ selected stop'
+        util.log(`${name}time(): ${emsg}. Setting error.`)
+        setError(emsg)
+        return false
+      }
+    } else {
+      const emsg = `${selected(name)} is not a valid date/time string.`
+      util.log(`${name}time(): ${emsg}. Setting error.`)
+      setError(emsg, name)
+      return false
+    }
+    return true
   }
-  const info = datasets.info[selected('dataset')].info
 
   util.log(`${name}time(): Reading ${storage} in localStorage.`)
   let lasts = localStorage.getItem(storage)
   lasts = JSON.parse(lasts)
   util.log(`${name}time(): Found ${storage} = ${lasts}.`)
 
-  if (window.HAPIUI.qsInitial[name]) {
-    if (!defaultDate.validTimeString(window.HAPIUI.qsInitial[name])) {
-      const amsg = `Invalid ${name} time in URL: '${window.HAPIUI.qsInitial[name]}'. Using default instead.`
-      util.log(`Showing alert ${amsg}`)
-      alert(amsg)
-      window.HAPIUI.qsInitial[name] = null
-    }
-  }
-
   let defaultStop = null
   if (name === 'stop') {
-    // Want second choice to be the default stop data, which is 
+    // Want second choice to be the default stop data, which is
     // computed if sampleStopDate is not given.
-    defaultStop = defaultDate.stop(info)
+    defaultStop = time.stop(info)
   }
-
-  let possibles = [
-    window.HAPIUI.qsInitial[name] || [],
-    defaultStop || [],
-    info[`sample${nameUpperCase}Date`] || [],
-    info[`${name}Date`] || [],
-    ...lasts || []
+  const possibles = [
+    window.HAPIUI.qsInitial[name] || '',
+    defaultStop || '',
+    info[`sample${nameUpperCase}Date`] || '',
+    info[`${name}Date`] || '',
+    ...lasts || ''
   ]
 
   util.log(`${name}time(): possible times to put in drop-down = ${JSON.stringify(possibles)}`)
@@ -723,16 +784,33 @@ function timeDropdown (fn, cb) {
   util.log(`${name}time(): uniques = ${JSON.stringify(uniques)}`)
 
   const list = []
+  const uniques_a = []
   for (let i = 0; i < uniques.length; i++) {
-    if (defaultDate[name+"OK"](info, uniques[i])) {
-      // Only add to list if different from default and acceptable.
-      util.log(`${name}time(): adding ${uniques[i]} to list of times`)
+    if (time[name + "OK"](info, uniques[i])) {
+      // Only add to list if acceptable.
+      uniques_a.push(uniques[i])
+      util.log(`${name}time(): adding '${uniques[i]}' to list of times`)
       list.push({ label: uniques[i], value: uniques[i] })
     } else {
-      util.log(`${name}time(): not adding ${uniques[i]} to list of times`)
+      util.log(`${name}time(): not adding '${uniques[i]}' to list of times`)
     }
   }
 
+  util.log(`${name}time(): uniques_a = ${JSON.stringify(uniques_a)}`)
+  if (window.HAPIUI.qsInitial[name] && !uniques_a.includes(window.HAPIUI.qsInitial[name])) {
+    alert(`${name} = '${window.HAPIUI.qsInitial[name]}' is not a valid date/time string or not in range ${allowed}. Using default.`)
+  }
+
+  if (list.length === 0) {
+    console.error(`${name}time(): No valid times could be generated. Likely there is an error in info.startDate and/or info.stopDate.`)
+    if (name === 'start') {
+      list.append({ label: info.startDate, value: info.startDate })
+    } else {
+      list.append({ label: defaultStop, value: defaultStop })
+    }
+  }
+
+  util.log(`${name}time(): list = ${JSON.stringify(list)}`)
   util.log(`${name}time(): Setting selected time to ${list[0].value}`)
   list[0].selected = true
   delete window.HAPIUI.qsInitial[name]

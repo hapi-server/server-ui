@@ -3,6 +3,7 @@ function script () {
   // - scripts/_scriptList.js
   // - index.htm (highlight.js)
   // - index.htm (hljs.getLanguage)
+  // - index.htm (list of scripts in text)
   // - server-ui/js/output/script.js (this file)
 
   let cclass = '' // Syntax highlight class

@@ -11,15 +11,15 @@ end
 
 using HAPIClient
 
-server     = 'SERVER'
-dataset    = 'DATASET'
+server     = "SERVER"
+dataset    = "DATASET"
 # Notes:
-# 1. Use parameters='' to request all parameters from DATASET.
+# 1. Use parameters="" to request all parameters from DATASET.
 # 2. Multiple parameters can be requested using a comma-separated
 #    listCSV_EXAMPLE
-parameters = 'PARAMETERS'
-start      = 'START' # min STARTMIN
-stop       = 'STOP' # max STOPMAX
+parameters = "PARAMETERS"
+start      = "START" # min STARTMIN
+stop       = "STOP" # max STOPMAX
 
 data = hapi(server, dataset, parameters, start, stop)
 

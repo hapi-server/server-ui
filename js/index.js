@@ -29,6 +29,13 @@ function main () {
   dropdowns(dfuncs, '#dropdowns')
 }
 
+function clearErrors () {
+  $('#allRequestError').empty().hide()
+  $('#datasetsRequestError').empty().hide()
+  $('#dataRequestError').empty().hide()
+  $('#appWarning').empty().hide()
+}
+
 // Determine selected value for a dropdown from hash.
 function selected (name) {
   // When dropdown value is selected, URL should be up-to-date.
@@ -112,8 +119,7 @@ function servers (cb) {
 
   const serverList = window.HAPIUI.options.serverList
   const serverListFallback = window.HAPIUI.options.serverListFallback
-  $('#allRequestError').empty().hide()
-  $('#appWarning').empty().hide()
+  clearErrors()
 
   const getOptions = { url: serverList, ...defaultOptions }
   get(getOptions, function (err, text) {
@@ -141,6 +147,7 @@ function servers (cb) {
 
   servers.onselect = function () {
     util.log('servers.onselect(): Called.')
+    clearErrors()
 
     const selectedServer = selected('server')
 
@@ -340,6 +347,7 @@ function datasets (cb) {
   datasets.clearFollowing = true
   datasets.onselect = function () {
     util.log('datasets.onselect(): Called.')
+    clearErrors()
 
     util.log('datasets.onselect(): Emptying #datasetinfo <ul>.')
     $('#datasetinfo ul').empty()
@@ -364,7 +372,7 @@ function datasets (cb) {
   util.log('datasets.onselect(): Emptying #datasetinfo <ul>.')
   $('#datasetinfo ul').empty()
 
-  $('#datasetsRequestError').empty().hide()
+  clearErrors()
   get(getOptions, function (err, res) {
     if (!err) {
       process(res)
@@ -460,6 +468,7 @@ function parameters (cb) {
 
   parameters.onselect = function () {
     util.log('parameters.onselect(): Called.')
+    clearErrors()
 
     if (selected('format')) {
       util.log("parameters.onselect(): 'format' is selected. Updating #output.")
@@ -514,6 +523,7 @@ function parameters (cb) {
   }
 
   // N.B. Call to get() must go last because cb() function requires above to be set.
+  clearErrors()
   $('#parametersRequestError').empty().hide()
   get(getOptions, function (err, res) {
     if (err) {
@@ -824,11 +834,14 @@ function returntype (cb) {
   returntype.clearFollowing = true
 
   returntype.onselect = function () {
+    clearErrors()
     $('#output').prevAll('details').each(function () {
       $(this).attr('open', false)
     })
     $(window).scrollTop(0)
   }
+
+  clearErrors()
 
   const values =
               [
@@ -853,6 +866,7 @@ function format (cb) {
   format.clearFollowing = true
 
   format.onselect = function () {
+    clearErrors()
     $(window).scrollTop(0)
     if (selected('style') || selected('return') === 'script') {
       // Update output
@@ -862,6 +876,7 @@ function format (cb) {
     // style.lastSelected = selected('style');
   }
 
+  clearErrors()
   let values = []
   if (selected('return').match('data')) {
     format.label = 'Output Format'
@@ -929,6 +944,7 @@ function style (cb) {
   style.id = 'style'
   style.clearFollowing = false
   style.onselect = function () {
+    clearErrors()
     output()
   }
 
@@ -979,6 +995,7 @@ function style (cb) {
     }
     values = query.chooseDefault(useDefault, values)
   }
+  clearErrors()
   delete window.HAPIUI.qsInitial.style
   cb(values)
 }

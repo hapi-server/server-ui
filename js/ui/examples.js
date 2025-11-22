@@ -10,21 +10,20 @@ function examples (serversObj, cb) {
     }
   }
 
-  const url = 'examples/examples.json'
+  const url = `${window["HAPIUI"].options.meta}/abouts.json`
   util.log('examples(): Requesting ' + url)
-  get({ url, ...getOptions }, (err, examplesJSON) => {
+  get({ url, ...getOptions }, (err, abouts) => {
     if (err) {
-      util.log(`examples(): Error when requesting ${examplesJSON}: ${err}`)
+      util.log(`examples(): Error when requesting ${url}: ${err}`)
       return
     }
     util.log(`examples(): Got ${url}`)
-    for (const serverID of Object.keys(serversObj).sort()) {
-      const linkObj = examplesJSON[serverID]
-      if (linkObj) {
-        cb(createLinkHTML(linkObj, serverID))
+    for (const about of abouts) {
+      if (about.dataTest && about.dataTest.query) {
+        cb(createLinkHTML(about.dataTest.query, about.id))
       } else {
-        // These will appear last in the list and not in alphabetical order.
-        autoCreateLinkJSON(serverID, serversObj[serverID].url, cb)
+        util.log(`examples(): No dataTest.query for ${about.x_url}`)
+        autoCreateLinkJSON(about.id, about.x_url, cb)
       }
     }
   })

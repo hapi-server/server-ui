@@ -8,6 +8,7 @@ function _scriptList() {
     {label: "IDL", value: "idl"},
     {label: "IDL/SPEDAS", value:"idl-spedas"},
     {label: "Javascript", value:"javascript"},
+    {label: "Julia", value:"julia"},
     {label: "MATLAB", value:"matlab"},
     {label: "Python", value:"python"},
     {label: "Python/SPEDAS", value:"python-spedas"},

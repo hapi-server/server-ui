@@ -1,10 +1,21 @@
 function script () {
+  // To add a script, need to modify:
+  // - scripts/_scriptList.js
+  // - index.htm (highlight.js)
+  // - index.htm (hljs.getLanguage)
+  // - index.htm (list of scripts in text)
+  // - server-ui/js/output/script.js (this file)
+
   let cclass = '' // Syntax highlight class
   let ext = '' // Script filename extension
 
   if (selected('format').startsWith('python')) {
     cclass = 'python'
     ext = 'py'
+  }
+  if (selected('format').startsWith('julia')) {
+    cclass = 'julia'
+    ext = 'jl'
   }
   if (selected('format').startsWith('javascript')) {
     cclass = 'javascript'

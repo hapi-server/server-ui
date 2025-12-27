@@ -57,13 +57,13 @@
 
   let ROOT = "";
   let VERSION = '__VERSION__';
-  let datasetKey = "id";
-  let startKey = "time.min";
-  let stopKey = "time.max";
-  if (parseInt(VERSION.substring(0)) >= 3) {
-    datasetKey = "dataset";
-    startKey = "start";
-    stopKey = "stop";
+  datasetKey = "dataset";
+  startKey = "start";
+  stopKey = "stop";
+  if (parseInt(VERSION.substring(0)) < 3) {
+    let datasetKey = "id";
+    let startKey = "time.min";
+    let stopKey = "time.max";
   }
 
   $(document).ready(function () {
@@ -72,18 +72,17 @@
       $("#about").remove();
     }
 
-    if (location.href.endsWith("/")) {
+    if (location.href.endsWith("hapi/")) {
       // This page should be served from a URL that ends in "hapi".
       // If this page is also served from a URL ending with "hapi/",
-      // we need to fix the links. (The server should 301
-      // redirect "hapi/" to "hapi" so this fix is not needed.)
+      // we need to fix the links. (Servers should 301 redirect "hapi/"
+      // to "hapi", but this is not always done so we need to fix here.)
       ROOT = "../"
       $("[href]").each(function(idx,el) {
         let href = el.href.replace();
-        $(el).attr('href',ROOT+el.href);
+        $(el).attr('href',el.href + "../hapi");
       })
     }
-
     if (VERIFIER.trim() !== "" && VERIFIER !== "__VERIFIER__") {
       let vargs = "?url=" + window.location.href;
       $("#verifier").attr("href",VERIFIER + vargs);
@@ -160,6 +159,6 @@
       }
     }
   }
-  </script> 
+  </script>
 </body>
 </html>

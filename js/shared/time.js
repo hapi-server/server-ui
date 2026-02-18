@@ -20,7 +20,6 @@ if (typeof dayjs === 'undefined') {
 
 function trimTime (dateTime) {
   if (!dateTime) return dateTime
-  console.log(dateTime)
   dateTime = dateTime.trim()
   if (dateTime.endsWith('Z')) {
     return dateTime.slice(0, -1)
@@ -38,17 +37,19 @@ function validTimeString (dateTime) {
 
 function startOK (meta, requestedStart) {
   const _start = trimTime(meta.startDate)
+  const _stop = trimTime(meta.stopDate)
   const _requestedStart = trimTime(requestedStart)
   const a = dayjs(_requestedStart).valueOf() >= dayjs(_start).valueOf()
-  const b = dayjs(_requestedStart).valueOf() < dayjs(meta.stopDate).valueOf()
+  const b = dayjs(_requestedStart).valueOf() < dayjs(_stop).valueOf()
   return a && b
 }
 
 function stopOK (meta, requestedStop) {
+  const _start = trimTime(meta.startDate)
   const _stop = trimTime(meta.stopDate)
   const _requestedStop = trimTime(requestedStop)
   const a = dayjs(_requestedStop).valueOf() <= dayjs(_stop).valueOf()
-  const b = dayjs(_requestedStop).valueOf() > dayjs(meta.startDate).valueOf()
+  const b = dayjs(_requestedStop).valueOf() > dayjs(_start).valueOf()
   return a && b
 }
 

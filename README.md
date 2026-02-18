@@ -51,7 +51,7 @@ Note that this will only work if the server(s) allow [CORS](https://github.com/h
 
 # Proxy Server
 
-If a server in `all.txt` or the `server` [passed as a URL parameter](ui-use) does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to use a proxy server to access resources from that server.
+If a server in `all.txt` or the `server` passed as a URL parameter does not allow [CORS](https://github.com/hapi-server/data-specification/blob/master/hapi-dev/HAPI-data-access-spec-dev.md#5-cross-origin-resource-sharing), you will need to use a proxy server to access resources from that server.
 
 A server with a proxy can be run on port `8000` using
 

@@ -9,15 +9,33 @@ function examples (serversObj, cb) {
       visible: false
     }
   }
+  const aboutsFiles = ['abouts.json', 'abouts-test.json']
 
-  const url = `${window["HAPIUI"].options.meta}/abouts.json`
-  util.log('examples(): Requesting ' + url)
-  get({ url, ...getOptions }, (err, abouts) => {
-    if (err) {
-      util.log(`examples(): Error when requesting ${url}: ${err}`)
-      return
-    }
-    util.log(`examples(): Got ${url}`)
+  const aboutsCombined = []
+  let pending = aboutsFiles.length
+
+  for (const aboutsFile of aboutsFiles) {
+    const url = `${window["HAPIUI"].options.meta}/${aboutsFile}`
+    util.log('examples(): Requesting ' + url)
+    get({ url, ...getOptions }, (err, abouts) => {
+      if (err) {
+        util.log(`examples(): Error when requesting ${url}: ${err}`)
+      } else if (Array.isArray(abouts)) {
+        util.log(`examples(): Got ${url}`)
+        aboutsCombined.push(...abouts)
+      } else {
+        util.log(`examples(): Invalid response from ${url}`)
+      }
+
+      pending -= 1
+      if (pending === 0) {
+        processAbouts(aboutsCombined)
+      }
+    })
+  }
+
+  function processAbouts (abouts) {
+    util.log(`examples(): Processing ${abouts.length} about entries`)
     for (const about of abouts) {
       if (about.dataTest && about.dataTest.query) {
         cb(createLinkHTML(about.dataTest.query, about.id))
@@ -26,7 +44,7 @@ function examples (serversObj, cb) {
         autoCreateLinkJSON(about.id, about.x_url, cb)
       }
     }
-  })
+  }
 
   function autoCreateLinkJSON (serverID, serverURL, cb) {
     util.log(`examples(): Auto-creating examples for ${serverURL}`)

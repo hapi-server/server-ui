@@ -230,8 +230,6 @@ function servers (cb) {
     }
 
     const selectedServer = selected('server')
-    // let qs = query.parseQueryString();
-    // window["HAPIUI"]["qsInitial"]['server'] === id
 
     servers.ids = []
     let found = false
@@ -792,7 +790,6 @@ function timeDropdown (fn, cb) {
   util.log(`${name}time(): possible times to put in drop-down = ${JSON.stringify(possibles)}`)
   let uniques = util.uniqueElements(possibles).filter(item => item !== '')
   util.log(`${name}time(): uniques = ${JSON.stringify(uniques)}`)
-
   const list = []
   const uniques_a = []
   for (let i = 0; i < uniques.length; i++) {
@@ -812,11 +809,12 @@ function timeDropdown (fn, cb) {
   }
 
   if (list.length === 0) {
-    console.error(`${name}time(): No valid times could be generated. Likely there is an error in info.startDate and/or info.stopDate.`)
+    console.log(list)
+    console.error(`${name}time(): No valid start time list could be generated. Likely there is an error in info.startDate and/or info.stopDate.`)
     if (name === 'start') {
-      list.append({ label: info.startDate, value: info.startDate })
+      list.push({ label: info.startDate, value: info.startDate })
     } else {
-      list.append({ label: defaultStop, value: defaultStop })
+      list.push({ label: defaultStop, value: defaultStop })
     }
   }
 

@@ -1,25 +1,25 @@
 function data () {
-  const selectedParameters = selected('parameters')
+  const selectedParameters = hash.selected('parameters')
 
   const parameterString = '&parameters=' + selectedParameters
 
-  let url = servers.info[selected('server')].url +
-              '/data?id=' + selected('dataset') +
+  let url = servers.info[hash.selected('server')].url +
+              '/data?id=' + hash.selected('dataset') +
               parameterString +
-              '&time.min=' + selected('start') +
-              '&time.max=' + selected('stop')
+              '&time.min=' + hash.selected('start') +
+              '&time.max=' + hash.selected('stop')
 
   url = util.hapi2to3(url)
 
   let getOptions = {}
-  if (selected('format') === 'csv') {
+  if (hash.selected('format') === 'csv') {
     getOptions = { dataType: 'text', chunk: true }
   }
-  if (selected('format') === 'json') {
+  if (hash.selected('format') === 'json') {
     url = url + '&format=json'
     getOptions = { dataType: 'json', chunk: false }
   }
-  if (selected('style') === 'header') {
+  if (hash.selected('style') === 'header') {
     url = url + '&include=header'
   }
 
@@ -66,7 +66,7 @@ function data () {
           $('#data').append(JSON.stringify(data, null, 2))
         }
       } else {
-        if (selected('style') === 'header') {
+        if (hash.selected('style') === 'header') {
           const datas = $('#data').val().trim().split('\n')
           let i
           for (i = 0; i < datas.length; i++) {

@@ -9,54 +9,54 @@ function script () {
   let cclass = '' // Syntax highlight class
   let ext = '' // Script filename extension
 
-  if (selected('format').startsWith('python')) {
+  if (hash.selected('format').startsWith('python')) {
     cclass = 'python'
     ext = 'py'
   }
-  if (selected('format').startsWith('julia')) {
+  if (hash.selected('format').startsWith('julia')) {
     cclass = 'julia'
     ext = 'jl'
   }
-  if (selected('format').startsWith('javascript')) {
+  if (hash.selected('format').startsWith('javascript')) {
     cclass = 'javascript'
     ext = 'html'
   }
-  if (selected('format').startsWith('matlab')) {
+  if (hash.selected('format').startsWith('matlab')) {
     cclass = 'matlab'
     ext = 'm'
   }
-  if (selected('format') === 'autoplot') {
+  if (hash.selected('format') === 'autoplot') {
     cclass = 'python'
     ext = 'jy'
   }
-  if (selected('format').startsWith('idl')) {
+  if (hash.selected('format').startsWith('idl')) {
     cclass = ''
     ext = 'pro'
   }
-  if (selected('format') === 'curl') {
+  if (hash.selected('format') === 'curl') {
     cclass = 'curl'
     ext = 'sh'
   }
-  if (selected('format') === 'wget') {
+  if (hash.selected('format') === 'wget') {
     cclass = 'wget'
     ext = 'sh'
   }
 
   const opts = {
-    server: servers.info[selected('server')].url,
-    dataset: selected('dataset'),
+    server: servers.info[hash.selected('server')].url,
+    dataset: hash.selected('dataset'),
     parametersList: Object.keys(parameters.info),
-    parametersSelected: selected('parameters'),
-    startDate: selected('start'),
-    stopDate: selected('stop'),
-    startDateMin: datasets.info[selected('dataset')].info.startDate,
-    stopDateMax: datasets.info[selected('dataset')].info.stopDate,
-    contactEmail: servers.info[selected('server')].contactEmail
+    parametersSelected: hash.selected('parameters'),
+    startDate: hash.selected('start'),
+    stopDate: hash.selected('stop'),
+    startDateMin: datasets.info[hash.selected('dataset')].info.startDate,
+    stopDateMax: datasets.info[hash.selected('dataset')].info.stopDate,
+    contactEmail: servers.info[hash.selected('server')].contactEmail
   }
 
   $.ajax({
     type: 'GET',
-    url: 'scripts/' + selected('format') + '.' + ext,
+    url: 'scripts/' + hash.selected('format') + '.' + ext,
     async: true,
     dataType: 'text',
     success: function (data, textStatus, jqXHR) {
@@ -84,7 +84,7 @@ function script () {
     const w = $('#infodiv').width() - 15
 
     // Common browser bug: &param is interpreted as &para;m (¶m)
-    if (!['wget', 'curl'].includes(selected('format'))) {
+    if (!['wget', 'curl'].includes(hash.selected('format'))) {
       sText = sText.replace('&param', '&amp;param')
     }
     $('#script').addClass(cclass)

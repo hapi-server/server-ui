@@ -1,9 +1,9 @@
 function plot (selectedParameter, cb) {
   // TODO: Check plotserver is known.
 
-  let format = selected('style')
+  let format = hash.selected('style')
 
-  let plotserver = selected('format')
+  let plotserver = hash.selected('format')
   let plotServer = window.HAPIUI.options.hapiplot;
   [plotserver, plotServer] = _plotServer(plotserver, plotServer)
 
@@ -12,7 +12,7 @@ function plot (selectedParameter, cb) {
 
   util.log('plot(): plotserver = ' + plotserver + ', plotServer = ' + plotServer)
 
-  let hapiServer = servers.info[selected('server')].url
+  let hapiServer = servers.info[hash.selected('server')].url
   if (!hapiServer.startsWith('http')) {
     hapiServer = location.origin + location.pathname + hapiServer
   }
@@ -22,10 +22,10 @@ function plot (selectedParameter, cb) {
   if (plotserver.startsWith('hapiplot')) {
     url = plotServer + '?' +
         'server=' + hapiServer +
-        '&dataset=' + selected('dataset') +
+        '&dataset=' + hash.selected('dataset') +
         '&parameters=' + selectedParameter +
-        '&start=' + selected('start') +
-        '&stop=' + selected('stop') +
+        '&start=' + hash.selected('start') +
+        '&stop=' + hash.selected('stop') +
         '&format=' + format +
         '&usecache=' + $('#useimagecache').prop('checked') +
         '&usedatacache=' + $('#usedatacache').prop('checked')
@@ -177,8 +177,8 @@ function plot (selectedParameter, cb) {
     //html.iconLink(url, 'download', `#${parentElementId} #plot-downloadlink`)
     html.iconLink(url, 'open-in-new-tab', `#${parentElementId} #plot-downloadlink`)
 
-    const format = selected('style')
-    const plotserver = selected('plotserver')
+    const format = hash.selected('style')
+    const plotserver = hash.selected('plotserver')
     if (/png|svg/.test(format) && plotserver !== 'cdaweb') {
       const galleryLink = html.aLink(_plotGalleryURL(url), '&#9638;&nbsp;Thumbnails')
       const pagerLink = html.aLink(_plotPagerURL(url), '&#9707;&nbsp;Plot pager')
@@ -228,7 +228,7 @@ function plot (selectedParameter, cb) {
 
   function _autoplot () {
     url = 'vap+hapi:' + hapiServer + '?id='
-    url = url + `${selected('dataset')}&parameters=${selectedParameter}&timerange=${selected('start')}/${selected('stop')}`
+    url = url + `${hash.selected('dataset')}&parameters=${selectedParameter}&timerange=${hash.selected('start')}/${hash.selected('stop')}`
     url = plotServer + '?url=' + encodeURIComponent(url)
 
     if (format === 'svg') {
@@ -265,11 +265,11 @@ function plot (selectedParameter, cb) {
   }
 
   function _cdaweb () {
-    let start = time.doy2ymd(selected('start'))
-    let stop = time.doy2ymd(selected('stop'))
+    let start = time.doy2ymd(hash.selected('start'))
+    let stop = time.doy2ymd(hash.selected('stop'))
     start = dayjs(start).toISOString().replace(/:|-/g, '').replace(/\.[0-9].*Z/, 'Z')
     stop = dayjs(stop).toISOString().replace(/:|-/g, '').replace(/\.[0-9].*Z/, 'Z')
-    const xurl = `${plotServer}/${selected('dataset')}/data/${start},${stop}/${selectedParameter}?format=${format}`
+    const xurl = `${plotServer}/${hash.selected('dataset')}/data/${start},${stop}/${selectedParameter}?format=${format}`
 
     if (Object.keys(parameters.info)[0] === selectedParameter) {
       const msg = 'Plotting only time parameter is not supported by CDAWeb plot server.'

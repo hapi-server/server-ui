@@ -225,7 +225,6 @@ function get (options, cb) {
             let msg = msgo + `<br><br>Proxy request of ${html.aLink(url)} failed.`
             msg += '<br><br>Another proxy <code>HEAD</code> request for the '
             msg += `first URL found a HTTP status code = <code>${head.status}<code>`
-            console.log(head.status)
             if (head.status !== 200) {
               cb(msg, null)
               return

@@ -1,5 +1,18 @@
 const hash = {}
 
+hash.selected = function(name) {
+  // Determine selected value for a dropdown from hash.
+  // When dropdown value is selected, URL should be up-to-date.
+  // Use value in URL.
+  if (location.hash !== '') {
+    const qs = query.parseQueryString()
+    if (qs[name]) {
+      return qs[name]
+    }
+  }
+  return ''
+}
+
 hash.update = function (qs) {
   const hash = decodeURIComponent($.param(qs))
   util.log(`hash.update(): Modifying hash from\n  ${window.location.hash}\nto\n  ${hash}.`)
@@ -12,20 +25,20 @@ hash.update = function (qs) {
   handleHashChange()
 }
 
-hash.hashchange = function () {
+hash.bind = function () {
   // Update dropdowns when URL is changed by editing URL.
 
-  util.log('hashchange(): Binding hashchange.')
+  util.log('hash.bind(): Binding hashchange.')
   $(window).hashchange.byurledit = true
 
   $(window).unbind('hashchange')
   $(window).bind('hashchange', function (event) {
     // Monitor hash for changes via text entry in address bar.
     if ($(window).hashchange.byurledit == true) {
-      util.log('hashchange.bind.hashchange(): byurledit = true. Calling handleHashChange.')
+      util.log('hash.bind(): byurledit = true. Calling handleHashChange.')
       handleHashChange(event)
     } else {
-      util.log('hashchange.bind.hashchange(): byurledit = false. Ignoring hashchange event.')
+      util.log('hash.bind(): byurledit = false. Ignoring hashchange event.')
       $(window).hashchange.byurledit = true
     }
   })

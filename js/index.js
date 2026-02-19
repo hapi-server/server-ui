@@ -15,7 +15,7 @@ function main () {
   options()
 
   // Bind events to changes in the hash part of the URL
-  hash.hashchange()
+  hash.bind()
 
   // Remove hash when reset clicked
   $('#clear').show().on('click', function () {
@@ -36,18 +36,6 @@ function clearErrors () {
   $('#appWarning').empty().hide()
 }
 
-// Determine selected value for a dropdown from hash.
-function selected (name) {
-  // When dropdown value is selected, URL should be up-to-date.
-  // Use value in URL.
-  if (location.hash !== '') {
-    const qs = query.parseQueryString()
-    if (qs[name]) {
-      return qs[name]
-    }
-  }
-  return ''
-}
 
 function about (url, HAPI) {
   if (about[url] === undefined) {
@@ -74,7 +62,7 @@ function about (url, HAPI) {
   const getOptions = { url, ...defaultOptions }
   get(getOptions, (err, json) => {
     if (!err) {
-      process(json)
+      html.aboutList(json, url)
       return
     }
     util.log('about(): Problem with /about response from ' + url)
@@ -86,28 +74,13 @@ function about (url, HAPI) {
     }
   })
 
-  function process (json) {
-    html.showJSONOnClick('about', url, '#serverinfo')
-    if (typeof json.contact === 'string') {
-      // Default is to show what is in all.txt. This updates based on info
-      // in /about response.
-      const newContact = 'Server contact: ' + html.mailtoLink(null, json.contact, url)
-      $('#servercontact').html(newContact)
-    }
-    if (typeof json.citation === 'string') {
-      if (json.citation.trim().startsWith('http')) {
-        const citation = html.aLink(json.citation, 'Server citation')
-        $('#serverinfo > ul').append('<li>' + citation + '</li>')
-      } else {
-        $('#serverinfo > ul').append(`<li>Server Citation: ${json.citation}"</li>`)
-      }
-    }
-  }
 }
 
 // Servers dropdown
 function servers (cb) {
   util.log('servers(): Called.')
+
+  clearErrors()
 
   const defaultOptions = {
     requestURLElement: '#allRequestURL',
@@ -119,7 +92,6 @@ function servers (cb) {
 
   const serverList = window.HAPIUI.options.serverList
   const serverListFallback = window.HAPIUI.options.serverListFallback
-  clearErrors()
 
   const getOptions = { url: serverList, ...defaultOptions }
   get(getOptions, function (err, text) {
@@ -149,7 +121,7 @@ function servers (cb) {
     util.log('servers.onselect(): Called.')
     clearErrors()
 
-    const selectedServer = selected('server')
+    const selectedServer = hash.selected('server')
 
     let metaURL = window.HAPIUI.options.availabilities
     if (metaURL !== false) {
@@ -161,7 +133,7 @@ function servers (cb) {
           return
         }
         $('#time-range-details').show()
-        $('#time-range-details  summary .selected-server').html(selected('server') + '&nbsp;')
+        $('#time-range-details  summary .selected-server').html(hash.selected('server') + '&nbsp;')
         $('#time-range-details summary a').attr('href', metaURL)
         $('#iframe').attr('src', metaURL)
         $('#iframe').css('height', '50vh')
@@ -187,15 +159,7 @@ function servers (cb) {
     $('#serverinfo').nextAll().hide()
     $('#serverinfo > ul').empty()
 
-    const contactEmail = servers.info[selected('server')].contactEmail || ''
-    const contactName = servers.info[selected('server')].contactName || ''
-    const li1 = '<li>Server URL: <code>' + html.aLink(url) + '</code></li>'
-    $('#serverinfo > ul').append(li1)
-    if (contactEmail && contactName) {
-      const mailtoLink = html.mailtoLink(contactName, contactEmail, url)
-      const li2 = `<li id="servercontact">Server Contact: ${mailtoLink}</li>`
-      $('#serverinfo > ul').append(li2)
-    }
+    html.serverList(servers.info[hash.selected('server')], url)
 
     $('#serverinfo').show()
 
@@ -204,9 +168,9 @@ function servers (cb) {
 
   function showSingleServerExamples () {
     $('#all-example-details-body > div').hide()
-    $('#all-example-details summary .selected-server').html(selected('server') + '&nbsp;')
-    $(`#${util.validHTMLID(selected('server'))}-examples b`).hide()
-    $(`#${util.validHTMLID(selected('server'))}-examples`).show()
+    $('#all-example-details summary .selected-server').html(hash.selected('server') + '&nbsp;')
+    $(`#${util.validHTMLID(hash.selected('server'))}-examples b`).hide()
+    $(`#${util.validHTMLID(hash.selected('server'))}-examples`).show()
   }
 
   function process (alltxt, serverListURL) {
@@ -229,7 +193,7 @@ function servers (cb) {
       return
     }
 
-    const selectedServer = selected('server')
+    const selectedServer = hash.selected('server')
 
     servers.ids = []
     let found = false
@@ -261,7 +225,7 @@ function servers (cb) {
       examples(info, function (html) {
         if (!html) return
         $('#all-example-details-body').append(html).show()
-        if (selected('server')) {
+        if (hash.selected('server')) {
           showSingleServerExamples()
         }
       })
@@ -354,7 +318,7 @@ function datasets (cb) {
     $('#output').hide()
   }
 
-  const url = servers.info[selected('server')].url + '/catalog'
+  const url = servers.info[hash.selected('server')].url + '/catalog'
   const getOptions = {
     url,
     dataType: 'json',
@@ -380,7 +344,7 @@ function datasets (cb) {
   })
 
   function process (res) {
-    about(servers.info[selected('server')].url, res.HAPI)
+    about(servers.info[hash.selected('server')].url, res.HAPI)
 
     $('#server-example-details').attr('open', false)
 
@@ -388,8 +352,9 @@ function datasets (cb) {
     res = res.catalog
 
     // Show number of datasets
-    const nDatasets = res.length + ' dataset' + util.plural(res)
-    $('#serverinfo ul').prepend('<li>' + nDatasets + '</li>')
+    let nDatasets = res.length + ' dataset' + util.plural(res)
+    nDatasets += ` from <code>${html.aLink(url, '/catalog')}</code> response`
+    $('#nDatasets').html(nDatasets)
 
     const getOptions = {
       url: 'https://hapi-server.org/urlwatcher/log/tests.json',
@@ -407,8 +372,8 @@ function datasets (cb) {
         util.log(`datasets.process(): Failed to read ${getOptions.url}.`)
         //$("#urlwatcherRequestError").html(err).show()
       }
-      if (json && json[selected('server')]) {
-        const watcherLink = window.HAPIUI.options.urlwatcher + '#category=' + selected('server')
+      if (json && json[hash.selected('server')]) {
+        const watcherLink = window.HAPIUI.options.urlwatcher + '#category=' + hash.selected('server')
         const serverTests = '<li id="statuslink" style="display:none">' +
                         html.aLink(watcherLink, 'View server response tests') +
                         '</li>'
@@ -445,8 +410,8 @@ function datasets (cb) {
 function parameters (cb) {
   util.log('parameters(): Called.')
 
-  let url = servers.info[selected('server')].url + '/info?id=' + selected('dataset')
-  if (selected('server') !== 'CSA') {
+  let url = servers.info[hash.selected('server')].url + '/info?id=' + hash.selected('dataset')
+  if (hash.selected('server') !== 'CSA') {
     url = util.hapi2to3(url)
   }
 
@@ -454,10 +419,9 @@ function parameters (cb) {
   parameters.label = 'Parameters'
   parameters.allowEmptyValue = true
   parameters.selectMultiple = true
-  parameters.clearFollowing = false
 
   parameters.clearfollowing = () => {
-    if (selected('format')) {
+    if (hash.selected('format')) {
       util.log("parameters.clearfollowing(): 'format' is selected. Updating #output.")
       output()
     }
@@ -468,7 +432,7 @@ function parameters (cb) {
     util.log('parameters.onselect(): Called.')
     clearErrors()
 
-    if (selected('format')) {
+    if (hash.selected('format')) {
       util.log("parameters.onselect(): 'format' is selected. Updating #output.")
       output()
     } else {
@@ -482,24 +446,24 @@ function parameters (cb) {
     $('#parameterinfo ul').empty()
 
     if (window.HAPIUI.options.allowAllParameters === true) {
-      if (selected('parameters') === '') {
+      if (hash.selected('parameters') === '') {
         // Loop through all parameters and create bulleted list.
         // return;
       }
     }
 
-    util.log(`parameters.onselect(): selected('parameters') = '${selected('parameters')}'.`)
-    const meta = parameters.info[selected('parameters')]
-    let url = servers.info[selected('server')].url +
-            '/info?id=' + selected('dataset') +
-            '&parameters=' + selected('parameters')
+    util.log(`parameters.onselect(): hash.selected('parameters') = '${hash.selected('parameters')}'.`)
+    const meta = parameters.info[hash.selected('parameters')]
+    let url = servers.info[hash.selected('server')].url +
+            '/info?id=' + hash.selected('dataset') +
+            '&parameters=' + hash.selected('parameters')
 
-    if (selected('server').id !== 'CSA') {
+    if (hash.selected('server').id !== 'CSA') {
       url = util.hapi2to3(url)
     }
 
     if (meta) {
-      $('#parameterinfo ul').append(`<li>id: <code>${selected('parameters')}</code></li>`)
+      $('#parameterinfo ul').append(`<li>id: <code>${hash.selected('parameters')}</code></li>`)
       for (const key of Object.keys(meta)) {
         if (key !== 'bins') {
           $('#parameterinfo ul').append(`<li>${key}: ${JSON.stringify(meta[key])}</li>`)
@@ -533,69 +497,13 @@ function parameters (cb) {
   })
 
   function process (res, url) {
-    $('#datasetinfo ul').append(`<li>id: <code>${selected('dataset')}</code></li>`)
+    html.parametersList(res, url)
 
-    let description = res.description
-    if (description && /\\n/.test(description)) {
-      // Preserve formatting in description.
-      description = '<pre>' + description.replace('\\n', '<br/>') + '</pre>'
-    }
-    if (description) {
-      $('#datasetinfo ul').append('<li>Description: ' + description + '</li>')
-    }
-
-    // Show number of parameters
-    $('#nParameters').html(`<code>${res.parameters.length}</code> parameter${util.plural(res.parameters)}.`)
-    $('#datasetinfo ul').append(`<li>Start: <code>${res.startDate}</code></li>`)
-    $('#datasetinfo ul').append(`<li>Stop: <code>${res.stopDate}</code></li>`)
-
-    let cadence = res.cadence
-    if (cadence) {
-      cadence = `Cadence: ${time.ISODuration2Words(cadence)} (<code>${cadence}</code>)`
-    } else {
-      cadence = 'Cadence: not specified'
-    }
-    $('#datasetinfo ul').append(`<li>${cadence}</li>`)
-
-    if (res.resourceURL) {
-      $('#datasetinfo ul')
-        .append('<li>' +
-                html.aLink(res.resourceURL, 'Dataset documentation or metadata') +
-                '</li>')
-    }
-    if (res.contact) {
-      $('#datasetinfo ul')
-        .append('<li>Dataset contact: ' + html.mailtoLink(null, res.contact, url) + '</li>')
-    }
-
-    html.showJSONOnClick('dataset', url, '#datasetinfo')
-
-    let surl = servers.info[selected('server')].url
-    if (!surl.startsWith('http')) {
-      surl = window.location.origin + window.location.pathname + surl
-    }
-    let vurl = window.HAPIUI.options.verifier +
-             '?url=' + surl +
-             '&id=' + datasets.info[selected('dataset')].id
-
-    if (selected('server').id !== 'CSA') {
-      vurl = util.hapi2to3(vurl)
-    }
-
-    const link = `<a target="_blank" href="${vurl}">Check this dataset using the HAPI Verifier</a>`
-    let warning = ''
-    if (new URL(surl).hostname.startsWith('localhost') === true) {
-      if (new URL(vurl).hostname.startsWith('localhost') === false) {
-        warning = '<br>(Server URL host name is <code>localhost</code> and verifier URL host name is not <code>localhost</code>. Verifier links may not work.)'
-      }
-    }
-    const li = `<li id="verifierlink" style="display:none">${link} ${warning}</li>`
-    $('#datasetinfo ul').append(li)
     if ($('#showverifierlink').prop('checked')) {
       $('#verifierlink').show()
     }
 
-    datasets.info[selected('dataset')].info = res
+    datasets.info[hash.selected('dataset')].info = res
 
     res = res.parameters
 
@@ -635,7 +543,7 @@ function parameters (cb) {
       })
     }
 
-    datasets.info[selected('dataset')].info.parameters = info
+    datasets.info[hash.selected('dataset')].info.parameters = info
     parameters.info = info
     parameters.list = list
 
@@ -646,183 +554,12 @@ function parameters (cb) {
 
 // Start time dropdown
 function starttime (cb) {
-  timeDropdown(starttime, cb)
+  util.timeDropdown(starttime, cb)
 }
+
+// Stop time dropdown
 function stoptime (cb) {
-  timeDropdown(stoptime, cb)
-}
-
-function timeDropdown (fn, cb) {
-  let nameUpperCase
-  let name = fn.name
-  if (name === 'starttime') {
-    name = 'start'
-    nameUpperCase = 'Start'
-  }
-  if (name === 'stoptime') {
-    name = 'stop'
-    nameUpperCase = 'Stop'
-  }
-
-  util.log(`${name}time(): Called.`)
-
-  fn.id = name
-  fn.label = nameUpperCase
-  fn.clearFollowing = false
-
-  const storage = `server-ui-last-${name}s`
-
-  const info = datasets.info[selected('dataset')].info
-  const allowed = `start ≥ ${info.startDate} and stop < ${info.stopDate}`
-
-  fn.onselect = function () {
-    util.log(`${name}time.onselect(): Called.`)
-    util.log(`${name}time.onselect(): Reading server-ui-last-${name}s in localStorage.`)
-    let lasts = localStorage.getItem(storage)
-    lasts = JSON.parse(lasts)
-    util.log(`${name}time.onselect(): ${storage} = ${JSON.stringify(lasts)}.`)
-    if (!lasts) {
-      util.log(`${name}time.onselect(): No ${storage} in localStorage. Setting = [].`)
-      lasts = []
-    }
-
-    if (time.validTimeString(name, selected(name)) === true) {
-      if (selected(name) in lasts) {
-        util.log(`${name}time.onselect(): ${selected(name)} is already in ${storage}. Not appending.`)
-      } else {
-        util.log(`${name}time.onselect(): Appending ${selected(name)} to ${name}.lasts = ${JSON.stringify(name.lasts)}.`)
-        lasts.push(selected(name))
-        util.log(`${name}time.onselect(): Writing ${storage} in localStorage.`)
-        localStorage.setItem(storage, JSON.stringify(lasts))
-      }
-    } else {
-      util.log(`${name}time(): ${selected(name)} is not a valid time. Not appending to ${storage}.`)
-    }
-    checks()
-  }
-
-  function checks () {
-    function setError (errorMessage, which) {
-      if (!which) {
-        which = ['start', 'stop']
-      } else {
-        which = [which]
-      }
-      for (const id of which) {
-        $('#' + id + '-list')
-          .css('color', 'red')
-          .attr('data-tooltip-error', errorMessage)
-      }
-    }
-
-    function unSetError (which) {
-      if (!which) {
-        which = ['start', 'stop']
-      } else {
-        which = [which]
-      }
-      for (const id of which) {
-        $('#' + id + '-list')
-          .css('color', 'black')
-          .removeAttr('data-tooltip-error')
-      }
-    }
-
-    unSetError()
-    const valid = time.validTimeString(selected(name))
-    if (valid) {
-      let msg = `${name}time(): ${selected(name)} is a valid date/time string`
-      util.log(`${msg}. Unsetting any errors on selected ${name}`)
-      unSetError(name)
-      const startStopOK = time.checkStartStop(name, selected('start'), selected('stop'))
-      if (startStopOK === true) {
-        msg = `${msg} and selected start < selected stop`
-        util.log(`${msg}. Unsetting any errors on selected start and selected stop.`)
-        unSetError()
-        if (time[name + 'OK'](info, selected(name))) {
-          msg = `${msg} and selected ${name} is valid for this dataset`
-          util.log(`${msg}. Unsetting any errors on selected ${name}.`)
-          unSetError(name)
-          if (selected('format')) {
-            util.log(`${name}time(): start/stop date/times passed validation. Updating #output.`)
-            output() // Update output
-          }
-        } else {
-          const emsg = `${selected(name)} is not valid for this dataset. Allowed: ${allowed}`
-          util.log(`${name}time(): ${emsg}. Setting error.`)
-          setError(emsg, name)
-          return false
-        }
-      } else {
-        const emsg = 'Selected start ≥ selected stop'
-        util.log(`${name}time(): ${emsg}. Setting error.`)
-        setError(emsg)
-        return false
-      }
-    } else {
-      const emsg = `${selected(name)} is not a valid date/time string.`
-      util.log(`${name}time(): ${emsg}. Setting error.`)
-      setError(emsg, name)
-      return false
-    }
-    return true
-  }
-
-  util.log(`${name}time(): Reading ${storage} in localStorage.`)
-  let lasts = localStorage.getItem(storage)
-  lasts = JSON.parse(lasts)
-  util.log(`${name}time(): Found ${storage} = ${lasts}.`)
-
-  let defaultStop = null
-  if (name === 'stop') {
-    // Want second choice to be the default stop data, which is
-    // computed if sampleStopDate is not given.
-    defaultStop = time.stop(info)
-  }
-  const possibles = [
-    window.HAPIUI.qsInitial[name] || '',
-    defaultStop || '',
-    info[`sample${nameUpperCase}Date`] || '',
-    info[`${name}Date`] || '',
-    ...lasts || ''
-  ]
-
-  util.log(`${name}time(): possible times to put in drop-down = ${JSON.stringify(possibles)}`)
-  let uniques = util.uniqueElements(possibles).filter(item => item !== '')
-  util.log(`${name}time(): uniques = ${JSON.stringify(uniques)}`)
-  const list = []
-  const uniques_a = []
-  for (let i = 0; i < uniques.length; i++) {
-    if (time[name + "OK"](info, uniques[i])) {
-      // Only add to list if acceptable.
-      uniques_a.push(uniques[i])
-      util.log(`${name}time(): adding '${uniques[i]}' to list of times`)
-      list.push({ label: uniques[i], value: uniques[i] })
-    } else {
-      util.log(`${name}time(): not adding '${uniques[i]}' to list of times`)
-    }
-  }
-
-  util.log(`${name}time(): uniques_a = ${JSON.stringify(uniques_a)}`)
-  if (window.HAPIUI.qsInitial[name] && !uniques_a.includes(window.HAPIUI.qsInitial[name])) {
-    alert(`${name} = '${window.HAPIUI.qsInitial[name]}' is not a valid date/time string or not in range ${allowed}. Using default.`)
-  }
-
-  if (list.length === 0) {
-    console.log(list)
-    console.error(`${name}time(): No valid start time list could be generated. Likely there is an error in info.startDate and/or info.stopDate.`)
-    if (name === 'start') {
-      list.push({ label: info.startDate, value: info.startDate })
-    } else {
-      list.push({ label: defaultStop, value: defaultStop })
-    }
-  }
-
-  util.log(`${name}time(): list = ${JSON.stringify(list)}`)
-  util.log(`${name}time(): Setting selected time to ${list[0].value}`)
-  list[0].selected = true
-  delete window.HAPIUI.qsInitial[name]
-  cb(list)
+  util.timeDropdown(stoptime, cb)
 }
 
 // Return dropdown
@@ -866,17 +603,17 @@ function format (cb) {
   format.onselect = function () {
     clearErrors()
     $(window).scrollTop(0)
-    if (selected('style') || selected('return') === 'script') {
+    if (hash.selected('style') || hash.selected('return') === 'script') {
       // Update output
       output()
     }
     // Keep state of following dropdown.
-    // style.lastSelected = selected('style');
+    // style.lastSelected = hash.selected('style');
   }
 
   clearErrors()
   let values = []
-  if (selected('return').match('data')) {
+  if (hash.selected('return').match('data')) {
     format.label = 'Output Format'
     values =
               [
@@ -885,7 +622,7 @@ function format (cb) {
               ]
   }
 
-  if (selected('return').match('image')) {
+  if (hash.selected('return').match('image')) {
     format.label = 'Plot Server'
     values =
         [
@@ -902,7 +639,7 @@ function format (cb) {
             value: 'autoplot'
           }
         ]
-    if (selected('server') === 'CDAWeb') {
+    if (hash.selected('server') === 'CDAWeb') {
       values.push({
         label: 'CDAWeb',
         value: 'cdaweb'
@@ -910,7 +647,7 @@ function format (cb) {
     }
   }
 
-  if (selected('return').match('script')) {
+  if (hash.selected('return').match('script')) {
     format.label = 'Language'
     values = _scriptList()
   }
@@ -918,11 +655,11 @@ function format (cb) {
   let autoOpen = false
   if (values.length > 0) {
     let selectDefault = true
-    if (selected('return').match('script')) {
+    if (hash.selected('return').match('script')) {
       if (window.HAPIUI.qsInitial.format === undefined) {
         autoOpen = true
       }
-      if (!selected('format') && !window.HAPIUI.qsInitial.format) {
+      if (!hash.selected('format') && !window.HAPIUI.qsInitial.format) {
         selectDefault = false
       }
     }
@@ -947,7 +684,7 @@ function style (cb) {
   }
 
   let values = []
-  if (selected('return') === 'image') {
+  if (hash.selected('return') === 'image') {
     values =
               [
                 { label: 'SVG', value: 'svg' },
@@ -955,7 +692,7 @@ function style (cb) {
                 { label: 'PDF', value: 'pdf' }
               ]
 
-    if (selected('server') === 'CDAWeb' && selected('format') === 'cdaweb') {
+    if (hash.selected('server') === 'CDAWeb' && hash.selected('format') === 'cdaweb') {
       values =
                 [
                   { label: 'GIF', value: 'gif' },
@@ -965,7 +702,7 @@ function style (cb) {
     }
   }
 
-  if (selected('return') === 'data') {
+  if (hash.selected('return') === 'data') {
     style.label = 'Header Options'
     style.label = 'Output header options'
     values =
@@ -1002,7 +739,7 @@ function style (cb) {
 function output () {
   util.log('output(): Called.')
 
-  if (!selected('return')) {
+  if (!hash.selected('return')) {
     util.log("output(): Warning: output called but 'return' not selected. Returning.")
     return
   }
@@ -1010,18 +747,18 @@ function output () {
   util.log('output(): Showing #output element.')
   $('#output').show()
 
-  if (selected('return').match(/script/)) {
+  if (hash.selected('return').match(/script/)) {
     script()
   }
 
-  if (selected('return').match(/data/)) {
+  if (hash.selected('return').match(/data/)) {
     data()
   }
 
-  if (selected('return').match(/image/)) {
+  if (hash.selected('return').match(/image/)) {
     // $('#plotserver').trigger('change');
 
-    let selectedParameters = selected('parameters').trim()
+    let selectedParameters = hash.selected('parameters').trim()
     if (selectedParameters === '') {
       selectedParameters = Object.keys(parameters.info)
     } else {

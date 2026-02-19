@@ -11,7 +11,7 @@ function examples (serversObj, cb) {
   }
   const aboutsFiles = ['abouts.json', 'abouts-test.json']
 
-  const aboutsCombined = []
+  const aboutsByFile = {}
   let pending = aboutsFiles.length
 
   for (const aboutsFile of aboutsFiles) {
@@ -20,15 +20,21 @@ function examples (serversObj, cb) {
     get({ url, ...getOptions }, (err, abouts) => {
       if (err) {
         util.log(`examples(): Error when requesting ${url}: ${err}`)
+        aboutsByFile[aboutsFile] = []
       } else if (Array.isArray(abouts)) {
         util.log(`examples(): Got ${url}`)
-        aboutsCombined.push(...abouts)
+        aboutsByFile[aboutsFile] = abouts
       } else {
         util.log(`examples(): Invalid response from ${url}`)
+        aboutsByFile[aboutsFile] = []
       }
 
       pending -= 1
       if (pending === 0) {
+        const aboutsCombined = []
+        for (const file of aboutsFiles) {
+          aboutsCombined.push(...(aboutsByFile[file] || []))
+        }
         processAbouts(aboutsCombined)
       }
     })

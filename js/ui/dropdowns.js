@@ -520,7 +520,7 @@ function dropdowns (funs, wrapper, i) {
         }
 
         function checkboxLabelHTML (i, valueText, labelHTML) {
-          const selectedParameters = selected('parameters')
+          const selectedParameters = hash.selected('parameters')
           let selectAll = false
           if (query.parseQueryString().parameters !== undefined && selectedParameters === '') {
             selectAll = true

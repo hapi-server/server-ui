@@ -39,9 +39,6 @@ function parseAllTxt (alltxt) {
       info[id].name = line[1] || id
       info[id].contactName = line[3] || ''
       info[id].contactEmail = line[4] || ''
-      if (info[id].contactName === info[id].contactEmail) {
-        info[id].contactName = ''
-      }
     }
   }
   if (Object.keys(info).length === 0) {

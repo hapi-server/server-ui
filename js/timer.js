@@ -1,10 +1,3 @@
-function timerSettings (given) {
-  return {
-    element: given.element || '#timing',
-    updateInterval: given.updateInterval || window.HAPIUI.options.timingUpdateInterval
-  }
-}
-
 function timer (id, timingOptions) {
   // This code does not catch error that will occur if two timers are created
   // with the same id. This should occur with a probability of less than
@@ -12,6 +5,13 @@ function timer (id, timingOptions) {
   // string of length 8 to the requested id. ("should" assuming perfectly random
   // number generator. "Less than 1 in 40^8" because equal to requires two timers
   // to be active with same id.)
+
+  function timerSettings (given) {
+    return {
+      element: given.element || '#timing',
+      updateInterval: given.updateInterval || window.HAPIUI.options.timingUpdateInterval
+    }
+  }
 
   if (timer[id] && timingOptions === 'stop') {
     // Timer was started. Stop timer and return.

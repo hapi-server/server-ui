@@ -4,6 +4,7 @@ const time = {
   stopOK,
   checkStartStop,
   trimTime,
+  doy2ymd,
   validTimeString,
   ISODuration2Words
 }

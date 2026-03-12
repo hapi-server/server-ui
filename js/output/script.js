@@ -60,7 +60,7 @@ function script () {
     async: true,
     dataType: 'text',
     success: function (data, textStatus, jqXHR) {
-      const scriptText = createScript(data, opts)
+      const scriptText = createScript(data, opts, hash.selected('format'))
       showText(scriptText, cclass, ext)
     }
   })

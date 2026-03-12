@@ -18,8 +18,7 @@ end
 %% Get data and metadata
 server     = 'SERVER';
 dataset    = 'DATASET'; % UNICODE_NOTE_DATASET
-% Use parameters='' to request all data. Multiple parameters
-% can be requested using a comma-separated listCSV_EXAMPLE
+% DATASET_NOTES
 parameters = 'PARAMETERS'; % UNICODE_NOTE_PARAMETERS
 start      = 'START'; % min STARTMIN
 stop       = 'STOP'  % max STOPMAX

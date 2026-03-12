@@ -18,10 +18,7 @@ from hapiclient import hapi, hapitime2datetime
 
 server     = 'SERVER'
 dataset    = 'DATASET'
-# Notes:
-# 1. Use parameters='' to request all parameters from DATASET.
-# 2. Multiple parameters can be requested using a comma-separated
-#    listCSV_EXAMPLE
+# DATASET_NOTES
 parameters = 'PARAMETERS'
 start      = 'START' # min STARTMIN
 stop       = 'STOP' # max STOPMAX

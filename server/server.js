@@ -65,7 +65,7 @@ log.debug("indexHTMLFile: " + indexHTMLFile);
 
 // URLs and names of files that contain lists of HAPI servers to expose in the web UI
 // and responses to /all.txt, which is read by index.html.
-const allFile = path.normalize(path.join(__dirname, "..", "all.txt"));
+const allFile = path.normalize(path.join(__dirname, "..", "all_.txt"));
 log.debug("allFile: " + allFile);
 
 // Allow proxy of files and URLs that that start with the URLs in these files.

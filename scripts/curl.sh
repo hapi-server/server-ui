@@ -6,3 +6,5 @@ curl "SERVER/info?id=DATASET&parameters=PARAMETERS" > meta.json
 # min start = STARTMIN
 # max stop = STOPMAX
 curl "SERVER/data?id=DATASET&parameters=PARAMETERS&time.min=START&time.max=STOP" > data.csv
+
+# DATASET_NOTES

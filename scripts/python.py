@@ -1,4 +1,4 @@
-# Python 2.7 and 3 compatible
+# Python 3.8+ compatible
 # Report software bugs/issues/feature requests at
 # https://github.com/hapi-server/client-python/issues
 # Report data server issues to CONTACT

@@ -177,7 +177,7 @@ const html = {
 
     if (json.geoLocation) {
       const link = html.aLink('https://en.wikipedia.org/wiki/World_Geodetic_System', 'WGS84') 
-      const desc = `(${link} [lat (deg), long (deg), elevevation (m)])`
+      const desc = `(${link} [long (deg), lat (deg), elevevation (m)])`
       const loc = json.geoLocation
       datasetList.append(`<li>Location of measurement: [${loc}] ${desc}</li>`)
     }

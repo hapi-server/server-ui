@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>HAPI Server</title>
+        <style>
+            body{
+                font:15px system-ui,sans-serif;
+                max-width:850px;
+                margin:2rem auto;
+                padding:0 1rem;
+                color:#222
+            }
+            input,button{
+                font:inherit;
+                padding:.45rem
+            }
+            input[type=search]{
+                width:100%;
+                box-sizing:border-box
+            }
+            fieldset{
+                border:1px solid #ccc;
+                margin:1rem 0
+            }
+            #datasets{
+                max-height:220px;
+                overflow:auto;
+                border:1px solid #ddd
+            }
+            #datasets button{
+                display:block;
+                width:100%;
+                text-align:left;
+                border:0;
+                background:white;
+                cursor:pointer;
+                overflow-wrap:anywhere;
+                padding:.18rem .4rem;
+                line-height:1.2;
+                font-size:.9rem
+            }
+            #datasets button:hover,#datasets button:focus{
+                background:#eaf2ff
+            }
+            .param{
+                display:block;
+                margin:.4rem 0
+            }
+            .dates{
+                display:flex;
+                gap:1rem;
+                flex-wrap:wrap
+            }
+            .dates label{
+                flex:1;
+                min-width:230px
+            }
+            .dates input{
+                width:100%;
+                box-sizing:border-box
+            }
+            #url{
+                overflow-wrap:anywhere;
+                font-family:monospace;
+                font-size:.85rem
+            }
+            #status{
+                min-height:1.5em;
+                color:#555
+            }
+            button{
+                cursor:pointer
+            }
+            button:disabled{
+                cursor:not-allowed;
+                opacity:.55
+            }
+            .selection-heading{
+                display:flex;
+                align-items:baseline;
+                gap:.75rem;
+                flex-wrap:wrap
+            }
+            .selection-heading h2{
+                overflow-wrap:anywhere
+            }
+            .selection-heading a{
+                white-space:nowrap
+            }
+            .search-help-container {
+                position: relative;
+                display: inline-block;
+            }
+
+            #searchHelpPopup {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                z-index: 1000;
+                width: max-content;
+                max-width: min(90vw, 450px);
+                padding: 12px;
+                background: white;
+                color: #222;
+                border: 1px solid #aaa;
+                border-radius: 4px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            }
+
+            #searchHelpPopup[hidden] {
+                display: none;
+            }
+
+            #searchHelpPopup td {
+                padding: 3px 12px 3px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1 id="server-title">Basic HAPI Server</h1>  
+        <p id="server-description" hidden></p>
+        
+        <h3>Some example requests:</h3>
+        <a href="hapi/about" target="_blank">About</a> <i>More about this server, like contact info.</i><br>
+        <a href="hapi/capabilities" target="_blank">Capabilities</a> <i>Capabilities of the server.</i><br>
+        <a href="hapi/catalog" target="_blank">Catalog</a> <i>The catalog of available datasets.</i><br>
+
+        <br>
+
+        <label>Dataset search 
+            <span class="search-help-container">
+                <a href="#" id="searchHelpLink">[help]</a>
+                <span id="searchHelpPopup" hidden>
+                    <strong>Search examples</strong>
+                    <table>
+                        <tr><td><code>rbsp density</code></td>
+                            <td>Both terms</td></tr>
+                        <tr><td><code>rbsp OR themis</code></td>
+                            <td>Either term</td></tr>
+                        <tr><td><code>rbsp NOT density</code></td>
+                            <td>Exclude density</td></tr>
+                        <tr><td><code>"electron density"</code></td>
+                            <td>Exact phrase</td></tr>
+                        <tr><td><code>(rbsp OR themis) AND density</code></td>
+                            <td>Grouped search</td></tr>
+                    </table>
+                    <small>Case-insensitive. Precedence: NOT, AND, OR.</small>
+                </span>
+            </span>
+
+            <input id="search" type="search" placeholder="Search dataset IDs and descriptions" autocomplete="off"></label>
+        <p id="count" aria-live="polite">Loading dataset count...</p><div id="datasets" role="listbox" aria-label="Datasets"></div>
+        <div class="selection-heading"><h2 id="selected">Select a dataset</h2><a id="info-link" href="#" target="_blank" rel="noopener noreferrer" hidden>Info</a></div>
+        <fieldset><legend>Parameters</legend><div id="params">Choose a dataset first.</div></fieldset>
+        <div class="dates"><label>Start (ISO 8601)<input id="start" placeholder="2020-01-01T00:00:00Z"></label><label>Stop (ISO 8601)<input id="stop" placeholder="2020-01-02T00:00:00Z"></label>        <button type="button" id="clearParameters">Clear all</button></div>
+        <p><button id="download" disabled>Download CSV</button> <button id="copy" disabled>Copy URL</button></p>
+        <p id="url"></p><p id="status" role="status"></p>
+        <script>
+            'use strict';
+            (() => {
+                // Same-origin by default. To use another HAPI server, set this to its /hapi URL.
+                const BASE = new URL('./', location.href).href.replace(/\/$/, '');
+                const $ = id => document.getElementById(id);
+                let catalog = [], selectedId = null, info = null, loadVersion = 0;
+                const status = message => {
+                    $('status').textContent = message;
+                };
+                const endpoint = (name, values = {}) => {
+                    const u = new URL(BASE + '/' + name);
+                    Object.entries(values).forEach(([key, value]) => u.searchParams.set(key, value));
+                    return u;
+                };
+                async function json(url) {
+                    const response = await fetch(url, {headers: {Accept: 'application/json'}});
+                    if (!response.ok)
+                        throw new Error('HTTP ' + response.status + ' from ' + url.pathname);
+                    const result = await response.json();
+                    if (result.status && result.status.code >= 1400)
+                        throw new Error(result.status.message || 'HAPI error');
+                    return result;
+                }
+                function renderCatalog() {
+                    const query = $('search').value.trim().toLowerCase();
+                    const predicate = compileSearch(query);
+                    const matches = catalog.filter(dataset => {
+                        const text = (
+                                dataset.id + " " +
+                                (dataset.title || "")
+                                );
+                        return predicate(text);
+                    });
+                    var s = "Matching datasets: " + matches.length + " of " + catalog.length;
+                    $('count').textContent = s;
+                    const box = $('datasets');
+                    box.replaceChildren();
+                    // Render a bounded set; filtering still searches the entire catalog.
+                    for (const d of matches.slice(0, 4000)) {
+                        const b = document.createElement('button');
+                        b.type = 'button';
+                        b.textContent = d.id + (d.title ? ' \u2014 ' + d.title : '');
+                        b.addEventListener('click', () => selectDataset(d.id));
+                        box.append(b);
+                    }
+                    if (matches.length > 4000) {
+                        const p = document.createElement('p');
+                        p.textContent = 'Showing first 4000 matches. Refine your search.';
+                        box.append(p);
+                    }
+                }
+
+
+
+                /**
+                 * Compile a Boolean search expression into a predicate.
+                 *
+                 * Supported:
+                 *   rbsp density
+                 *   rbsp AND density
+                 *   rbsp OR themis
+                 *   rbsp NOT density
+                 *   rbsp -density
+                 *   "electron density"
+                 *   (rbsp OR themis) AND density
+                 *
+                 * Operators are case-insensitive.
+                 * Precedence: NOT, AND, OR.
+                 *
+                 * @param {string} query search expression
+                 * @returns {function(string): boolean}
+                 * @throws {SyntaxError} for malformed expressions
+                 */
+                function compileSearch(query) {
+                    const tokens = tokenizeSearch(query);
+                    let pos = 0;
+
+                    function peek() {
+                        return tokens[pos];
+                    }
+
+                    function take() {
+                        return tokens[pos++];
+                    }
+
+                    function accept(type) {
+                        if (peek() && peek().type === type) {
+                            pos++;
+                            return true;
+                        }
+                        return false;
+                    }
+
+                    function primary() {
+                        if (accept("LPAREN")) {
+                            const expr = parseOr();
+                            if (!accept("RPAREN")) {
+                                throw new SyntaxError("Missing closing ')'");
+                            }
+                            return expr;
+                        }
+
+                        const token = peek();
+                        if (token && token.type === "WORD") {
+                            take();
+                            const word = token.value.toLowerCase();
+                            return text => text.includes(word);
+                        }
+
+                        throw new SyntaxError(
+                                "Expected a search term or '('"
+                                );
+                    }
+
+                    function parseNot() {
+                        if (accept("NOT")) {
+                            const expr = parseNot();
+                            return text => !expr(text);
+                        }
+                        return primary();
+                    }
+
+                    function parseAnd() {
+                        let left = parseNot();
+
+                        while (true) {
+                            if (accept("AND")) {
+                                const right = parseNot();
+                                const previous = left;
+                                left = text =>
+                                    previous(text) && right(text);
+                            } else if (
+                                    peek() &&
+                                    ["WORD", "LPAREN", "NOT"].includes(
+                                    peek().type
+                                    )
+                                    ) {
+                                // Implicit AND
+                                const right = parseNot();
+                                const previous = left;
+                                left = text =>
+                                    previous(text) && right(text);
+                            } else {
+                                break;
+                            }
+                        }
+
+                        return left;
+                    }
+
+                    function parseOr() {
+                        let left = parseAnd();
+
+                        while (accept("OR")) {
+                            const right = parseAnd();
+                            const previous = left;
+                            left = text =>
+                                previous(text) || right(text);
+                        }
+
+                        return left;
+                    }
+
+                    if (tokens.length === 0) {
+                        return () => true;
+                    }
+
+                    const result = parseOr();
+
+                    if (pos !== tokens.length) {
+                        throw new SyntaxError(
+                                "Unexpected token: " + tokens[pos].value
+                                );
+                    }
+
+                    return text => result(String(text).toLowerCase());
+                }
+
+                /**
+                 * Tokenize a Boolean search expression.
+                 */
+                function tokenizeSearch(query) {
+                    const tokens = [];
+                    let i = 0;
+
+                    while (i < query.length) {
+                        const ch = query[i];
+
+                        if (/\s/.test(ch)) {
+                            i++;
+                            continue;
+                        }
+
+                        if (ch === "(" || ch === ")") {
+                            tokens.push({
+                                type: ch === "(" ? "LPAREN" : "RPAREN",
+                                value: ch
+                            });
+                            i++;
+                            continue;
+                        }
+
+                        if (ch === '"') {
+                            i++;
+                            let value = "";
+                            let closed = false;
+
+                            while (i < query.length) {
+                                if (query[i] === '"') {
+                                    i++;
+                                    closed = true;
+                                    break;
+                                }
+                                value += query[i++];
+                            }
+
+                            if (!closed) {
+                                throw new SyntaxError(
+                                        "Unterminated quoted phrase"
+                                        );
+                            }
+
+                            tokens.push({
+                                type: "WORD",
+                                value: value
+                            });
+                            continue;
+                        }
+
+                        if (ch === "-") {
+                            tokens.push({
+                                type: "NOT",
+                                value: "-"
+                            });
+                            i++;
+                            continue;
+                        }
+
+                        let value = "";
+
+                        while (
+                                i < query.length &&
+                                !/\s/.test(query[i]) &&
+                                query[i] !== "(" &&
+                                query[i] !== ")"
+                                ) {
+                            value += query[i++];
+                        }
+
+                        const upper = value.toUpperCase();
+
+                        tokens.push({
+                            type: ["AND", "OR", "NOT"].includes(upper)
+                                    ? upper
+                                    : "WORD",
+                            value: value
+                        });
+                    }
+
+                    return tokens;
+                }
+
+                function filterCatalog(catalog, query) {
+                    const matches = compileSearch(query);
+
+                    return catalog.filter(dataset => {
+                        const text = [
+                            dataset.id || "",
+                            dataset.title || ""
+                        ].join(" ");
+
+                        return matches(text);
+                    });
+                }
+
+                async function selectDataset(id) {
+                    selectedId = id;
+                    info = null;
+                    const version = ++loadVersion;
+                    $('selected').textContent = id;
+                    $('info-link').href = endpoint('info', {id}).href;
+                    $('info-link').hidden = false;
+                    $('params').textContent = 'Loading parameters\u2026';
+                    updateURL();
+                    status('');
+                    try {
+                        const result = await json(endpoint('info', {id}));
+                        if (version !== loadVersion)
+                            return;
+                        info = result;
+                        const box = $('params');
+                        box.replaceChildren();
+                        (result.parameters || []).forEach((p, index) => {
+                            const label = document.createElement('label');
+                            label.className = 'param';
+                            const cb = document.createElement('input');
+                            cb.type = 'checkbox';
+                            cb.value = p.name;
+                            cb.checked = true;
+                            cb.disabled = index === 0; // HAPI's first parameter is Time.
+                            cb.addEventListener('change', updateURL);
+                            label.append(cb, document.createTextNode(' ' + p.name + (p.description ? ' \u2014 ' + p.description : '')));
+                            box.append(label);
+                        });
+                        let start = result.sampleStartDate;
+                        let stop = result.sampleStopDate;
+
+                        if (!start) {
+                            const end = stop || result.stopDate || new Date().toISOString();
+                            const endTime = new Date(end).getTime();
+
+                            stop = end;
+                            start = new Date(endTime - 24 * 60 * 60 * 1000).toISOString();
+
+                            // Don't request data before the dataset begins.
+                            if (result.startDate && new Date(start) < new Date(result.startDate)) {
+                                start = result.startDate;
+                            }
+                        }
+                        $('start').value = start || '';
+                        $('stop').value = stop || '';
+                        updateURL();
+                    } catch (e) {
+                        if (version === loadVersion) {
+                            $('params').textContent = 'Unable to load parameters.';
+                            status(e.message);
+                        }
+                    }
+                }
+                function requestURL() {
+                    if (!info || !selectedId) return null;
+                    const start = $('start').value.trim();
+                    const stop = $('stop').value.trim();
+                    const selected = [...$('params').querySelectorAll('input:checked')].map(x => x.value);
+                    if (!start || !stop || !selected.length) return null;
+                    const args = {id: selectedId, start, stop, format: 'csv'};
+                    if (selected.length !== info.parameters.length) {
+                        args.parameters = selected.join(',');
+                    }
+                    const url= endpoint('data', args).href;
+                    return url.replace(/%2C/gi, ',').replace(/%3A/gi, ':');
+                }
+                
+                function updateURL() {
+                    const url = requestURL();
+                    $('url').textContent = url || 'Select a dataset and enter a start and stop time.';
+                    $('download').disabled = $('copy').disabled = !url;
+                }
+                $('search').addEventListener('input', renderCatalog);
+                $('start').addEventListener('input', updateURL);
+                $('stop').addEventListener('input', updateURL);
+                $('download').addEventListener('click', () => {
+                    const url = requestURL();
+                    if (!url)
+                        return;
+                    // Browser handles the response stream, not JavaScript. Same-origin server
+                    // should set Content-Disposition: attachment for a reliable download.
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = (selectedId || 'hapi').replace(/[^a-z0-9._-]/gi, '_') + '.csv';
+                    document.body.append(a);
+                    a.click();
+                    a.remove();
+                });
+                $('copy').addEventListener('click', async () => {
+                    try {
+                        await navigator.clipboard.writeText(requestURL());
+                        status('URL copied.');
+                    } catch (e) {
+                        status('Copy failed: ' + e.message);
+                    }
+                });
+                (async () => {
+                    try {
+                        status('Loading catalog\u2026');
+                        const result = await json(endpoint('catalog'));
+                        catalog = result.catalog || [];
+                        renderCatalog();
+                        status('');
+                    } catch (e) {
+                        status('Could not load catalog: ' + e.message);
+                    }
+                })();
+                (async () => {
+                    try {
+                      status('about to get branding');
+                      const about = await json(endpoint('about'));
+                      if (typeof about.title === 'string' && about.title.trim()) {
+                        $('server-title').textContent = about.title;
+                        document.title = about.title + ' - HAPI CSV Client';
+                      }
+                      if (typeof about.description === 'string' && about.description.trim()) {
+                        $('server-description').textContent = about.description;
+                        $('server-description').hidden = false;
+                      }
+                    } catch (e) {
+                      // /about is optional; retain the default heading if unavailable.
+                      console.warn('Could not load HAPI /about branding:', e);
+                    }
+                })();
+                
+            })();
+            
+            const helpLink = document.getElementById("searchHelpLink");
+            const helpPopup = document.getElementById("searchHelpPopup");
+
+            helpLink.addEventListener("click", function (event) {
+                event.preventDefault();
+                helpPopup.hidden = !helpPopup.hidden;
+            });
+
+            document.addEventListener("click", function (event) {
+                if (!event.target.closest(".search-help-container")) {
+                    helpPopup.hidden = true;
+                }
+            });
+                
+            document.addEventListener('click', function (event) {
+                if (event.target.id === 'clearParameters') {
+                    document.querySelectorAll('input[type="checkbox"]').forEach(function (cb) {
+                        cb.checked = false;
+                });
+            } } );
+        </script>
+        <!-- <small>Build time: </small> -->
+    </body>
+</html>
